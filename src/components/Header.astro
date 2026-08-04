@@ -37,7 +37,8 @@ const isActive = (href: string) => {
   data-transparent={transparent ? 'true' : 'false'}
 >
   <div class="container site-header__inner">
-    <Logo locale={locale} variant={transparent ? 'white' : 'light'} withWordmark={true} />
+    <!-- Logo always white: navbar is either transparent (over hero) or navy glass (scrolled / non-transparent pages) — never on a white background -->
+    <Logo locale={locale} variant="white" withWordmark={true} />
 
     <nav class="site-nav" aria-label="Principal">
       <ul class="site-nav__list">
