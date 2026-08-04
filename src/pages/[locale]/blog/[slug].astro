@@ -10,7 +10,6 @@ export async function getStaticPaths() {
   for (const locale of supportedLocales) {
     for (const post of posts) {
       if (post.data.locale !== locale) continue;
-      // Strip the -es / -en suffix added for uniqueness
       const slug = post.slug.replace(/-(es|en)$/, '');
       paths.push({ params: { locale, slug }, props: { post, locale } });
     }
@@ -53,50 +52,82 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
 >
   <article class="article">
     {post.data.cover && (
-      <header class="article__hero">
-        <img src={post.data.cover} alt={post.data.coverAlt ?? ''} />
-        <div class="article__hero-overlay"></div>
-        <div class="container article__hero-content">
-          <a href={`/${displayLocale}/blog`} class="article__back">← {t(displayLocale, 'blog.backToBlog')}</a>
-          <span class="article__cat">{categoryLabel(post.data.category, displayLocale)}</span>
-          <h1 class="article__title">{post.data.title}</h1>
-          <div class="article__meta">
+      <header class="relative text-white min-h-[60vh] flex items-end overflow-hidden">
+        <img
+          src={post.data.cover}
+          alt={post.data.coverAlt ?? ''}
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+        <div class="absolute inset-0"
+          style="background: linear-gradient(180deg, rgba(10,29,63,0.5) 0%, rgba(10,29,63,0.85) 100%);"
+        ></div>
+        <div class="container relative pt-[calc(var(--header-height)+4rem)] pb-16">
+          <a
+            href={`/${displayLocale}/blog`}
+            class="inline-block text-xs tracking-[0.14em] uppercase text-gold-soft mb-6 border-b border-current pb-0.5 hover:text-white transition-colors duration-300"
+          >← {t(displayLocale, 'blog.backToBlog')}</a>
+
+          <span class="inline-block text-[0.72rem] font-semibold tracking-[0.18em] uppercase text-gold bg-white/10 px-3.5 py-1.5 rounded-full mb-5">
+            {categoryLabel(post.data.category, displayLocale)}
+          </span>
+
+          <h1 class="font-serif text-white font-medium max-w-5xl leading-tight tracking-tight mb-5"
+              style="font-size: clamp(2rem, 5vw, 3.75rem); letter-spacing: -0.015em;">
+            {post.data.title}
+          </h1>
+
+          <div class="flex flex-wrap gap-2 text-sm text-white/80">
             <span>{t(displayLocale, 'blog.publishedOn')} {formatDate(post.data.publishDate, displayLocale)}</span>
             {post.data.readTime && (
               <>
-                <span aria-hidden="true">·</span>
+                <span aria-hidden="true" class="text-gold">·</span>
                 <span>{post.data.readTime} {t(displayLocale, 'blog.minutesRead')}</span>
               </>
             )}
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" class="text-gold">·</span>
             <span>{t(displayLocale, 'blog.by')} {post.data.author}</span>
           </div>
         </div>
       </header>
     )}
 
-    <div class="article__body container">
-      <div class="article__content">
+    <div class="py-16 md:py-20">
+      <div class="article__content container">
         <Content />
       </div>
     </div>
 
     {related.length > 0 && (
-      <section class="section section--subtle">
+      <section class="section bg-cream">
         <div class="container">
-          <h2 class="h-3 article__related-heading">{t(displayLocale, 'blog.title')}</h2>
-          <div class="related-grid">
+          <h2 class="h-3 text-navy mb-8">{t(displayLocale, 'blog.title')}</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {related.map((p, i) => (
-              <a href={`/${displayLocale}/blog/${p.slug.replace(/-(es|en)$/, '')}`} class="related-card reveal" style={`transition-delay:${i * 60}ms`}>
+              <a
+                href={`/${displayLocale}/blog/${p.slug.replace(/-(es|en)$/, '')}`}
+                class="reveal group block bg-white rounded-lg overflow-hidden transition-all duration-300 text-text-primary no-underline hover:-translate-y-1 hover:shadow-lg"
+                style={`transition-delay:${i * 60}ms`}
+              >
                 {p.data.cover && (
-                  <div class="related-card__media">
-                    <img src={p.data.cover} alt="" loading="lazy" />
+                  <div class="aspect-[16/10] overflow-hidden">
+                    <img
+                      src={p.data.cover}
+                      alt=""
+                      loading="lazy"
+                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                   </div>
                 )}
-                <div class="related-card__body">
-                  <span class="related-card__cat">{categoryLabel(p.data.category, displayLocale)}</span>
-                  <h3 class="related-card__title">{p.data.title}</h3>
-                  <span class="related-card__cta">{t(displayLocale, 'blog.readMore')} →</span>
+                <div class="p-6">
+                  <span class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-gold">
+                    {categoryLabel(p.data.category, displayLocale)}
+                  </span>
+                  <h3 class="font-serif text-lg text-navy mt-2 mb-4 leading-tight">
+                    {p.data.title}
+                  </h3>
+                  <span class="text-xs tracking-[0.1em] uppercase text-gold font-semibold">
+                    {t(displayLocale, 'blog.readMore')} →
+                  </span>
                 </div>
               </a>
             ))}
@@ -108,6 +139,7 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
 </BaseLayout>
 
 <style is:global>
+  /* Article prose styling for Markdown-rendered content */
   .article__content {
     max-width: 720px;
     margin-inline: auto;
@@ -116,7 +148,7 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
     color: var(--text-primary);
   }
   .article__content h2 {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1.85rem;
     color: var(--color-navy);
     margin-top: 3rem;
@@ -124,17 +156,14 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
     line-height: 1.2;
   }
   .article__content h3 {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1.4rem;
     color: var(--color-navy);
     margin-top: 2rem;
     margin-bottom: 0.75rem;
   }
   .article__content p { margin-bottom: 1.25rem; }
-  .article__content ul, .article__content ol {
-    margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
-  }
+  .article__content ul, .article__content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
   .article__content ul li { list-style: disc; margin-bottom: 0.5rem; }
   .article__content ol li { list-style: decimal; margin-bottom: 0.5rem; }
   .article__content a {
@@ -147,7 +176,6 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
     border-left: 3px solid var(--color-gold);
     padding: 0.25rem 0 0.25rem 1.5rem;
     margin: 2rem 0;
-    font-family: var(--font-serif);
     font-style: italic;
     color: var(--color-navy);
     font-size: 1.15rem;
@@ -178,123 +206,4 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
     color: var(--color-navy);
   }
   .article__content strong { color: var(--color-navy); font-weight: 600; }
-</style>
-
-<style>
-  .article__hero {
-    position: relative;
-    color: var(--color-white);
-    min-height: 60vh;
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
-  }
-  .article__hero img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-  .article__hero-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(10,29,63,0.5) 0%, rgba(10,29,63,0.85) 100%);
-  }
-  .article__hero-content {
-    position: relative;
-    padding-block: calc(var(--header-height) + 4rem) 4rem;
-  }
-  .article__back {
-    display: inline-block;
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-gold-soft);
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid currentColor;
-    padding-bottom: 2px;
-    transition: gap var(--dur-base) var(--ease);
-  }
-  .article__back:hover { color: var(--color-white); }
-  .article__cat {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-    background: rgba(255,255,255,0.08);
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-    margin-bottom: 1.25rem;
-  }
-  .article__title {
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 5vw, 3.75rem);
-    line-height: 1.1;
-    color: var(--color-white);
-    font-weight: 500;
-    margin-bottom: 1.25rem;
-    max-width: 880px;
-    letter-spacing: -0.015em;
-  }
-  .article__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.78);
-  }
-  .article__meta span[aria-hidden] { color: var(--color-gold); }
-
-  .article__body { padding-block: 4rem 5rem; }
-
-  .article__related-heading {
-    margin-bottom: 2rem;
-    color: var(--color-navy);
-  }
-  .related-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-  .related-card {
-    background: var(--color-white);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
-    color: var(--text-primary);
-  }
-  .related-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-  }
-  .related-card__media { aspect-ratio: 16/10; overflow: hidden; }
-  .related-card__media img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform 1s var(--ease-out);
-  }
-  .related-card:hover .related-card__media img { transform: scale(1.05); }
-  .related-card__body { padding: 1.5rem; }
-  .related-card__cat {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-  }
-  .related-card__title {
-    font-family: var(--font-serif);
-    font-size: 1.15rem;
-    color: var(--color-navy);
-    margin: 0.5rem 0 1rem;
-    line-height: 1.25;
-  }
-  .related-card__cta {
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-    font-weight: 600;
-  }
-
-  @media (max-width: 960px) { .related-grid { grid-template-columns: 1fr; } }
 </style>

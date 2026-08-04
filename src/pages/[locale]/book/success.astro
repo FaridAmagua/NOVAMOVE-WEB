@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { t, localeParams, type Locale } from '../../../utils/i18n';
-import { properties, getPropertyBySlug } from '../../../data/properties';
+import { getPropertyBySlug } from '../../../data/properties';
 
 export async function getStaticPaths() {
   return localeParams;
@@ -23,29 +23,32 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
   description={t(locale, 'bookingSuccess.subtitle')}
   transparentHeader={false}
 >
-  <section class="success">
+  <section class="pt-[calc(var(--header-height)+4rem)] pb-24 bg-cream min-h-screen">
     <div class="container">
-      <div class="success__inner reveal">
-        <div class="success__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <!-- Inner confirmation block -->
+      <div class="reveal text-center max-w-2xl mx-auto mb-20">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gold text-navy rounded-full mb-8" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-11 h-11">
             <circle cx="12" cy="12" r="11"/>
             <path d="M7 12l3 3 7-7"/>
           </svg>
         </div>
 
         <p class="eyebrow">{t(locale, 'bookingSuccess.thanks')}</p>
-        <h1 class="h-1">{t(locale, 'bookingSuccess.title')}</h1>
-        <p class="lead">{t(locale, 'bookingSuccess.message')}</p>
+        <h1 class="h-1 mb-4">{t(locale, 'bookingSuccess.title')}</h1>
+        <p class="lead mx-auto">{t(locale, 'bookingSuccess.message')}</p>
 
         {orderRef && (
-          <div class="success__ref">
-            <span class="success__ref-label">{t(locale, 'bookingSuccess.reference')}</span>
-            <span class="success__ref-value">{orderRef}</span>
-            {isDev && <span class="success__ref-dev">DEV MODE</span>}
+          <div class="inline-flex flex-col items-center gap-2 my-10 px-8 py-5 bg-white border border-navy/10 rounded-lg">
+            <span class="text-xs text-gold tracking-[0.16em] uppercase font-semibold">
+              {t(locale, 'bookingSuccess.reference')}
+            </span>
+            <span class="font-serif text-2xl text-navy tracking-[0.1em]">{orderRef}</span>
+            {isDev && <span class="text-xs text-red-700 font-semibold tracking-[0.18em] uppercase">DEV MODE</span>}
           </div>
         )}
 
-        <div class="success__cta">
+        <div class="flex flex-wrap justify-center gap-6 mt-8">
           <a href={`/${locale}/`} class="btn btn--secondary">{t(locale, 'bookingSuccess.backHome')}</a>
           {property && (
             <a href={`/${locale}/properties/${property.slug}`} class="btn btn--link">
@@ -55,15 +58,18 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
         </div>
       </div>
 
-      <div class="next-steps reveal">
-        <h2 class="h-2">{t(locale, 'bookingSuccess.nextSteps')}</h2>
-        <ol class="next-steps__list">
+      <!-- Next steps block -->
+      <div class="reveal max-w-4xl mx-auto">
+        <h2 class="h-2 text-center mb-12">{t(locale, 'bookingSuccess.nextSteps')}</h2>
+        <ol class="flex flex-col gap-6">
           {steps.map((step, i) => (
-            <li class="next-step">
-              <span class="next-step__num">{String(i + 1).padStart(2, '0')}</span>
+            <li class="flex gap-6 p-8 bg-white rounded-lg border-l-4 border-gold">
+              <span class="font-serif text-3xl text-gold font-medium leading-none flex-shrink-0">
+                {String(i + 1).padStart(2, '0')}
+              </span>
               <div>
-                <h3>{t(locale, `bookingSuccess.${step}`)}</h3>
-                <p>{t(locale, `bookingSuccess.${stepDescs[i]}`)}</p>
+                <h3 class="font-serif text-xl text-navy font-semibold mb-2">{t(locale, `bookingSuccess.${step}`)}</h3>
+                <p class="text-text-secondary leading-relaxed m-0">{t(locale, `bookingSuccess.${stepDescs[i]}`)}</p>
               </div>
             </li>
           ))}
@@ -72,104 +78,3 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .success {
-    padding: calc(var(--header-height) + 4rem) 0 6rem;
-    background: var(--color-light);
-    min-height: 100vh;
-  }
-
-  .success__inner {
-    text-align: center;
-    max-width: 720px;
-    margin: 0 auto 5rem;
-  }
-
-  .success__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    background: var(--color-gold);
-    color: var(--color-navy);
-    border-radius: 50%;
-    margin-bottom: 2rem;
-  }
-  .success__icon svg { width: 44px; height: 44px; }
-
-  .success__inner h1 { margin-bottom: 1rem; }
-  .success__inner .lead { margin-inline: auto; }
-
-  .success__ref {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 2.5rem 0 2rem;
-    padding: 1.25rem 2rem;
-    background: var(--color-white);
-    border: 1px solid rgba(10, 29, 63, 0.08);
-    border-radius: var(--radius-md);
-  }
-  .success__ref-label {
-    font-size: 0.72rem;
-    color: var(--color-gold);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  .success__ref-value {
-    font-family: var(--font-serif);
-    font-size: 1.6rem;
-    color: var(--color-navy);
-    letter-spacing: 0.1em;
-  }
-  .success__ref-dev {
-    font-size: 0.7rem;
-    color: #b94545;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-
-  .success__cta {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .next-steps { max-width: 880px; margin: 0 auto; }
-  .next-steps h2 { text-align: center; margin-bottom: 3rem; }
-  .next-steps__list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .next-step {
-    display: flex;
-    gap: 1.5rem;
-    padding: 2rem;
-    background: var(--color-white);
-    border-radius: var(--radius-md);
-    border-left: 3px solid var(--color-gold);
-  }
-  .next-step__num {
-    font-family: var(--font-serif);
-    font-size: 2rem;
-    color: var(--color-gold);
-    font-weight: 500;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .next-step h3 {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    color: var(--color-navy);
-    margin-bottom: 0.5rem;
-  }
-  .next-step p { color: var(--text-secondary); line-height: 1.5; margin: 0; }
-</style>

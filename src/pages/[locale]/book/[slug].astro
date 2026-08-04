@@ -11,7 +11,6 @@ import {
 
 export async function getStaticPaths() {
   const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
-  // Only generate booking routes for rental properties
   for (const locale of supportedLocales) {
     for (const p of properties.filter(prop => prop.transaction === 'rent')) {
       paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
@@ -33,124 +32,133 @@ const locale = Astro.params.locale as Locale;
 
   <section class="section">
     <div class="container">
-      <a href={`/${locale}/properties/${property.slug}`} class="back-link">← {property.name[locale]}</a>
+      <a href={`/${locale}/properties/${property.slug}`}
+         class="inline-block text-xs tracking-[0.14em] uppercase text-gold mb-8 border-b border-current pb-0.5 hover:text-navy transition-colors">
+        ← {property.name[locale]}
+      </a>
 
-      <header class="booking-header reveal">
+      <header class="reveal max-w-2xl mb-12">
         <h1 class="h-1">{t(locale, 'booking.title')}</h1>
         <p class="lead">{t(locale, 'booking.subtitle')}</p>
       </header>
 
-      <div class="booking-grid">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-12 items-start">
         <!-- LEFT: Form -->
-        <form id="booking-form" class="booking-form reveal" novalidate data-loading-on-submit>
-          <!-- Step 1: Dates & guests -->
-          <fieldset class="form-step">
-            <legend><span class="step-num">1</span> {t(locale, 'booking.step1')}</legend>
-            <div class="field-row">
-              <div class="field">
-                <label for="checkIn">{t(locale, 'booking.checkIn')}</label>
+        <form id="booking-form" class="reveal bg-white" novalidate data-loading-on-submit>
+          <fieldset class="border border-navy/10 rounded-lg p-6 md:p-8 mb-6">
+            <legend class="flex items-center gap-3 px-4 -ml-2 font-serif text-xl text-navy font-medium">
+              <span class="inline-flex items-center justify-center w-7 h-7 bg-gold text-navy rounded-full font-sans text-sm font-bold">1</span>
+              {t(locale, 'booking.step1')}
+            </legend>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
+              <div class="flex flex-col gap-1.5">
+                <label for="checkIn" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.checkIn')}</label>
                 <input type="date" id="checkIn" name="checkIn" class="input" required />
               </div>
-              <div class="field">
-                <label for="checkOut">{t(locale, 'booking.checkOut')}</label>
+              <div class="flex flex-col gap-1.5">
+                <label for="checkOut" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.checkOut')}</label>
                 <input type="date" id="checkOut" name="checkOut" class="input" required />
               </div>
             </div>
-            <div class="field">
-              <label for="guests">{t(locale, 'booking.guests')}</label>
+            <div class="flex flex-col gap-1.5 mt-5">
+              <label for="guests" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.guests')}</label>
               <select id="guests" name="guests" class="input" required>
                 {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(n => (
                   <option value={n}>{n} {n === 1 ? t(locale, 'common.guests').replace(/s$/, '') : t(locale, 'common.guests')}</option>
                 ))}
               </select>
             </div>
-            <p id="dates-error" class="field-error" hidden></p>
+            <p id="dates-error" class="text-red-700 text-sm mt-2" hidden></p>
           </fieldset>
 
-          <!-- Step 2: Guest details -->
-          <fieldset class="form-step">
-            <legend><span class="step-num">2</span> {t(locale, 'booking.step2')}</legend>
-            <div class="field-row">
-              <div class="field">
-                <label for="firstName">{t(locale, 'booking.firstName')}</label>
+          <fieldset class="border border-navy/10 rounded-lg p-6 md:p-8 mb-6">
+            <legend class="flex items-center gap-3 px-4 -ml-2 font-serif text-xl text-navy font-medium">
+              <span class="inline-flex items-center justify-center w-7 h-7 bg-gold text-navy rounded-full font-sans text-sm font-bold">2</span>
+              {t(locale, 'booking.step2')}
+            </legend>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
+              <div class="flex flex-col gap-1.5">
+                <label for="firstName" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.firstName')}</label>
                 <input type="text" id="firstName" name="firstName" class="input" required autocomplete="given-name" />
               </div>
-              <div class="field">
-                <label for="lastName">{t(locale, 'booking.lastName')}</label>
+              <div class="flex flex-col gap-1.5">
+                <label for="lastName" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.lastName')}</label>
                 <input type="text" id="lastName" name="lastName" class="input" required autocomplete="family-name" />
               </div>
             </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="email">{t(locale, 'booking.email')}</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+              <div class="flex flex-col gap-1.5">
+                <label for="email" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.email')}</label>
                 <input type="email" id="email" name="email" class="input" required autocomplete="email" />
               </div>
-              <div class="field">
-                <label for="phone">{t(locale, 'booking.phone')}</label>
+              <div class="flex flex-col gap-1.5">
+                <label for="phone" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.phone')}</label>
                 <input type="tel" id="phone" name="phone" class="input" required autocomplete="tel" />
               </div>
             </div>
-            <div class="field">
-              <label for="country">{t(locale, 'booking.country')}</label>
+            <div class="flex flex-col gap-1.5 mt-5">
+              <label for="country" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.country')}</label>
               <input type="text" id="country" name="country" class="input" autocomplete="country-name" />
             </div>
-            <div class="field">
-              <label for="specialRequests">{t(locale, 'booking.specialRequests')}</label>
+            <div class="flex flex-col gap-1.5 mt-5">
+              <label for="specialRequests" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.specialRequests')}</label>
               <textarea id="specialRequests" name="specialRequests" class="textarea" rows="3"></textarea>
             </div>
           </fieldset>
 
-          <button type="submit" class="btn btn--primary booking-form__submit" id="submit-btn" data-magnetic="0.25">
+          <button type="submit" class="btn btn--primary w-full mt-4" id="submit-btn" data-magnetic="0.25">
             <span data-magnetic-inner>{t(locale, 'booking.submitBooking')}</span>
           </button>
-          <p class="booking-form__legal">{t(locale, 'booking.cancellationPolicy')}</p>
+          <p class="text-xs text-text-secondary mt-4 text-center">{t(locale, 'booking.cancellationPolicy')}</p>
         </form>
 
         <!-- RIGHT: Summary -->
-        <aside class="booking-summary">
-          <div class="summary-card reveal">
-            <div class="summary-card__media">
-              <img src={property.images[0]} alt={property.name[locale]} />
+        <aside class="lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
+          <div class="reveal bg-white border border-navy/5 rounded-lg overflow-hidden shadow-md">
+            <div class="aspect-[16/10] overflow-hidden">
+              <img src={property.images[0]} alt={property.name[locale]} class="w-full h-full object-cover" />
             </div>
-            <div class="summary-card__body">
-              <span class="summary-card__meta">{propertyTypeLabel(property.type, locale)} · {destinationLabel(property.destination as DestinationId, locale)}</span>
-              <h3 class="summary-card__title">{property.name[locale]}</h3>
+            <div class="p-7">
+              <span class="text-[0.72rem] text-gold font-semibold tracking-[0.12em] uppercase">
+                {propertyTypeLabel(property.type, locale)} · {destinationLabel(property.destination as DestinationId, locale)}
+              </span>
+              <h3 class="font-serif text-[1.35rem] text-navy mt-1.5 mb-0">{property.name[locale]}</h3>
 
-              <div class="summary-card__divider"></div>
+              <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="summary-card__row">
+              <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
                 <span data-summary="dates">{t(locale, 'booking.selectDates')}</span>
               </div>
-              <div class="summary-card__row">
+              <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
                 <span data-summary="nights">—</span>
               </div>
 
-              <div class="summary-card__divider"></div>
+              <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="summary-card__row summary-card__row--price">
+              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
                 <span>{property.pricePerNight} € × <span data-summary="nights-val">0</span></span>
                 <span data-summary="subtotal">0 €</span>
               </div>
-              <div class="summary-card__row summary-card__row--price">
+              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
                 <span>{t(locale, 'booking.cleaningFee')}</span>
                 <span data-summary="cleaning">{property.cleaningFee} €</span>
               </div>
-              <div class="summary-card__row summary-card__row--price">
+              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
                 <span>{t(locale, 'booking.serviceFee')} (10%)</span>
                 <span data-summary="service">0 €</span>
               </div>
 
-              <div class="summary-card__divider"></div>
+              <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="summary-card__row summary-card__row--total">
+              <div class="flex justify-between font-serif text-xl text-navy font-medium">
                 <span>{t(locale, 'booking.total')}</span>
                 <span data-summary="total">0 €</span>
               </div>
             </div>
           </div>
 
-          <div class="payment-trust">
-            <p>🔒 {t(locale, 'booking.securePayment')}</p>
+          <div class="mt-6 text-center text-[0.82rem] text-text-secondary">
+            🔒 {t(locale, 'booking.securePayment')}
           </div>
         </aside>
       </div>
@@ -182,7 +190,6 @@ const locale = Astro.params.locale as Locale;
   const errorEl = document.getElementById('dates-error');
   const submitBtn = document.getElementById('submit-btn');
 
-  // Set min date = tomorrow
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
@@ -213,7 +220,6 @@ const locale = Astro.params.locale as Locale;
     const nights = calculateNights(checkIn, checkOut);
     const guests = parseInt(guestsEl.value, 10);
 
-    // Validate
     let valid = true;
     let message = '';
 
@@ -238,7 +244,6 @@ const locale = Astro.params.locale as Locale;
       errorEl.hidden = true;
     }
 
-    // Update summary
     const dateLabel = checkIn && checkOut
       ? `${fmtDate(checkIn)} → ${fmtDate(checkOut)}`
       : (locale === 'es' ? 'Selecciona fechas' : 'Select dates');
@@ -273,11 +278,9 @@ const locale = Astro.params.locale as Locale;
     const { valid, nights, subtotal, service, total } = recalculate();
     if (!valid) return;
 
-    // Loading state on the button itself
     submitBtn.classList.add('is-loading');
     submitBtn.setAttribute('aria-busy', 'true');
 
-    // Show full-screen overlay (delayed slightly so it doesn't flash on fast responses)
     const overlay = document.querySelector('[data-payment-overlay]');
     const showOverlayTimer = setTimeout(() => {
       if (overlay) {
@@ -347,143 +350,3 @@ const locale = Astro.params.locale as Locale;
     }
   });
 </script>
-
-<style>
-  .back-link {
-    display: inline-block;
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-    margin-bottom: 2rem;
-    border-bottom: 1px solid currentColor;
-    padding-bottom: 2px;
-  }
-  .back-link:hover { color: var(--color-navy); }
-
-  .booking-header {
-    margin-bottom: 3rem;
-    max-width: 720px;
-  }
-
-  .booking-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 3rem;
-    align-items: start;
-  }
-
-  .booking-form { background: var(--color-white); }
-  .form-step {
-    border: 1px solid rgba(10, 29, 63, 0.1);
-    border-radius: var(--radius-md);
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-  }
-  .form-step legend {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding-inline: 1rem;
-    margin-left: -0.5rem;
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    color: var(--color-navy);
-    font-weight: 500;
-  }
-  .step-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--color-gold);
-    color: var(--color-navy);
-    border-radius: 50%;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-  .field-row .field { margin-bottom: 1.25rem; }
-  .field label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-navy);
-  }
-  .field-error {
-    color: #b94545;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-  }
-
-  .booking-form__submit { width: 100%; margin-top: 1rem; }
-  .booking-form__legal {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-top: 1rem;
-    text-align: center;
-  }
-
-  .booking-summary { position: sticky; top: calc(var(--header-height) + 2rem); }
-  .summary-card {
-    background: var(--color-white);
-    border: 1px solid rgba(10, 29, 63, 0.08);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-  }
-  .summary-card__media { aspect-ratio: 16/10; overflow: hidden; }
-  .summary-card__media img { width: 100%; height: 100%; object-fit: cover; }
-  .summary-card__body { padding: 1.75rem; }
-  .summary-card__meta {
-    font-size: 0.72rem;
-    color: var(--color-gold);
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .summary-card__title {
-    font-family: var(--font-serif);
-    font-size: 1.35rem;
-    color: var(--color-navy);
-    margin-top: 0.4rem;
-    margin-bottom: 0;
-  }
-  .summary-card__divider {
-    height: 1px;
-    background: rgba(10, 29, 63, 0.08);
-    margin: 1.25rem 0;
-  }
-  .summary-card__row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.92rem;
-    color: var(--text-primary);
-    margin-bottom: 0.6rem;
-  }
-  .summary-card__row--price { color: var(--text-secondary); }
-  .summary-card__row--total {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    color: var(--color-navy);
-    font-weight: 500;
-    margin-bottom: 0;
-  }
-
-  .payment-trust {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-  }
-
-  @media (max-width: 960px) {
-    .booking-grid { grid-template-columns: 1fr; }
-    .booking-summary { position: static; }
-    .field-row { grid-template-columns: 1fr; }
-  }
-</style>

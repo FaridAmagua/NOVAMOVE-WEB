@@ -23,65 +23,65 @@ export async function getStaticPaths() {
 
   <section class="section">
     <div class="container">
-      <div class="contact-grid">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-16 items-start">
         <!-- Contact form -->
-        <form class="contact-form reveal" novalidate data-loading-on-submit>
-          <div class="field-row">
-            <div class="field">
-              <label for="name">{t(locale, 'contact.form.name')}</label>
+        <form class="contact-form reveal bg-white p-6 md:p-10 border border-navy/5 rounded-lg shadow-sm" novalidate data-loading-on-submit>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label for="name" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.name')}</label>
               <input class="input" type="text" id="name" name="name" required autocomplete="name" />
             </div>
-            <div class="field">
-              <label for="email">{t(locale, 'contact.form.email')}</label>
+            <div class="flex flex-col gap-1.5">
+              <label for="email" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.email')}</label>
               <input class="input" type="email" id="email" name="email" required autocomplete="email" />
             </div>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="phone">{t(locale, 'contact.form.phone')}</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
+            <div class="flex flex-col gap-1.5">
+              <label for="phone" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.phone')}</label>
               <input class="input" type="tel" id="phone" name="phone" autocomplete="tel" />
             </div>
-            <div class="field">
-              <label for="origin">{t(locale, 'contact.form.origin')}</label>
+            <div class="flex flex-col gap-1.5">
+              <label for="origin" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.origin')}</label>
               <input class="input" type="text" id="origin" name="origin" />
             </div>
           </div>
-          <div class="field">
-            <label for="destination">{t(locale, 'contact.form.destination')}</label>
+          <div class="flex flex-col gap-1.5 mt-5">
+            <label for="destination" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.destination')}</label>
             <input class="input" type="text" id="destination" name="destination" />
           </div>
-          <div class="field">
-            <label for="message">{t(locale, 'contact.form.message')}</label>
+          <div class="flex flex-col gap-1.5 mt-5">
+            <label for="message" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'contact.form.message')}</label>
             <textarea class="textarea" id="message" name="message" required></textarea>
           </div>
-          <p class="contact-form__privacy">{t(locale, 'contact.form.privacy')}</p>
-          <button type="submit" class="btn btn--primary contact-form__submit">
+          <p class="text-xs text-text-secondary my-4">{t(locale, 'contact.form.privacy')}</p>
+          <button type="submit" class="btn btn--primary w-full">
             {t(locale, 'contact.form.submit')}
           </button>
         </form>
 
         <!-- Contact info -->
-        <aside class="contact-info reveal">
-          <h2 class="h-3">{t(locale, 'contact.info.title')}</h2>
+        <aside class="contact-info reveal bg-navy text-white p-6 md:p-10 rounded-lg">
+          <h2 class="h-3 text-white mb-8">{t(locale, 'contact.info.title')}</h2>
 
-          <div class="info-block">
-            <span class="info-block__label">Email</span>
-            <a href="mailto:hello@globalmove.com" class="info-block__value">hello@globalmove.com</a>
+          <div class="py-5 border-b border-white/10 flex flex-col gap-1.5 last:border-b-0">
+            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-gold">Email</span>
+            <a href="mailto:hello@globalmove.com" class="text-white text-lg leading-relaxed hover:text-gold-soft transition-colors">hello@globalmove.com</a>
           </div>
 
-          <div class="info-block">
-            <span class="info-block__label">{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
-            <a href="tel:+34600123456" class="info-block__value">+34 600 123 456</a>
+          <div class="py-5 border-b border-white/10 flex flex-col gap-1.5 last:border-b-0">
+            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-gold">{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
+            <a href="tel:+34600123456" class="text-white text-lg leading-relaxed hover:text-gold-soft transition-colors">+34 600 123 456</a>
           </div>
 
-          <div class="info-block">
-            <span class="info-block__label">{locale === 'es' ? 'Oficinas' : 'Offices'}</span>
-            <span class="info-block__value">{t(locale, 'contact.info.address')}</span>
+          <div class="py-5 border-b border-white/10 flex flex-col gap-1.5 last:border-b-0">
+            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-gold">{locale === 'es' ? 'Oficinas' : 'Offices'}</span>
+            <span class="text-white text-lg leading-relaxed whitespace-pre-line">{t(locale, 'contact.info.address')}</span>
           </div>
 
-          <div class="info-block info-block--hours">
-            <span class="info-block__label">{locale === 'es' ? 'Horario' : 'Hours'}</span>
-            <span class="info-block__value">
+          <div class="py-5 border-b border-white/10 flex flex-col gap-1.5 last:border-b-0">
+            <span class="text-xs font-semibold tracking-[0.18em] uppercase text-gold">{locale === 'es' ? 'Horario' : 'Hours'}</span>
+            <span class="text-white/85 text-base leading-relaxed whitespace-pre-line">
               {locale === 'es'
                 ? 'Lunes a Viernes · 9:00 – 19:00\nConcierge 24/7'
                 : 'Monday to Friday · 9:00 – 19:00\nConcierge 24/7'}
@@ -93,120 +93,8 @@ export async function getStaticPaths() {
   </section>
 </BaseLayout>
 
-<style>
-  .contact-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 4rem;
-    align-items: start;
-  }
-
-  .contact-form {
-    background: var(--color-white);
-    padding: 2.5rem;
-    border: 1px solid rgba(10, 29, 63, 0.06);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-  }
-  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-  .field-row .field { margin-bottom: 1.25rem; }
-  .field label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-navy);
-  }
-  .contact-form__privacy {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin: 0.5rem 0 1.5rem;
-  }
-  .contact-form__submit { width: 100%; }
-
-  .contact-info {
-    background: var(--color-navy);
-    color: var(--color-white);
-    padding: 2.5rem;
-    border-radius: var(--radius-md);
-  }
-  .contact-info h2 {
-    color: var(--color-white);
-    margin-bottom: 2rem;
-  }
-  .info-block {
-    padding: 1.25rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  .info-block:last-child { border-bottom: 0; }
-  .info-block__label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-  }
-  .info-block__value {
-    color: var(--color-white);
-    line-height: 1.5;
-    font-size: 1.05rem;
-    white-space: pre-line;
-  }
-  .info-block--hours .info-block__value {
-    font-size: 0.95rem;
-    color: rgba(255,255,255,0.85);
-  }
-  a.info-block__value:hover { color: var(--color-gold-soft); }
-
-  @media (max-width: 860px) {
-    .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
-    .field-row { grid-template-columns: 1fr; }
-  }
-</style>
-
-<script>
-  const form = document.querySelector('.contact-form') as HTMLFormElement | null;
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-    if (!btn) return;
-    const original = btn.textContent ?? '';
-    btn.classList.add('is-loading');
-    btn.setAttribute('aria-busy', 'true');
-
-    // Show inline success banner above the form
-    showBanner(form, 'success', locale === 'es' ? '✓ Mensaje enviado. Te contactaremos en menos de 24 horas.' : '✓ Message sent. We\'ll get back to you within 24 hours.');
-
-    setTimeout(() => {
-      btn.classList.remove('is-loading');
-      btn.removeAttribute('aria-busy');
-      form.reset();
-    }, 2400);
-  });
-
-  function showBanner(form: HTMLFormElement, type: 'success' | 'error', message: string) {
-    let banner = form.parentElement?.querySelector<HTMLElement>('.form-banner');
-    if (!banner) {
-      banner = document.createElement('div');
-      banner.className = 'form-banner';
-      form.prepend(banner);
-    }
-    banner.className = `form-banner form-banner--${type}`;
-    banner.textContent = message;
-    banner.setAttribute('role', type === 'error' ? 'alert' : 'status');
-    setTimeout(() => banner?.remove(), 6000);
-  }
-</script>
-
-<script
-  define:vars={{ locale: (Astro.params.locale as string) }}
-></script>
-
 <style is:global>
+  /* Form banner (used by JS to show success message) */
   .form-banner {
     padding: 0.95rem 1.25rem;
     border-radius: var(--radius-md);
@@ -230,3 +118,38 @@ export async function getStaticPaths() {
     to   { opacity: 1; transform: none; }
   }
 </style>
+
+<script>
+  const form = document.querySelector('.contact-form') as HTMLFormElement | null;
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (!btn) return;
+    const original = btn.textContent ?? '';
+    btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy', 'true');
+
+    showBanner(form, 'success', document.documentElement.lang === 'es'
+      ? '✓ Mensaje enviado. Te contactaremos en menos de 24 horas.'
+      : '✓ Message sent. We\'ll get back to you within 24 hours.');
+
+    setTimeout(() => {
+      btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
+      form.reset();
+    }, 2400);
+  });
+
+  function showBanner(form: HTMLFormElement, type: 'success' | 'error', message: string) {
+    let banner = form.parentElement?.querySelector<HTMLElement>('.form-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'form-banner';
+      form.prepend(banner);
+    }
+    banner.className = `form-banner form-banner--${type}`;
+    banner.textContent = message;
+    banner.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    setTimeout(() => banner?.remove(), 6000);
+  }
+</script>

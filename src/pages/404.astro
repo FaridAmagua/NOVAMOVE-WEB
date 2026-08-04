@@ -3,10 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Logo from '../components/Logo.astro';
 import { localizedPath, type Locale } from '../utils/i18n';
 
-// Detect locale from the URL or the Accept-Language header (static fallback).
-// Static pages don't have access to headers, so we default to Spanish (the
-// site's default language) and let the language switcher in the header
-// take users to the EN version of the home.
+// Detect locale from the URL (static fallback to Spanish).
 const locale: Locale = 'es';
 
 // Quick-escape pages
@@ -26,23 +23,44 @@ const escapeRoutes = [
   hideHeader={true}
   hideFooter={true}
 >
-  <main class="not-found">
-    <div class="not-found__bg" aria-hidden="true">
-      <img src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=2000&q=80" alt="" data-ken-burns />
-      <div class="not-found__overlay"></div>
+  <main class="relative min-h-screen flex items-stretch text-white overflow-hidden">
+    <!-- Background image + overlay -->
+    <div class="absolute inset-0 -z-0" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=2000&q=80"
+        alt=""
+        data-ken-burns
+        class="w-full h-full object-cover opacity-45"
+      />
+      <div class="absolute inset-0"
+        style="background:
+          radial-gradient(ellipse at 30% 30%, rgba(10,29,63,0.4) 0%, rgba(10,29,63,0.85) 70%),
+          linear-gradient(180deg, rgba(10,29,63,0.3) 0%, rgba(10,29,63,0.85) 100%);"
+      ></div>
     </div>
 
-    <div class="not-found__container container">
-      <div class="not-found__brand reveal">
+    <div class="container relative pt-[calc(var(--header-height)+2rem)] sm:pt-[calc(var(--header-height)+3rem)] pb-16 grid grid-rows-[auto_1fr_auto_auto] gap-8 w-full">
+      <!-- Brand top -->
+      <div class="reveal pt-4">
         <Logo locale={locale} variant="white" withWordmark={true} size={48} />
       </div>
 
-      <div class="not-found__content">
-        <p class="eyebrow eyebrow--light reveal reveal--blur">{locale === 'es' ? 'Error 404 · Página no encontrada' : 'Error 404 · Page not found'}</p>
+      <!-- Main content -->
+      <div class="max-w-3xl mt-8">
+        <p class="eyebrow eyebrow--light reveal reveal--blur">
+          {locale === 'es' ? 'Error 404 · Página no encontrada' : 'Error 404 · Page not found'}
+        </p>
 
-        <h1 class="not-found__number reveal" aria-hidden="true">404</h1>
+        <h1
+          class="reveal font-serif font-normal text-gold-soft leading-[0.85] tracking-tight mt-0 mb-4"
+          style="font-size: clamp(8rem, 22vw, 18rem); text-shadow: 0 8px 60px rgba(200,167,106,0.25);"
+          aria-hidden="true"
+        >404</h1>
 
-        <h2 class="not-found__title reveal" style="--reveal-delay: 200ms;">
+        <h2
+          class="reveal font-serif font-medium text-white text-[clamp(1.5rem,3vw,2.25rem)] leading-tight mb-5"
+          style="--reveal-delay: 200ms;"
+        >
           {locale === 'es' ? (
             <>Esta dirección <span class="italic-serif">se ha mudado</span><br/>o nunca existió.</>
           ) : (
@@ -50,13 +68,16 @@ const escapeRoutes = [
           )}
         </h2>
 
-        <p class="not-found__lead reveal" style="--reveal-delay: 320ms;">
+        <p
+          class="reveal text-white/80 text-base sm:text-lg leading-relaxed max-w-[56ch] mb-10"
+          style="--reveal-delay: 320ms;"
+        >
           {locale === 'es'
             ? 'A veces las cosas cambian de sitio durante un relocation. Aquí tienes algunos atajos para volver al buen camino.'
             : 'Sometimes things move during a relocation. Here are some shortcuts to get you back on track.'}
         </p>
 
-        <div class="not-found__cta reveal" style="--reveal-delay: 440ms;">
+        <div class="reveal flex flex-wrap gap-4" style="--reveal-delay: 440ms;">
           <a href={localizedPath(locale, '/')} class="btn btn--primary" data-magnetic="0.3">
             <span data-magnetic-inner>{locale === 'es' ? 'Volver al inicio' : 'Back home'}</span>
           </a>
@@ -66,200 +87,44 @@ const escapeRoutes = [
         </div>
       </div>
 
-      <nav class="not-found__nav reveal" style="--reveal-delay: 600ms;" aria-label={locale === 'es' ? 'Atajos' : 'Shortcuts'}>
-        <p class="not-found__nav-heading">{locale === 'es' ? 'O explora:' : 'Or explore:'}</p>
-        <ul class="not-found__nav-list" data-stagger data-stagger-step="80">
+      <!-- Escape routes nav -->
+      <nav
+        class="reveal mt-12"
+        style="--reveal-delay: 600ms;"
+        aria-label={locale === 'es' ? 'Atajos' : 'Shortcuts'}
+      >
+        <p class="text-xs text-gold tracking-[0.18em] uppercase font-semibold mb-4">
+          {locale === 'es' ? 'O explora:' : 'Or explore:'}
+        </p>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl" data-stagger data-stagger-step="80">
           {escapeRoutes.slice(0, 4).map((r) => (
             <li class="reveal reveal--fade">
-              <a href={r.href} class="escape-card">
-                <span class="escape-card__label">{r.label}</span>
-                <span class="escape-card__desc">{r.desc}</span>
-                <span class="escape-card__arrow" aria-hidden="true">→</span>
+              <a
+                href={r.href}
+                class="escape-card group grid grid-cols-[1fr_auto] grid-rows-[auto_auto] gap-x-4 gap-y-1 items-center p-4 md:px-5 bg-white/[0.06] border border-white/10 rounded-lg text-white no-underline transition-all duration-300 hover:bg-white/[0.12] hover:border-gold hover:-translate-y-0.5"
+                style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"
+              >
+                <span class="font-serif text-[1.05rem] text-white">{r.label}</span>
+                <span class="text-gold transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
+                <span class="col-span-2 text-xs text-white/60">{r.desc}</span>
               </a>
             </li>
           ))}
         </ul>
       </nav>
 
-      <div class="not-found__corner reveal reveal--fade" style="--reveal-delay: 800ms;">
+      <!-- Bottom corner with logo + locale -->
+      <div
+        class="reveal reveal--fade flex flex-wrap justify-between items-center gap-4 pt-8 border-t border-white/10"
+        style="--reveal-delay: 800ms;"
+      >
         <Logo locale={locale} variant="white" withWordmark={false} size={28} />
-        <p class="not-found__locale">
-          <a href="/es/">ES</a>
-          <span aria-hidden="true">/</span>
-          <a href="/en/">EN</a>
+        <p class="inline-flex items-center gap-2.5 text-xs font-semibold tracking-[0.12em] m-0">
+          <a href="/es/" class="text-white/70 hover:opacity-100 hover:text-gold transition-opacity duration-300">ES</a>
+          <span aria-hidden="true" class="text-white/40">/</span>
+          <a href="/en/" class="text-white/70 hover:opacity-100 hover:text-gold transition-opacity duration-300">EN</a>
         </p>
       </div>
     </div>
   </main>
 </BaseLayout>
-
-<style>
-  .not-found {
-    position: relative;
-    min-height: 100vh;
-    min-height: 100svh;
-    display: flex;
-    align-items: stretch;
-    color: var(--color-white);
-    overflow: hidden;
-  }
-
-  .not-found__bg {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-  }
-  .not-found__bg img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    opacity: 0.45;
-  }
-  .not-found__overlay {
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse at 30% 30%, rgba(10, 29, 63, 0.4) 0%, rgba(10, 29, 63, 0.85) 70%),
-      linear-gradient(180deg, rgba(10, 29, 63, 0.3) 0%, rgba(10, 29, 63, 0.85) 100%);
-  }
-
-  .not-found__container {
-    padding: calc(var(--header-height) + 2rem) 0 4rem;
-    display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    gap: 2rem;
-    width: 100%;
-    align-content: space-between;
-  }
-
-  .not-found__brand { padding-top: 1rem; }
-
-  .not-found__content {
-    max-width: 800px;
-    margin-top: 2rem;
-  }
-
-  .not-found__number {
-    font-family: var(--font-serif);
-    font-size: clamp(8rem, 22vw, 18rem);
-    line-height: 0.85;
-    color: var(--color-gold-soft);
-    letter-spacing: -0.02em;
-    margin: 0 0 1rem;
-    font-weight: 400;
-    text-shadow: 0 8px 60px rgba(200, 167, 106, 0.25);
-  }
-
-  .not-found__title {
-    font-family: var(--font-serif);
-    font-size: clamp(1.5rem, 3vw, 2.25rem);
-    line-height: 1.2;
-    color: var(--color-white);
-    font-weight: 500;
-    margin-bottom: 1.25rem;
-  }
-  .not-found__title .italic-serif {
-    color: var(--color-gold-soft);
-  }
-
-  .not-found__lead {
-    font-size: clamp(1rem, 1.4vw, 1.2rem);
-    color: rgba(255, 255, 255, 0.78);
-    line-height: 1.55;
-    max-width: 56ch;
-    margin-bottom: 2.5rem;
-  }
-
-  .not-found__cta {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .not-found__nav {
-    margin-top: 3rem;
-  }
-  .not-found__nav-heading {
-    font-size: 0.75rem;
-    color: var(--color-gold);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-  .not-found__nav-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    max-width: 640px;
-  }
-
-  .escape-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "label arrow"
-      "desc  desc";
-    align-items: center;
-    gap: 0.25rem 1rem;
-    padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    color: var(--color-white);
-    text-decoration: none;
-    transition: background var(--dur-base) var(--ease),
-                border-color var(--dur-base) var(--ease),
-                transform var(--dur-base) var(--ease);
-    backdrop-filter: blur(8px);
-  }
-  .escape-card:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: var(--color-gold);
-    transform: translateY(-2px);
-  }
-  .escape-card__label {
-    grid-area: label;
-    font-family: var(--font-serif);
-    font-size: 1.05rem;
-    color: var(--color-white);
-  }
-  .escape-card__desc {
-    grid-area: desc;
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.6);
-  }
-  .escape-card__arrow {
-    grid-area: arrow;
-    color: var(--color-gold);
-    transition: transform var(--dur-base) var(--ease);
-  }
-  .escape-card:hover .escape-card__arrow { transform: translateX(4px); }
-
-  .not-found__corner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .not-found__locale {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    margin: 0;
-  }
-  .not-found__locale a {
-    color: var(--color-white);
-    opacity: 0.7;
-    transition: opacity var(--dur-base) var(--ease);
-  }
-  .not-found__locale a:hover { opacity: 1; color: var(--color-gold); }
-
-  @media (max-width: 700px) {
-    .not-found__nav-list { grid-template-columns: 1fr; }
-  }
-</style>

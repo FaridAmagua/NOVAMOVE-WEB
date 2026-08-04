@@ -23,9 +23,12 @@ export async function getStaticPaths() {
   <!-- Mission -->
   <section class="section">
     <div class="container">
-      <div class="about-mission reveal">
+      <div class="reveal max-w-[880px] mx-auto text-center">
         <p class="eyebrow">{t(locale, 'about.mission.title')}</p>
-        <p class="h-2 italic-serif">{t(locale, 'about.mission.body')}</p>
+        <p class="font-serif text-navy italic leading-snug max-w-3xl mx-auto"
+           style="font-size: clamp(1.5rem, 3vw, 2.25rem);">
+          {t(locale, 'about.mission.body')}
+        </p>
       </div>
     </div>
   </section>
@@ -33,17 +36,19 @@ export async function getStaticPaths() {
   <!-- Values -->
   <section class="section section--subtle" aria-labelledby="values-heading">
     <div class="container">
-      <header class="section-header reveal">
+      <header class="reveal max-w-3xl mb-16">
         <p class="eyebrow">{t(locale, 'about.values.title')}</p>
         <h2 id="values-heading" class="h-2">{t(locale, 'about.values.title')}</h2>
       </header>
 
-      <div class="values-grid" data-stagger data-stagger-step="120">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-stagger data-stagger-step="120">
         {values.map((v, i) => (
-          <div class="value-card reveal reveal--fade" data-tilt="3">
-            <span class="value-card__num">0{i + 1}</span>
-            <h3 class="value-card__title">{t(locale, `about.values.items.${v}.title`)}</h3>
-            <p>{t(locale, `about.values.items.${v}.description`)}</p>
+          <div class="reveal reveal--fade bg-white p-10 rounded-lg border-t-4 border-gold shadow-sm" data-tilt="3">
+            <span class="block font-serif text-lg text-gold font-medium tracking-[0.1em] mb-4">
+              0{i + 1}
+            </span>
+            <h3 class="font-serif text-[1.35rem] text-navy mb-3">{t(locale, `about.values.items.${v}.title`)}</h3>
+            <p class="text-text-secondary text-[0.95rem] leading-relaxed">{t(locale, `about.values.items.${v}.description`)}</p>
           </div>
         ))}
       </div>
@@ -53,30 +58,30 @@ export async function getStaticPaths() {
   <!-- Team -->
   <section class="section">
     <div class="container">
-      <div class="team-grid">
-        <div class="team-grid__media reveal">
-          <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80" alt="" loading="lazy" />
+      <div class="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-8 md:gap-16 items-center">
+        <div class="reveal rounded-lg overflow-hidden aspect-[4/5] shadow-md">
+          <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80" alt="" loading="lazy" class="w-full h-full object-cover" />
         </div>
-        <div class="team-grid__body reveal">
+        <div class="reveal">
           <p class="eyebrow">{t(locale, 'about.team.title')}</p>
           <h2 class="h-2">{t(locale, 'about.team.title')}</h2>
           <p class="lead">{t(locale, 'about.team.body')}</p>
-          <div class="stats">
-            <div class="stat">
-              <span class="stat__num" data-counter="12" data-counter-duration="1400">12</span>
-              <span class="stat__label">{locale === 'es' ? 'nacionalidades' : 'nationalities'}</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-8 border-t border-navy/10">
+            <div class="flex flex-col gap-1.5">
+              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="12" data-counter-duration="1400">12</span>
+              <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'nacionalidades' : 'nationalities'}</span>
             </div>
-            <div class="stat">
-              <span class="stat__num" data-counter="20" data-counter-suffix="+" data-counter-duration="1600">20+</span>
-              <span class="stat__label">{locale === 'es' ? 'destinos' : 'destinations'}</span>
+            <div class="flex flex-col gap-1.5">
+              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="20" data-counter-suffix="+" data-counter-duration="1600">20+</span>
+              <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'destinos' : 'destinations'}</span>
             </div>
-            <div class="stat">
-              <span class="stat__num" data-counter="15" data-counter-suffix="y" data-counter-duration="1400">15y</span>
-              <span class="stat__label">{locale === 'es' ? 'de experiencia' : 'experience'}</span>
+            <div class="flex flex-col gap-1.5">
+              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="15" data-counter-suffix="y" data-counter-duration="1400">15y</span>
+              <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'de experiencia' : 'experience'}</span>
             </div>
-            <div class="stat">
-              <span class="stat__num" data-counter="500" data-counter-suffix="+" data-counter-duration="2200">500+</span>
-              <span class="stat__label">{locale === 'es' ? 'mudanzas guiadas' : 'moves delivered'}</span>
+            <div class="flex flex-col gap-1.5">
+              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="500" data-counter-suffix="+" data-counter-duration="2200">500+</span>
+              <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'mudanzas guiadas' : 'moves delivered'}</span>
             </div>
           </div>
         </div>
@@ -86,9 +91,9 @@ export async function getStaticPaths() {
 
   <section class="section section--dark grain">
     <div class="container">
-      <div class="center-cta reveal reveal--scale">
+      <div class="reveal reveal--scale text-center max-w-2xl mx-auto">
         <h2 class="h-2">{t(locale, 'cta.headline')}</h2>
-        <p class="lead">{t(locale, 'cta.subheadline')}</p>
+        <p class="lead mx-auto my-5">{t(locale, 'cta.subheadline')}</p>
         <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.35">
           <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
         </a>
@@ -96,94 +101,3 @@ export async function getStaticPaths() {
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .about-mission {
-    max-width: 880px;
-    margin-inline: auto;
-    text-align: center;
-  }
-  .about-mission .h-2 {
-    color: var(--color-navy);
-    font-size: clamp(1.5rem, 3vw, 2.25rem);
-    line-height: 1.4;
-  }
-
-  .values-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-  }
-  .value-card {
-    background: var(--color-white);
-    padding: 2.5rem 1.75rem;
-    border-radius: var(--radius-md);
-    border-top: 3px solid var(--color-gold);
-    box-shadow: var(--shadow-sm);
-  }
-  .value-card__num {
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    color: var(--color-gold);
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    display: block;
-    margin-bottom: 1rem;
-  }
-  .value-card__title {
-    font-family: var(--font-serif);
-    font-size: 1.35rem;
-    color: var(--color-navy);
-    margin-bottom: 0.75rem;
-  }
-  .value-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
-
-  @media (max-width: 960px) { .values-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .values-grid { grid-template-columns: 1fr; } }
-
-  .team-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 4rem;
-    align-items: center;
-  }
-  .team-grid__media {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    aspect-ratio: 4 / 5;
-    box-shadow: var(--shadow-md);
-  }
-  .team-grid__media img { width: 100%; height: 100%; object-fit: cover; }
-
-  .stats {
-    margin-top: 2.5rem;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    padding-top: 2rem;
-    border-top: 1px solid rgba(10, 29, 63, 0.1);
-  }
-  .stat { display: flex; flex-direction: column; gap: 0.4rem; }
-  .stat__num {
-    font-family: var(--font-serif);
-    font-size: 2.25rem;
-    color: var(--color-gold);
-    line-height: 1;
-    font-weight: 500;
-  }
-  .stat__label {
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  .center-cta { text-align: center; max-width: 640px; margin-inline: auto; }
-  .center-cta .lead { margin: 1.25rem auto 2rem; }
-
-  @media (max-width: 860px) {
-    .team-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-    .stats { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-  }
-</style>

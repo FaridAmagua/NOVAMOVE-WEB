@@ -112,21 +112,24 @@ export async function getStaticPaths() {
   />
 
   {services.map(({ key, image, bullets }, i) => (
-    <section
-      id={key}
-      class={`section service-block ${i % 2 === 1 ? 'service-block--alt' : ''}`}
-    >
+    <section id={key} class={`section ${i % 2 === 1 ? 'service-block--alt' : ''}`}>
       <div class="container">
-        <div class="service-block__grid">
-          <div class="service-block__media reveal">
-            <img src={image} alt="" loading="lazy" />
+        <div class={`grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center ${i % 2 === 1 ? 'md:[direction:rtl]' : ''}`}>
+          <div class="reveal rounded-lg overflow-hidden aspect-[4/5] shadow-md">
+            <img src={image} alt="" loading="lazy" class="w-full h-full object-cover" />
           </div>
-          <div class="service-block__content reveal">
+          <div class="reveal [direction:ltr]">
             <span class="eyebrow">0{i + 1} · {t(locale, 'nav.services')}</span>
             <h2 class="h-2">{t(locale, `services.items.${key}.title`)}</h2>
             <p class="lead">{t(locale, `services.items.${key}.description`)}</p>
-            <ul class="check-list">
-              {bullets[locale].map(b => <li>{b}</li>)}
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-6 my-8">
+              {bullets[locale].map(b => (
+                <li class="relative pl-7 text-[0.95rem] text-text-primary leading-snug">
+                  <span class="absolute left-0 top-1.5 w-[18px] h-2 border-l-2 border-b-2 border-gold"
+                    style="transform: rotate(-45deg);"></span>
+                  {b}
+                </li>
+              ))}
             </ul>
             <a href={`/${locale}/contact`} class="btn btn--secondary">
               {t(locale, 'common.scheduleConsultation')}
@@ -139,74 +142,11 @@ export async function getStaticPaths() {
 
   <section class="section section--dark" aria-labelledby="services-cta">
     <div class="container">
-      <div class="center-cta reveal">
+      <div class="reveal text-center max-w-2xl mx-auto">
         <h2 id="services-cta" class="h-2">{t(locale, 'cta.headline')}</h2>
-        <p class="lead">{t(locale, 'cta.subheadline')}</p>
+        <p class="lead mx-auto my-5">{t(locale, 'cta.subheadline')}</p>
         <a href={`/${locale}/contact`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
       </div>
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .service-block__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-  }
-  .service-block--alt .service-block__grid { direction: rtl; }
-  .service-block--alt .service-block__grid > * { direction: ltr; }
-
-  .service-block__media {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    aspect-ratio: 4 / 5;
-    box-shadow: var(--shadow-md);
-  }
-  .service-block__media img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
-
-  .check-list {
-    margin: 2rem 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.65rem 1.5rem;
-  }
-  .check-list li {
-    position: relative;
-    padding-left: 1.85rem;
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    line-height: 1.4;
-  }
-  .check-list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.45rem;
-    width: 18px;
-    height: 8px;
-    border-left: 2px solid var(--color-gold);
-    border-bottom: 2px solid var(--color-gold);
-    transform: rotate(-45deg);
-  }
-
-  .center-cta {
-    text-align: center;
-    max-width: 640px;
-    margin-inline: auto;
-  }
-  .center-cta .lead { margin: 1.25rem auto 2rem; }
-
-  @media (max-width: 860px) {
-    .service-block__grid,
-    .service-block--alt .service-block__grid {
-      grid-template-columns: 1fr;
-      direction: ltr;
-      gap: 2.5rem;
-    }
-    .check-list { grid-template-columns: 1fr; }
-  }
-</style>

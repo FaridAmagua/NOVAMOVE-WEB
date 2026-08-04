@@ -58,19 +58,27 @@ if (sort === 'price-asc') {
   <section class="section">
     <div class="container">
       <!-- Filters -->
-      <form class="filters" method="get" aria-label={locale === 'es' ? 'Filtros' : 'Filters'}>
-        <div class="filters__group">
-          <label for="tx">{t(locale, 'properties.filterTransaction')}</label>
-          <select name="tx" id="tx" class="filters__select" onchange="this.form.submit()">
+      <form class="flex flex-wrap items-end gap-4 md:gap-6 p-6 bg-cream rounded-lg mb-12" method="get" aria-label={locale === 'es' ? 'Filtros' : 'Filters'}>
+        <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
+          <label for="tx" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
+            {t(locale, 'properties.filterTransaction')}
+          </label>
+          <select name="tx" id="tx"
+            class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
+            onchange="this.form.submit()">
             <option value="">{t(locale, 'properties.filterAllTransactions')}</option>
             <option value="rent" selected={transactionFilter === 'rent'}>{t(locale, 'properties.filterRent')}</option>
             <option value="sale" selected={transactionFilter === 'sale'}>{t(locale, 'properties.filterSale')}</option>
           </select>
         </div>
 
-        <div class="filters__group">
-          <label for="dest">{t(locale, 'properties.filterDestination')}</label>
-          <select name="dest" id="dest" class="filters__select" onchange="this.form.submit()">
+        <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
+          <label for="dest" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
+            {t(locale, 'properties.filterDestination')}
+          </label>
+          <select name="dest" id="dest"
+            class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
+            onchange="this.form.submit()">
             <option value="">{t(locale, 'properties.filterAll')}</option>
             {destinationIds.map(id => (
               <option value={id} selected={destinationFilter === id}>{destinationLabel(id, locale)}</option>
@@ -78,9 +86,13 @@ if (sort === 'price-asc') {
           </select>
         </div>
 
-        <div class="filters__group">
-          <label for="sort">{t(locale, 'properties.sortBy')}</label>
-          <select name="sort" id="sort" class="filters__select" onchange="this.form.submit()">
+        <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
+          <label for="sort" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
+            {t(locale, 'properties.sortBy')}
+          </label>
+          <select name="sort" id="sort"
+            class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
+            onchange="this.form.submit()">
             <option value="featured" selected={sort === 'featured'}>{t(locale, 'properties.sortDefault')}</option>
             <option value="price-asc" selected={sort === 'price-asc'}>{t(locale, 'properties.sortPriceAsc')}</option>
             <option value="price-desc" selected={sort === 'price-desc'}>{t(locale, 'properties.sortPriceDesc')}</option>
@@ -88,14 +100,17 @@ if (sort === 'price-asc') {
         </div>
 
         {(transactionFilter || destinationFilter) && (
-          <a href={`/${locale}/properties`} class="filters__reset">× {t(locale, 'properties.filterReset')}</a>
+          <a href={`/${locale}/properties`}
+            class="self-end text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-gold py-2.5 hover:opacity-80">
+            × {t(locale, 'properties.filterReset')}
+          </a>
         )}
       </form>
 
       {filtered.length === 0 ? (
-        <p class="empty">{t(locale, 'properties.noResults')}</p>
+        <p class="text-center text-text-secondary py-16 text-lg">{t(locale, 'properties.noResults')}</p>
       ) : (
-        <div class="properties-grid" data-stagger data-stagger-step="80">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="80">
           {filtered.map((p, i) => {
             const priceUnit = p.transaction === 'rent' ? t(locale, 'properties.priceUnitRent') : t(locale, 'properties.priceUnitSale');
             const badgeLabel = p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge');
@@ -104,36 +119,51 @@ if (sort === 'price-asc') {
               ? `/${locale}/properties/${p.slug}#inquiry`
               : `/${locale}/properties/${p.slug}`;
             return (
-              <article class="property-card reveal reveal--fade" data-tilt="3">
-                <a href={targetPath} class="property-card__link">
-                  <div class="property-card__media">
+              <article class="reveal reveal--fade bg-white border border-navy/5 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" data-tilt="3">
+                <a href={targetPath} class="block text-text-primary no-underline">
+                  <div class="relative aspect-[4/3] overflow-hidden">
                     <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
+                         class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.06]"
                          style={`object-position: center ${p.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
-                    <span class="property-card__type">{propertyTypeLabel(p.type, locale)}</span>
-                    {p.featured && <span class="property-card__badge">★ {locale === 'es' ? 'Destacada' : 'Featured'}</span>}
-                    <span class={`property-card__transaction property-card__transaction--${p.transaction}`}>{badgeLabel}</span>
+                    <span class="absolute top-4 left-4 bg-white/95 text-navy text-[0.7rem] font-semibold tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-full">
+                      {propertyTypeLabel(p.type, locale)}
+                    </span>
+                    {p.featured && (
+                      <span class="absolute top-4 right-4 bg-gold text-navy text-[0.7rem] font-bold tracking-[0.1em] uppercase px-3.5 py-1.5 rounded-full">
+                        ★ {locale === 'es' ? 'Destacada' : 'Featured'}
+                      </span>
+                    )}
+                    <span class={`absolute bottom-4 left-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase px-3.5 py-1.5 rounded-full ${
+                      p.transaction === 'rent'
+                        ? 'bg-navy/85 text-gold-soft'
+                        : 'bg-gold text-navy'
+                    }`}>
+                      {badgeLabel}
+                    </span>
                   </div>
-                  <div class="property-card__body">
-                    <div class="property-card__meta">
+                  <div class="p-6">
+                    <div class="flex gap-2 text-[0.78rem] text-gold font-semibold tracking-[0.08em] uppercase mb-2">
                       <span>{destinationLabel(p.destination, locale)}</span>
                       <span>·</span>
                       <span>{p.location[locale]}</span>
                     </div>
-                    <h3 class="property-card__title">{p.name[locale]}</h3>
-                    <p class="property-card__tagline">{p.tagline[locale]}</p>
-                    <div class="property-card__specs">
+                    <h3 class="font-serif text-[1.45rem] leading-tight text-navy mb-2">{p.name[locale]}</h3>
+                    <p class="text-[0.9rem] text-text-secondary leading-relaxed mb-4 min-h-[2.7em]">{p.tagline[locale]}</p>
+                    <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
                       <span>{p.maxGuests} {t(locale, 'common.guests')}</span>
                       <span>·</span>
                       <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>
                       <span>·</span>
                       <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>
                     </div>
-                    <div class="property-card__price">
-                      <span class="property-card__price-from">{t(locale, 'common.from')}</span>
-                      <span class="property-card__price-amount">{formatPrice(p.price, locale)}</span>
-                      <span class="property-card__price-unit">{priceUnit}</span>
+                    <div class="flex items-baseline gap-2 flex-wrap">
+                      <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
+                      <span class="font-serif text-2xl text-gold font-medium">{formatPrice(p.price, locale)}</span>
+                      <span class="text-[0.82rem] text-text-secondary">{priceUnit}</span>
                     </div>
-                    <span class="property-card__cta">{ctaLabel} →</span>
+                    <span class="block mt-4 text-gold text-[0.78rem] font-semibold tracking-[0.12em] uppercase transition-all duration-300 group-hover:tracking-[0.16em]">
+                      {ctaLabel} →
+                    </span>
                   </div>
                 </a>
               </article>
@@ -144,193 +174,3 @@ if (sort === 'price-asc') {
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .empty {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 4rem 0;
-    font-size: 1.1rem;
-  }
-
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: var(--color-light);
-    border-radius: var(--radius-md);
-    margin-bottom: 3rem;
-  }
-  .filters__group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 200px; }
-  .filters__group label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-navy);
-  }
-  .filters__select {
-    padding: 0.7rem 1rem;
-    background: var(--color-white);
-    border: 1px solid rgba(10, 29, 63, 0.15);
-    border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    color: var(--color-navy);
-    cursor: pointer;
-  }
-  .filters__select:focus { outline: 2px solid var(--color-gold); }
-  .filters__reset {
-    align-self: end;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-gold);
-    padding: 0.7rem 0;
-  }
-
-  .properties-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-
-  .property-card {
-    background: var(--color-white);
-    border: 1px solid rgba(10, 29, 63, 0.06);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
-  }
-  .property-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-  }
-  .property-card__link { display: block; color: var(--text-primary); text-decoration: none; }
-  .property-card__media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-  }
-  .property-card__media img {
-    width: 100%; height: 100%; object-fit: cover;
-    object-position: center 65%;
-    transition: transform 1.2s var(--ease-out);
-  }
-  .property-card:hover .property-card__media img { transform: scale(1.06); }
-
-  .property-card__type {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--color-navy);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-  }
-  .property-card__badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--color-gold);
-    color: var(--color-navy);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-  }
-  .property-card__transaction {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-  }
-  .property-card__transaction--rent {
-    background: rgba(10, 29, 63, 0.85);
-    color: var(--color-gold-soft);
-  }
-  .property-card__transaction--sale {
-    background: var(--color-gold);
-    color: var(--color-navy);
-  }
-  .property-card__cta {
-    display: block;
-    margin-top: 1rem;
-    color: var(--color-gold);
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    transition: gap var(--dur-base) var(--ease);
-  }
-  .property-card:hover .property-card__cta { letter-spacing: 0.16em; }
-
-  .property-card__body { padding: 1.5rem; }
-  .property-card__meta {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.78rem;
-    color: var(--color-gold);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-  .property-card__title {
-    font-family: var(--font-serif);
-    font-size: 1.45rem;
-    line-height: 1.2;
-    color: var(--color-navy);
-    margin-bottom: 0.5rem;
-  }
-  .property-card__tagline {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    min-height: 2.7em;
-  }
-  .property-card__specs {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(10, 29, 63, 0.08);
-    margin-bottom: 1rem;
-  }
-
-  .property-card__price { display: flex; align-items: baseline; gap: 0.35rem; flex-wrap: wrap; }
-  .property-card__price-from {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .property-card__price-amount {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    color: var(--color-gold);
-    font-weight: 500;
-  }
-  .property-card__price-unit {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-  }
-
-  @media (max-width: 960px) { .properties-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .properties-grid { grid-template-columns: 1fr; } }
-</style>
