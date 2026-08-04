@@ -179,26 +179,34 @@ const isActive = (href: string) => {
 
   .site-header__toggle {
     display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     width: 44px;
     height: 44px;
     padding: 0;
     z-index: 110;
     border-radius: 4px;
-    margin: -12px 0; /* visually center the 20px icon within a 44px hit area */
+    position: relative;
   }
+  /* Use absolute positioning so the 3 bars are always evenly spaced
+     regardless of flex/justify-content quirks */
   .site-header__toggle span {
-    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
     width: 24px;
     height: 2px;
+    margin-left: -12px;
     background: currentColor;
+    border-radius: 1px;
+    transform: translateY(-50%);
     transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease);
   }
-  .site-header__toggle.is-open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+  .site-header__toggle span:nth-child(1) { transform: translate(-12px, -10px); }
+  .site-header__toggle span:nth-child(2) { transform: translate(-12px, -50%); }
+  .site-header__toggle span:nth-child(3) { transform: translate(-12px, 10px); }
+
+  .site-header__toggle.is-open span:nth-child(1) { transform: translate(-12px, -50%) rotate(45deg); }
   .site-header__toggle.is-open span:nth-child(2) { opacity: 0; }
-  .site-header__toggle.is-open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+  .site-header__toggle.is-open span:nth-child(3) { transform: translate(-12px, -50%) rotate(-45deg); }
 
   .site-drawer {
     position: fixed;
@@ -208,7 +216,8 @@ const isActive = (href: string) => {
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
     padding: calc(var(--header-height) + 2rem) 1.5rem 2rem;
-    z-index: 90;
+    /* Above header so links are clickable when open. */
+    z-index: 200;
     overflow-y: auto;
   }
   .site-drawer.is-open { transform: translateX(0); }
@@ -236,30 +245,42 @@ const isActive = (href: string) => {
 </style>
 
 <script>
-  const toggle = document.querySelector('[data-menu-toggle]');
-  const drawer = document.querySelector('[data-menu-drawer]');
+  // Mobile drawer toggle. Uses event delegation so it survives Astro View
+  // Transitions (which replace the drawer element on each navigation).
+  const closeDrawer = () => {
+    document.querySelectorAll('.site-header__toggle.is-open, .site-drawer.is-open').forEach((el) => {
+      el.classList.remove('is-open');
+      if (el.classList.contains('site-header__toggle')) el.setAttribute('aria-expanded', 'false');
+      if (el.classList.contains('site-drawer')) el.setAttribute('aria-hidden', 'true');
+    });
+    document.body.style.overflow = '';
+  };
 
-  // The header scroll behavior (transparent → solid) lives in enhance.ts
-  // because View Transitions re-create this header element on navigation,
-  // and a captured reference would go stale. See initHeaderScroll() there.
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const toggle = target.closest('[data-menu-toggle]');
+    const drawer = target.closest('.site-drawer');
 
-  toggle?.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!open));
-    toggle.classList.toggle('is-open', !open);
-    drawer?.classList.toggle('is-open', !open);
-    drawer?.setAttribute('aria-hidden', String(open));
-    document.body.style.overflow = open ? '' : 'hidden';
+    if (toggle) {
+      const willBeOpen = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(willBeOpen));
+      toggle.classList.toggle('is-open', willBeOpen);
+      const drawerEl = document.querySelector('.site-drawer');
+      drawerEl?.classList.toggle('is-open', willBeOpen);
+      drawerEl?.setAttribute('aria-hidden', String(!willBeOpen));
+      document.body.style.overflow = willBeOpen ? 'hidden' : '';
+      return;
+    }
+
+    // Click on a link inside the open drawer → navigate + close drawer
+    if (drawer && target.closest('a')) {
+      closeDrawer();
+      return;
+    }
   });
 
-  // Close drawer on link click
-  drawer?.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      toggle?.classList.remove('is-open');
-      toggle?.setAttribute('aria-expanded', 'false');
-      drawer.classList.remove('is-open');
-      drawer.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-    });
+  // ESC closes the drawer
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
   });
 </script>

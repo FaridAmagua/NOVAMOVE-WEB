@@ -98,22 +98,40 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
       import '../scripts/enhance.ts';
     </script>
 
-    <!-- Inline header-scroll handler: runs synchronously per page load,
-         can't be blocked by cache or hydration timing. -->
+    <!-- Inline header-scroll handler: uses IntersectionObserver (more
+         reliable than scroll events on mobile Safari/Android Chrome). -->
     <script is:inline>
       (function() {
-        const update = () => {
+        let observer = null;
+
+        const setupObserver = () => {
           const header = document.querySelector('.site-header');
           if (!header || header.dataset.transparent !== 'true') return;
-          if (window.scrollY > 30) header.classList.add('is-scrolled');
-          else header.classList.remove('is-scrolled');
+          // Sentinel: a 1px line just below the header. When it scrolls
+          // out of viewport, the header becomes solid.
+          let sentinel = document.getElementById('header-scroll-sentinel');
+          if (!sentinel) {
+            sentinel = document.createElement('div');
+            sentinel.id = 'header-scroll-sentinel';
+            sentinel.style.cssText = 'position:absolute;top:60px;left:0;width:1px;height:1px;pointer-events:none;';
+            document.body.prepend(sentinel);
+          }
+          if (observer) observer.disconnect();
+          observer = new IntersectionObserver(
+            ([entry]) => {
+              header.classList.toggle('is-scrolled', !entry.isIntersecting);
+            },
+            { rootMargin: '0px 0px 0px 0px', threshold: 0 }
+          );
+          observer.observe(sentinel);
+          // Also keep scroll fallback for top-of-page <30px edge case
+          window.addEventListener('scroll', () => {
+            header.classList.toggle('is-scrolled', window.scrollY > 60);
+          }, { passive: true });
         };
-        // Run on every possible event: load, scroll, pageshow, after transitions
-        window.addEventListener('scroll', update, { passive: true });
-        document.addEventListener('astro:page-load', update);
-        window.addEventListener('pageshow', update);
-        // Initial pass
-        update();
+
+        setupObserver();
+        document.addEventListener('astro:page-load', setupObserver);
       })();
     </script>
 
