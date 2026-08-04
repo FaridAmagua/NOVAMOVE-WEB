@@ -111,34 +111,37 @@ export async function getStaticPaths() {
     image="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=2000&q=80"
   />
 
-  {services.map(({ key, image, bullets }, i) => (
-    <section id={key} class={`section ${i % 2 === 1 ? 'service-block--alt' : ''}`}>
-      <div class="container">
-        <div class={`grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center ${i % 2 === 1 ? 'md:[direction:rtl]' : ''}`}>
-          <div class="reveal rounded-lg overflow-hidden aspect-[4/5] shadow-md">
-            <img src={image} alt="" loading="lazy" class="w-full h-full object-cover" />
-          </div>
-          <div class="reveal [direction:ltr]">
-            <span class="eyebrow">0{i + 1} · {t(locale, 'nav.services')}</span>
-            <h2 class="h-2">{t(locale, `services.items.${key}.title`)}</h2>
-            <p class="lead">{t(locale, `services.items.${key}.description`)}</p>
-            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-6 my-8">
-              {bullets[locale].map(b => (
-                <li class="relative pl-7 text-[0.95rem] text-text-primary leading-snug">
-                  <span class="absolute left-0 top-1.5 w-[18px] h-2 border-l-2 border-b-2 border-gold"
-                    style="transform: rotate(-45deg);"></span>
-                  {b}
-                </li>
-              ))}
-            </ul>
-            <a href={`/${locale}/contact`} class="btn btn--secondary">
-              {t(locale, 'common.scheduleConsultation')}
-            </a>
+  {services.map(({ key, image, bullets }, i) => {
+    const isAlt = i % 2 === 1;
+    return (
+      <section id={key} class="section">
+        <div class="container">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div class={`reveal rounded-lg overflow-hidden aspect-[4/5] shadow-md ${isAlt ? 'md:order-2' : 'md:order-1'}`}>
+              <img src={image} alt="" loading="lazy" class="w-full h-full object-cover" />
+            </div>
+            <div class={`reveal ${isAlt ? 'md:order-1' : 'md:order-2'}`}>
+              <span class="eyebrow">0{i + 1} · {t(locale, 'nav.services')}</span>
+              <h2 class="h-2">{t(locale, `services.items.${key}.title`)}</h2>
+              <p class="lead">{t(locale, `services.items.${key}.description`)}</p>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-6 my-8">
+                {bullets[locale].map(b => (
+                  <li class="relative pl-7 text-[0.95rem] text-text-primary leading-snug">
+                    <span class="absolute left-0 top-1.5 w-[18px] h-2 border-l-2 border-b-2 border-gold"
+                      style="transform: rotate(-45deg);"></span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <a href={`/${locale}/contact`} class="btn btn--secondary">
+                {t(locale, 'common.scheduleConsultation')}
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-  ))}
+      </section>
+    );
+  })}
 
   <section class="section section--dark" aria-labelledby="services-cta">
     <div class="container">
