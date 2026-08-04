@@ -81,11 +81,11 @@ export async function getStaticPaths() {
   <!-- ============ SERVICES ============ -->
   <section class="section" aria-labelledby="services-heading">
     <div class="container">
-      <header class="reveal max-w-3xl mb-16">
+      <div class="max-w-3xl mb-16">
         <p class="eyebrow">{t(locale, 'services.eyebrow')}</p>
-        <h2 id="services-heading" class="h-2">{t(locale, 'services.headline')}</h2>
-        <p class="lead">{t(locale, 'services.subheadline')}</p>
-      </header>
+        <h2 id="services-heading" class="h-2 mt-4 mb-4">{t(locale, 'services.headline')}</h2>
+        <p class="lead mt-0">{t(locale, 'services.subheadline')}</p>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-stagger data-stagger-step="100">
         {services.map(({ key, icon, href }) => (
