@@ -1501,10 +1501,15 @@ function monthName(monthIdx: number, loc: Locale): string {
     .prop-gallery { grid-template-columns: 1fr; height: auto; }
     .prop-gallery__main { aspect-ratio: 16/10; }
     .prop-gallery__thumbs {
-      grid-template-rows: 1fr;
+      display: grid;
+      grid-template-rows: none;
       grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
     }
-    .prop-gallery__thumb { aspect-ratio: 1; }
+    .prop-gallery__thumb {
+      aspect-ratio: 1;
+      min-height: 80px;
+    }
     .prop-layout { grid-template-columns: 1fr; gap: 2.5rem; }
     .prop-sidebar { position: static; }
     .amenities-grid { grid-template-columns: repeat(2, 1fr); }

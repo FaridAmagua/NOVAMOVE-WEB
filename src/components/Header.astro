@@ -81,7 +81,7 @@ const isActive = (href: string) => {
         {t(locale, 'nav.cta')}
       </a>
       <div class="site-drawer__lang">
-        <LanguageSwitcher locale={locale} currentPath={currentPath} variant="dark" />
+        <LanguageSwitcher locale={locale} currentPath={currentPath} variant="light" />
       </div>
     </nav>
   </div>
@@ -215,10 +215,11 @@ const isActive = (href: string) => {
     color: var(--color-white);
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
-    padding: calc(var(--header-height) + 2rem) 1.5rem 2rem;
+    padding: calc(var(--header-height) + 0.5rem) 1.5rem 2rem;
     /* Above header so links are clickable when open. */
     z-index: 200;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .site-drawer.is-open { transform: translateX(0); }
 
