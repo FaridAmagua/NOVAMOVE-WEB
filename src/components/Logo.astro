@@ -61,14 +61,19 @@ const taglineColor = variant === 'white' ? 'rgba(255,255,255,0.7)' : 'rgba(10,29
   .logo__wordmark { display: flex; flex-direction: column; line-height: 1; gap: 5px; }
   .logo__name {
     font-family: var(--font-serif);
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     letter-spacing: 0.18em;
     font-weight: 500;
   }
   .logo__tag {
     font-family: var(--font-sans);
-    font-size: 0.58rem;
-    letter-spacing: 0.32em;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
     font-weight: 500;
+  }
+  @media (max-width: 540px) {
+    /* Hide the small tagline on mobile to save header space */
+    .logo__tag { display: none; }
+    .logo__wordmark { gap: 0; }
   }
 </style>

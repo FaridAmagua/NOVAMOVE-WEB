@@ -98,6 +98,25 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
       import '../scripts/enhance.ts';
     </script>
 
+    <!-- Inline header-scroll handler: runs synchronously per page load,
+         can't be blocked by cache or hydration timing. -->
+    <script is:inline>
+      (function() {
+        const update = () => {
+          const header = document.querySelector('.site-header');
+          if (!header || header.dataset.transparent !== 'true') return;
+          if (window.scrollY > 30) header.classList.add('is-scrolled');
+          else header.classList.remove('is-scrolled');
+        };
+        // Run on every possible event: load, scroll, pageshow, after transitions
+        window.addEventListener('scroll', update, { passive: true });
+        document.addEventListener('astro:page-load', update);
+        window.addEventListener('pageshow', update);
+        // Initial pass
+        update();
+      })();
+    </script>
+
     <style is:global>
       /* View transition defaults — fade by default, slide on named groups */
       ::view-transition-old(root),

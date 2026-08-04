@@ -175,20 +175,23 @@ const isActive = (href: string) => {
     gap: var(--space-5);
   }
 
-  .site-header__cta { padding: 0.7rem 1.25rem; font-size: 0.72rem; }
+  .site-header__cta { padding: 0.85rem 1.25rem; font-size: 0.72rem; min-height: 44px; }
 
   .site-header__toggle {
     display: none;
     flex-direction: column;
-    justify-content: space-between;
-    width: 28px;
-    height: 20px;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
     padding: 0;
     z-index: 110;
+    border-radius: 4px;
+    margin: -12px 0; /* visually center the 20px icon within a 44px hit area */
   }
   .site-header__toggle span {
     display: block;
-    width: 100%;
+    width: 24px;
     height: 2px;
     background: currentColor;
     transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease);
