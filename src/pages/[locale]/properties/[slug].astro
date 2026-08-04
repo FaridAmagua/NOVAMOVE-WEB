@@ -1534,7 +1534,6 @@ function monthName(monthIdx: number, loc: Locale): string {
 
   /* ============ MOBILE STICKY CTA BAR (rental properties only) ============ */
   .prop-mobile-cta {
-    /* Hidden by default; visible only on mobile via media query below */
     display: none;
     position: fixed;
     bottom: 0;
@@ -1547,19 +1546,27 @@ function monthName(monthIdx: number, loc: Locale): string {
     padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -4px 22px rgba(0, 0, 0, 0.25);
     border-top: 1px solid rgba(200, 167, 106, 0.25);
+    text-align: left; /* explicit iOS Safari hardening */
   }
   @media (max-width: 720px) {
-    .prop-mobile-cta { display: flex; flex-direction: column; gap: 0.5rem; }
+    .prop-mobile-cta { display: flex; flex-direction: column; gap: 0.65rem; }
     /* Reserve bottom space so footer isn't covered */
-    body:has(.prop-mobile-cta) { padding-bottom: 124px; }
+    body:has(.prop-mobile-cta) { padding-bottom: 128px; }
   }
   .prop-mobile-cta__price {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: baseline;
-    justify-content: flex-start;
+    justify-content: flex-start; /* LEFT (Safari hardening) */
     gap: 0.4rem;
     line-height: 1.1;
+    text-align: left;
+    width: 100%;
+    margin-right: auto; /* extra Safari hardening */
   }
+  .prop-mobile-cta__from,
+  .prop-mobile-cta__unit { white-space: nowrap; }
   .prop-mobile-cta__from {
     font-size: 0.65rem;
     color: rgba(255, 255, 255, 0.6);
@@ -1568,9 +1575,11 @@ function monthName(monthIdx: number, loc: Locale): string {
   }
   .prop-mobile-cta__amount {
     font-family: var(--font-sans);
-    font-size: 1.25rem;
+    font-size: 1.35rem; /* slightly larger for iOS readability */
     font-weight: 700;
     color: var(--color-gold);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .prop-mobile-cta__unit {
     font-size: 0.7rem;
@@ -1582,6 +1591,22 @@ function monthName(monthIdx: number, loc: Locale): string {
     padding: 0.95rem 1.5rem;
     min-height: 50px;
     letter-spacing: 0.06em;
+  }
+
+  /* ============ BOOKING CARD price: belt-and-suspenders for iOS Safari ============ */
+  .booking-card__price {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    width: 100%;
+  }
+  .booking-card__from { white-space: nowrap; }
+  .booking-card__amount {
+    font-size: 1.75rem; /* smaller mobile so 3 elements fit */
   }
 </style>
 </style>
