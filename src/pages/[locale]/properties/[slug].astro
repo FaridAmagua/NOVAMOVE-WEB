@@ -197,7 +197,7 @@ function monthName(monthIdx: number, loc: Locale): string {
 
           <!-- Description with collapse -->
           <section class="prop-section reveal">
-            <h2 class="h-3 prop-section__title">{t(locale, 'properties.highlights')}</h2>
+            <h2 class="h3 prop-section__title">{t(locale, 'properties.highlights')}</h2>
             <div class="prop-description" data-collapse>
               <p class="prop-description__text">{property.description[locale]}</p>
               <p class="prop-description__extra" hidden>
@@ -215,7 +215,7 @@ function monthName(monthIdx: number, loc: Locale): string {
           <!-- Amenities grid with icons -->
           <section class="prop-section reveal">
             <header class="prop-section__header">
-              <h2 class="h-3">{t(locale, 'properties.amenitiesTitle')}</h2>
+              <h2 class="h3">{t(locale, 'properties.amenitiesTitle')}</h2>
               <span class="prop-section__count">
                 {t(locale, 'properties.amenitiesCount', { n: property.amenities.length })}
               </span>
@@ -233,7 +233,7 @@ function monthName(monthIdx: number, loc: Locale): string {
 
           {!isSale && (
             <section class="prop-section reveal">
-              <h2 class="h-3 prop-section__title">{t(locale, 'properties.houseRules')}</h2>
+              <h2 class="h3 prop-section__title">{t(locale, 'properties.houseRules')}</h2>
               <ul class="rules-list">
                 {((t(locale, 'properties.houseRulesItems') as unknown) as string[]).map((rule: string) => (
                   <li>{rule}</li>
@@ -245,7 +245,7 @@ function monthName(monthIdx: number, loc: Locale): string {
           <!-- Map placeholder -->
           <section class="prop-section reveal">
             <header class="prop-section__header">
-              <h2 class="h-3">{t(locale, 'properties.neighborhood')}</h2>
+              <h2 class="h3">{t(locale, 'properties.neighborhood')}</h2>
             </header>
             <div class="prop-map">
               <iframe
@@ -270,7 +270,7 @@ function monthName(monthIdx: number, loc: Locale): string {
           <!-- Sale inquiry -->
           {isSale && (
             <section id="inquiry" class="prop-section prop-inquiry reveal">
-              <h2 class="h-3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
+              <h2 class="h3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
               <p class="lead">{t(locale, 'salesInquiry.subtitle')}</p>
 
               <form class="inquiry-form" id="inquiry-form" novalidate data-loading-on-submit>
@@ -332,7 +332,7 @@ function monthName(monthIdx: number, loc: Locale): string {
             <section class="prop-section prop-reviews reveal">
               <header class="prop-section__header">
                 <div>
-                  <h2 class="h-3">{t(locale, 'properties.reviewsTitle')}</h2>
+                  <h2 class="h3">{t(locale, 'properties.reviewsTitle')}</h2>
                   <p class="prop-section__subtitle">{t(locale, 'properties.reviewsSubtitle')}</p>
                 </div>
                 <div class="prop-reviews__score">
@@ -383,7 +383,7 @@ function monthName(monthIdx: number, loc: Locale): string {
           <section class="prop-section reveal">
             <header class="prop-section__header prop-section__header--center">
               <p class="eyebrow">{t(locale, 'properties.processSubtitle')}</p>
-              <h2 class="h-2">{t(locale, 'properties.processTitle')}</h2>
+              <h2 class="h2">{t(locale, 'properties.processTitle')}</h2>
             </header>
             <ol class="prop-process" data-stagger data-stagger-step="120">
               {[1, 2, 3].map((num, i) => (
@@ -543,7 +543,7 @@ function monthName(monthIdx: number, loc: Locale): string {
       <div class="container">
         <header class="section-header reveal">
           <p class="eyebrow">{t(locale, 'properties.relatedInDestination', { city: destLabel })}</p>
-          <h2 class="h-2">{t(locale, 'properties.title')}</h2>
+          <h2 class="h2">{t(locale, 'properties.title')}</h2>
         </header>
         <div class="related-grid" data-stagger data-stagger-step="80">
           {otherProps.map((p, i) => (

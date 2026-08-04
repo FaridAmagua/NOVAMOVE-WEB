@@ -74,7 +74,7 @@ export async function getStaticPaths() {
 
     <!-- Scroll indicator -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-6 h-10 border-[1.5px] border-white/50 rounded-xl flex justify-center pt-2" aria-hidden="true">
-      <span class="block w-0.5 h-2 bg-gold rounded-sm" style="animation: scrollHint 1.6s ease-in-out infinite;"></span>
+      <span class="block w-0.5 h2 bg-gold rounded-sm" style="animation: scrollHint 1.6s ease-in-out infinite;"></span>
     </div>
   </section>
 
@@ -83,7 +83,7 @@ export async function getStaticPaths() {
     <div class="container">
       <div class="max-w-3xl mb-16">
         <p class="eyebrow">{t(locale, 'services.eyebrow')}</p>
-        <h2 id="services-heading" class="h-2 mt-4 mb-4">{t(locale, 'services.headline')}</h2>
+        <h2 id="services-heading" class="h2 mt-4 mb-4">{t(locale, 'services.headline')}</h2>
         <p class="lead mt-0">{t(locale, 'services.subheadline')}</p>
       </div>
 
@@ -117,7 +117,7 @@ export async function getStaticPaths() {
     <div class="container">
       <header class="reveal max-w-3xl mx-auto mb-16 text-center">
         <p class="eyebrow eyebrow--light">{t(locale, 'destinations.eyebrow')}</p>
-        <h2 id="destinations-heading" class="h-2">{t(locale, 'destinations.headline')}</h2>
+        <h2 id="destinations-heading" class="h2">{t(locale, 'destinations.headline')}</h2>
         <p class="lead">{t(locale, 'destinations.subheadline')}</p>
       </header>
 
@@ -149,7 +149,7 @@ export async function getStaticPaths() {
     <div class="container">
       <header class="reveal max-w-3xl mx-auto mb-16 text-center">
         <p class="eyebrow">{t(locale, 'process.eyebrow')}</p>
-        <h2 id="process-heading" class="h-2">{t(locale, 'process.headline')}</h2>
+        <h2 id="process-heading" class="h2">{t(locale, 'process.headline')}</h2>
         <p class="lead">{t(locale, 'process.subheadline')}</p>
       </header>
 
@@ -174,7 +174,7 @@ export async function getStaticPaths() {
     <div class="container">
       <header class="reveal max-w-3xl mx-auto mb-16 text-center">
         <p class="eyebrow">{t(locale, 'testimonials.eyebrow')}</p>
-        <h2 id="testimonials-heading" class="h-2">{t(locale, 'testimonials.headline')}</h2>
+        <h2 id="testimonials-heading" class="h2">{t(locale, 'testimonials.headline')}</h2>
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="120">
@@ -211,7 +211,7 @@ export async function getStaticPaths() {
         </div>
         <div class="relative text-center max-w-2xl mx-auto"
              style="padding: clamp(3rem, 6vw, 5rem);">
-          <h2 class="h-2 text-white mb-4">{t(locale, 'cta.headline')}</h2>
+          <h2 class="h2 text-white mb-4">{t(locale, 'cta.headline')}</h2>
           <p class="lead text-white/80 mx-auto mb-9"
              style="font-size: clamp(1.1rem, 1.5vw, 1.3rem);">
             {t(locale, 'cta.subheadline')}

@@ -122,12 +122,12 @@ export async function getStaticPaths() {
             </div>
             <div class={`reveal ${isAlt ? 'md:order-1' : 'md:order-2'}`}>
               <span class="eyebrow">0{i + 1} · {t(locale, 'nav.services')}</span>
-              <h2 class="h-2">{t(locale, `services.items.${key}.title`)}</h2>
+              <h2 class="h2">{t(locale, `services.items.${key}.title`)}</h2>
               <p class="lead">{t(locale, `services.items.${key}.description`)}</p>
               <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-6 my-8">
                 {bullets[locale].map(b => (
                   <li class="relative pl-7 text-[0.95rem] text-text-primary leading-snug">
-                    <span class="absolute left-0 top-1.5 w-[18px] h-2 border-l-2 border-b-2 border-gold"
+                    <span class="absolute left-0 top-1.5 w-[18px] h2 border-l-2 border-b-2 border-gold"
                       style="transform: rotate(-45deg);"></span>
                     {b}
                   </li>
@@ -146,7 +146,7 @@ export async function getStaticPaths() {
   <section class="section section--dark" aria-labelledby="services-cta">
     <div class="container">
       <div class="reveal text-center max-w-2xl mx-auto">
-        <h2 id="services-cta" class="h-2">{t(locale, 'cta.headline')}</h2>
+        <h2 id="services-cta" class="h2">{t(locale, 'cta.headline')}</h2>
         <p class="lead mx-auto my-5">{t(locale, 'cta.subheadline')}</p>
         <a href={`/${locale}/contact`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
       </div>

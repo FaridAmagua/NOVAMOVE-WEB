@@ -100,7 +100,7 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
     {related.length > 0 && (
       <section class="section bg-cream">
         <div class="container">
-          <h2 class="h-3 text-navy mb-8">{t(displayLocale, 'blog.title')}</h2>
+          <h2 class="h3 text-navy mb-8">{t(displayLocale, 'blog.title')}</h2>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {related.map((p, i) => (
               <a
