@@ -34,7 +34,7 @@ const isActive = (href: string) => {
 
 <header
   class={`site-header ${transparent ? 'site-header--transparent' : ''}`}
-  data-transparent={transparent}
+  data-transparent={transparent ? 'true' : 'false'}
 >
   <div class="container site-header__inner">
     <Logo locale={locale} variant={transparent ? 'white' : 'light'} withWordmark={true} />
