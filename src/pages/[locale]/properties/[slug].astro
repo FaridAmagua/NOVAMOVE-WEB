@@ -1151,16 +1151,26 @@ function monthName(monthIdx: number, loc: Locale): string {
   }
   .inquiry-form__submit { width: 100%; }
 
-  /* ============ BOOKING SIDEBAR ============ */
+  /* ============ BOOKING SIDEBAR (mobile-first, sticky on lg+) ============ */
   .prop-layout {
     display: grid;
-    grid-template-columns: 1.65fr 1fr;
-    gap: 4rem;
+    /* Mobile (default): single column, booking card below content */
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
     align-items: start;
   }
+  /* lg+ : 2 columns with sidebar (Tailwind lg = 1024px) */
+  @media (min-width: 1024px) {
+    .prop-layout {
+      grid-template-columns: 1.65fr 1fr;
+      gap: 4rem;
+    }
+  }
   .prop-sidebar {
-    position: sticky;
-    top: calc(var(--header-height) + 1.5rem);
+    position: static; /* static on mobile so it stacks below */
+  }
+  @media (min-width: 1024px) {
+    .prop-sidebar { position: sticky; top: calc(var(--header-height) + 1.5rem); }
   }
   .booking-card {
     background: var(--color-white);
@@ -1168,10 +1178,13 @@ function monthName(monthIdx: number, loc: Locale): string {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     overflow: hidden;
+    text-align: left;
   }
   .booking-card__top {
-    padding: 2rem;
+    padding: 1.25rem; /* mobile */
   }
+  @media (min-width: 540px) { .booking-card__top { padding: 1.75rem; } }
+  @media (min-width: 1024px) { .booking-card__top { padding: 2rem; } }
   .booking-card__chip {
     display: inline-block;
     padding: 0.35rem 0.85rem;
@@ -1196,20 +1209,26 @@ function monthName(monthIdx: number, loc: Locale): string {
     gap: 0.35rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
+    text-align: left;
+    width: 100%;
   }
   .booking-card__from {
     font-size: 0.78rem;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    white-space: nowrap;
   }
   .booking-card__amount {
     font-family: var(--font-sans);
-    font-size: 2.25rem;
+    font-size: 1.85rem; /* mobile */
     color: var(--color-gold);
     font-weight: 700;
     letter-spacing: -0.025em;
+    white-space: nowrap;
   }
+  @media (min-width: 540px)  { .booking-card__amount { font-size: 2rem; } }
+  @media (min-width: 1024px) { .booking-card__amount { font-size: 2.25rem; } }
   .booking-card__unit {
     font-size: 0.88rem;
     color: var(--text-secondary);
@@ -1435,8 +1454,6 @@ function monthName(monthIdx: number, loc: Locale): string {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
-  .related-card {
-    background: var(--color-white);
   .related-card {
     background: var(--color-white);
     border-radius: var(--radius-md);
