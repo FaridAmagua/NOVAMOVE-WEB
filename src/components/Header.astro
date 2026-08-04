@@ -107,12 +107,19 @@ const isActive = (href: string) => {
 
   .site-header.is-scrolled,
   .site-header:not(.site-header--transparent) {
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: var(--shadow-sm);
-    color: var(--color-navy);
-    border-bottom-color: rgba(10, 29, 63, 0.06);
+    background: rgba(10, 29, 63, 0.92);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 4px 22px rgba(0, 0, 0, 0.18);
+    color: var(--color-white);
+    border-bottom-color: rgba(200, 167, 106, 0.18);
+  }
+
+  /* When scrolled on dark navy, the active link underline stays gold
+     and the link opacity lifts to 1 for legibility */
+  .site-header.is-scrolled .site-nav__link,
+  .site-header:not(.site-header--transparent) .site-nav__link {
+    opacity: 1;
   }
 
   .site-header__inner {
