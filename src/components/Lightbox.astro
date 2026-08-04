@@ -1,0 +1,271 @@
+---
+/**
+ * Lightbox — full-screen image gallery triggered by [data-lightbox].
+ *
+ * Usage:
+ *   import Lightbox from '.../Lightbox.astro';
+ *   <Lightbox selector="#my-gallery" />
+ *
+ * The component looks for all <img> elements under the selector and binds
+ * them: clicking opens the lightbox, keyboard arrows navigate, ESC closes.
+ */
+interface Props {
+  /** CSS selector for the gallery container whose <img> children should trigger the lightbox. */
+  selector?: string;
+}
+
+const { selector = '[data-lightbox]' } = Astro.props;
+---
+
+<div class="lightbox" data-lightbox-root aria-hidden="true" role="dialog" aria-label="Image gallery">
+  <button type="button" class="lightbox__close" data-lightbox-close aria-label="Close (Esc)">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  </button>
+
+  <button type="button" class="lightbox__nav lightbox__nav--prev" data-lightbox-prev aria-label="Previous (←)">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M15 18l-6-6 6-6"/>
+    </svg>
+  </button>
+  <button type="button" class="lightbox__nav lightbox__nav--next" data-lightbox-next aria-label="Next (→)">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M9 6l6 6-6 6"/>
+    </svg>
+  </button>
+
+  <div class="lightbox__stage">
+    <img data-lightbox-image alt="" />
+    <div class="lightbox__counter" data-lightbox-counter></div>
+  </div>
+
+  <div class="lightbox__thumbs" data-lightbox-thumbs></div>
+</div>
+
+<style is:global>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(6, 18, 41, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms var(--ease);
+  }
+  body.lightbox-open { overflow: hidden; }
+  .lightbox.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lightbox__stage {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 4rem 6rem;
+  }
+  .lightbox__stage img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+  }
+  .lightbox__counter {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.08);
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+  }
+  .lightbox__close,
+  .lightbox__nav {
+    position: absolute;
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.18);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+    z-index: 2;
+  }
+  .lightbox__close { top: 1.5rem; right: 1.5rem; }
+  .lightbox__nav--prev { left: 1.5rem; top: 50%; transform: translateY(-50%); }
+  .lightbox__nav--next { right: 1.5rem; top: 50%; transform: translateY(-50%); }
+  .lightbox__close:hover,
+  .lightbox__nav:hover { background: rgba(255,255,255,0.18); }
+  .lightbox__nav--prev:hover { transform: translateY(-50%) translateX(-2px); }
+  .lightbox__nav--next:hover { transform: translateY(-50%) translateX(2px); }
+  .lightbox__thumbs {
+    width: 100%;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+  .lightbox__thumb {
+    width: 64px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.5;
+    border: 2px solid transparent;
+    transition: opacity var(--dur-base) var(--ease), border-color var(--dur-base) var(--ease);
+    background: rgba(255,255,255,0.05);
+  }
+  .lightbox__thumb.is-active { opacity: 1; border-color: var(--color-gold); }
+  .lightbox__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  @media (max-width: 640px) {
+    .lightbox__stage { padding: 3rem 1.5rem; }
+    .lightbox__nav { width: 40px; height: 40px; }
+    .lightbox__nav--prev { left: 0.5rem; }
+    .lightbox__nav--next { right: 0.5rem; }
+  }
+</style>
+
+<script>
+  class Lightbox {
+    root: HTMLElement;
+    stageImg: HTMLImageElement;
+    counter: HTMLElement;
+    thumbsContainer: HTMLElement;
+    closeBtn: HTMLButtonElement;
+    prevBtn: HTMLButtonElement;
+    nextBtn: HTMLButtonElement;
+    images: string[] = [];
+    alts: string[] = [];
+    index = 0;
+    triggers: HTMLElement[] = [];
+
+    constructor() {
+      this.root = document.querySelector('[data-lightbox-root]')!;
+      if (!this.root) return;
+      this.stageImg = this.root.querySelector('[data-lightbox-image]')!;
+      this.counter = this.root.querySelector('[data-lightbox-counter]')!;
+      this.thumbsContainer = this.root.querySelector('[data-lightbox-thumbs]')!;
+      this.closeBtn = this.root.querySelector('[data-lightbox-close]')!;
+      this.prevBtn = this.root.querySelector('[data-lightbox-prev]')!;
+      this.nextBtn = this.root.querySelector('[data-lightbox-next]')!;
+      this.bind();
+    }
+
+    bind() {
+      // Listen for clicks on any element with data-lightbox trigger attribute
+      document.addEventListener('click', (e) => {
+        const trigger = (e.target as HTMLElement).closest<HTMLElement>('[data-lightbox-trigger]');
+        if (!trigger) return;
+        // Find all triggers on the same page (collecting all images in the gallery group)
+        const groupId = trigger.dataset.lightboxGroup || 'default';
+        this.collectTriggers(groupId);
+        if (this.triggers.length === 0) return;
+        const triggerIndex = this.triggers.indexOf(trigger);
+        this.open(triggerIndex >= 0 ? triggerIndex : 0);
+      });
+
+      this.closeBtn.addEventListener('click', () => this.close());
+      this.prevBtn.addEventListener('click', () => this.prev());
+      this.nextBtn.addEventListener('click', () => this.next());
+
+      // Backdrop click closes (but not clicks inside stage or thumbs)
+      this.root.addEventListener('click', (e) => {
+        if (e.target === this.root) this.close();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (!this.root.classList.contains('is-open')) return;
+        if (e.key === 'Escape') this.close();
+        if (e.key === 'ArrowLeft') this.prev();
+        if (e.key === 'ArrowRight') this.next();
+      });
+    }
+
+    collectTriggers(groupId: string) {
+      this.triggers = Array.from(
+        document.querySelectorAll<HTMLElement>(`[data-lightbox-trigger][data-lightbox-group="${groupId}"]`)
+      );
+      this.images = this.triggers.map(el => {
+        const img = el.querySelector('img') || el as unknown as HTMLImageElement;
+        return (img as HTMLImageElement).src;
+      });
+      this.alts = this.triggers.map(el => {
+        const img = el.querySelector('img');
+        return img?.alt || '';
+      });
+    }
+
+    open(index: number) {
+      this.index = index;
+      this.render();
+      this.root.classList.add('is-open');
+      this.root.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('lightbox-open');
+    }
+
+    close() {
+      this.root.classList.remove('is-open');
+      this.root.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('lightbox-open');
+    }
+
+    prev() {
+      this.index = (this.index - 1 + this.images.length) % this.images.length;
+      this.render();
+    }
+
+    next() {
+      this.index = (this.index + 1) % this.images.length;
+      this.render();
+    }
+
+    render() {
+      this.stageImg.src = this.images[this.index];
+      this.stageImg.alt = this.alts[this.index] || '';
+      this.counter.textContent = `${this.index + 1} / ${this.images.length}`;
+
+      // Rebuild thumbs
+      this.thumbsContainer.innerHTML = '';
+      this.images.forEach((src, i) => {
+        const thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.className = 'lightbox__thumb' + (i === this.index ? ' is-active' : '');
+        thumb.setAttribute('aria-label', `Image ${i + 1}`);
+        thumb.innerHTML = `<img src="${src}" alt="" />`;
+        thumb.addEventListener('click', () => {
+          this.index = i;
+          this.render();
+        });
+        this.thumbsContainer.appendChild(thumb);
+      });
+    }
+  }
+
+  // Re-init on Astro page transitions
+  function init() {
+    document.querySelectorAll('[data-lightbox-root]').forEach(() => new Lightbox());
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

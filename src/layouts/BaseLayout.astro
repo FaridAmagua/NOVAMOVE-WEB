@@ -1,0 +1,109 @@
+---
+import '../styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { t, supportedLocales, type Locale, stripLocale } from '../utils/i18n';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  transparentHeader?: boolean;
+  /** Hide the global header (used by full-bleed pages like 404). */
+  hideHeader?: boolean;
+  /** Hide the global footer (used by full-bleed pages like 404). */
+  hideFooter?: boolean;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og-image.jpg',
+  transparentHeader = false,
+  hideHeader = false,
+  hideFooter = false,
+} = Astro.props;
+
+// Resolve locale: prefer Astro.params.locale (set by [locale]/ routes),
+// fall back to pathname detection for safety.
+const paramLocale = Astro.params.locale as Locale | undefined;
+const seg = Astro.url.pathname.split('/').filter(Boolean)[0];
+const locale: Locale = paramLocale ?? ((seg === 'en' || seg === 'es') ? seg : 'es');
+
+const path = Astro.url.pathname;
+const siteTitle = t(locale, 'site.name');
+const siteTagline = t(locale, 'site.tagline');
+const defaultDesc = t(locale, 'site.description');
+const fullTitle = title ? `${title} · ${siteTitle}` : `${siteTitle} · ${siteTagline}`;
+const finalDesc = description ?? defaultDesc;
+
+// Build canonical: strip trailing slash except for the root locale path
+const normalizedPath = path.replace(/\/+$/, '') || `/${locale}`;
+const canonical = new URL(normalizedPath, Astro.site ?? 'https://globalmove.com').toString();
+
+const restOfPath = stripLocale(path); // e.g. "/services"
+const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 'https://globalmove.com').toString();
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0A1D3F" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={finalDesc} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={finalDesc} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.com').toString()} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={siteTitle} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_US'} />
+    <meta property="og:locale:alternate" content={locale === 'es' ? 'en_US' : 'es_ES'} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={finalDesc} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.com').toString()} />
+
+    <!-- Hreflang alternates -->
+    {supportedLocales.map(loc => (
+      <link rel="alternate" hreflang={loc} href={buildAlt(loc)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={buildAlt('es')} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <ViewTransitions fallback="swap" />
+  </head>
+  <body class:list={[{ 'no-header': hideHeader }]}>
+    <div class="scroll-progress" data-scroll-progress aria-hidden="true"></div>
+    {!hideHeader && <Header locale={locale} currentPath={path} transparent={transparentHeader} />}
+    <main id="main">
+      <slot />
+    </main>
+    {!hideFooter && <Footer locale={locale} />}
+
+    <script>
+      import '../scripts/enhance.ts';
+    </script>
+
+    <style is:global>
+      /* View transition defaults — fade by default, slide on named groups */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 320ms;
+      }
+    </style>
+  </body>
+</html>

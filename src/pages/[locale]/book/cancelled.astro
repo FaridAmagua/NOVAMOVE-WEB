@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { getPropertyBySlug } from '../../../data/properties';
+
+export async function getStaticPaths() {
+  return localeParams;
+}
+
+const locale = Astro.params.locale as Locale;
+const propertySlug = Astro.url.searchParams.get('prop') ?? '';
+const property = propertySlug ? getPropertyBySlug(propertySlug) : undefined;
+---
+
+<BaseLayout
+  title={t(locale, 'bookingCancelled.title')}
+  description={t(locale, 'bookingCancelled.subtitle')}
+  transparentHeader={false}
+>
+  <section class="cancelled">
+    <div class="container">
+      <div class="cancelled__inner reveal">
+        <div class="cancelled__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="11"/>
+            <path d="M8 8l8 8M16 8l-8 8"/>
+          </svg>
+        </div>
+
+        <p class="eyebrow">{t(locale, 'bookingCancelled.subtitle')}</p>
+        <h1 class="h-1">{t(locale, 'bookingCancelled.title')}</h1>
+        <p class="lead">{t(locale, 'bookingCancelled.message')}</p>
+
+        <div class="cancelled__cta">
+          {property && (
+            <a href={`/${locale}/properties/${property.slug}`} class="btn btn--primary">
+              {t(locale, 'bookingCancelled.tryAgain')}
+            </a>
+          )}
+          <a href={`/${locale}/properties`} class="btn btn--secondary">
+            {t(locale, 'nav.properties')}
+          </a>
+        </div>
+
+        <p class="cancelled__help">{t(locale, 'bookingCancelled.help')}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cancelled {
+    padding: calc(var(--header-height) + 4rem) 0 6rem;
+    background: var(--color-light);
+    min-height: 80vh;
+  }
+  .cancelled__inner {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .cancelled__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: var(--color-charcoal);
+    color: var(--color-white);
+    border-radius: 50%;
+    margin-bottom: 2rem;
+  }
+  .cancelled__icon svg { width: 44px; height: 44px; }
+  .cancelled__inner h1 { margin-bottom: 1rem; }
+  .cancelled__inner .lead { margin-inline: auto; }
+
+  .cancelled__cta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+  .cancelled__help {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+</style>

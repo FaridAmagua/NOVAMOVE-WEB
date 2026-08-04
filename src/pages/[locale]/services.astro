@@ -1,0 +1,212 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { t, localeParams, type Locale } from '../../utils/i18n';
+
+const locale = Astro.params.locale as Locale;
+
+const services = [
+  {
+    key: 'relocation',
+    image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1400&q=80',
+    bullets: {
+      es: [
+        'Asesoramiento fiscal y legal (Ley Beckham, NIE, visados)',
+        'Tramitación de documentos y residencia',
+        'Búsqueda de colegios internacionales y universidades',
+        'Apertura de cuentas bancarias y gestión financiera',
+        'Alta en Seguridad Social y seguros privados',
+        'Integración cultural y lingüística',
+      ],
+      en: [
+        'Tax & legal advisory (Beckham Law, NIE, visas)',
+        'Documentation and residency processing',
+        'School and university search',
+        'Bank accounts and financial setup',
+        'Social Security and private insurance',
+        'Cultural and language integration',
+      ],
+    },
+  },
+  {
+    key: 'rentals',
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1400&q=80',
+    bullets: {
+      es: [
+        'Selección curada de villas y apartamentos premium',
+        'Contratos transparentes y protegidos legalmente',
+        'Inventario detallado y check-in privado',
+        'Gestión de mantenimiento 24/7',
+        'Suministros, limpieza y servicios incluidos',
+        'Check-out profesional con devolución de fianza',
+      ],
+      en: [
+        'Curated selection of premium villas and apartments',
+        'Transparent, legally protected contracts',
+        'Detailed inventory and private check-in',
+        '24/7 maintenance management',
+        'Utilities, cleaning and services included',
+        'Professional check-out with deposit refund',
+      ],
+    },
+  },
+  {
+    key: 'sales',
+    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1400&q=80',
+    bullets: {
+      es: [
+        'Acceso a propiedades off-market exclusivas',
+        'Asesoramiento de inversión inmobiliaria',
+        'Due diligence legal y técnica completa',
+        'Estructuración fiscal (Beckham, IRNR, sociedades)',
+        'Negociación profesional del precio y condiciones',
+        'Acompañamiento hasta la firma notarial',
+      ],
+      en: [
+        'Access to exclusive off-market properties',
+        'Real estate investment advisory',
+        'Full legal and technical due diligence',
+        'Tax structuring (Beckham, IRNR, companies)',
+        'Professional price and terms negotiation',
+        'Support through to notary signing',
+      ],
+    },
+  },
+  {
+    key: 'concierge',
+    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&q=80',
+    bullets: {
+      es: [
+        'Atención personalizada 24/7 multilingüe',
+        'Reservas en restaurantes, eventos y experiencias',
+        'Personal trainer, yoga y wellness a domicilio',
+        'Catering y chef privado bajo demanda',
+        'Transporte premium y chofer privado',
+        'Compras, personal shopping y lifestyle',
+      ],
+      en: [
+        '24/7 multilingual personal assistance',
+        'Restaurant, event and experience bookings',
+        'Personal trainer, yoga and wellness at home',
+        'Private catering and chef on demand',
+        'Premium transport and private chauffeur',
+        'Shopping, personal shopping and lifestyle',
+      ],
+    },
+  },
+];
+export async function getStaticPaths() {
+  return localeParams;
+}
+---
+
+<BaseLayout
+  title={t(locale, 'nav.services')}
+  transparentHeader={true}
+>
+  <PageHero
+    eyebrow={t(locale, 'services.eyebrow')}
+    title={t(locale, 'services.headline')}
+    subtitle={t(locale, 'services.subheadline')}
+    image="https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=2000&q=80"
+  />
+
+  {services.map(({ key, image, bullets }, i) => (
+    <section
+      id={key}
+      class={`section service-block ${i % 2 === 1 ? 'service-block--alt' : ''}`}
+    >
+      <div class="container">
+        <div class="service-block__grid">
+          <div class="service-block__media reveal">
+            <img src={image} alt="" loading="lazy" />
+          </div>
+          <div class="service-block__content reveal">
+            <span class="eyebrow">0{i + 1} · {t(locale, 'nav.services')}</span>
+            <h2 class="h-2">{t(locale, `services.items.${key}.title`)}</h2>
+            <p class="lead">{t(locale, `services.items.${key}.description`)}</p>
+            <ul class="check-list">
+              {bullets[locale].map(b => <li>{b}</li>)}
+            </ul>
+            <a href={`/${locale}/contact`} class="btn btn--secondary">
+              {t(locale, 'common.scheduleConsultation')}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="section section--dark" aria-labelledby="services-cta">
+    <div class="container">
+      <div class="center-cta reveal">
+        <h2 id="services-cta" class="h-2">{t(locale, 'cta.headline')}</h2>
+        <p class="lead">{t(locale, 'cta.subheadline')}</p>
+        <a href={`/${locale}/contact`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .service-block__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .service-block--alt .service-block__grid { direction: rtl; }
+  .service-block--alt .service-block__grid > * { direction: ltr; }
+
+  .service-block__media {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    box-shadow: var(--shadow-md);
+  }
+  .service-block__media img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .check-list {
+    margin: 2rem 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem 1.5rem;
+  }
+  .check-list li {
+    position: relative;
+    padding-left: 1.85rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .check-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: 18px;
+    height: 8px;
+    border-left: 2px solid var(--color-gold);
+    border-bottom: 2px solid var(--color-gold);
+    transform: rotate(-45deg);
+  }
+
+  .center-cta {
+    text-align: center;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .center-cta .lead { margin: 1.25rem auto 2rem; }
+
+  @media (max-width: 860px) {
+    .service-block__grid,
+    .service-block--alt .service-block__grid {
+      grid-template-columns: 1fr;
+      direction: ltr;
+      gap: 2.5rem;
+    }
+    .check-list { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,116 @@
+---
+/**
+ * Skeleton — visual loading placeholder.
+ * Use while data fetches / images load to avoid layout shift.
+ *
+ * Variants:
+ *   - 'text'      → text line (customisable width via style)
+ *   - 'title'     → larger text line
+ *   - 'media'     → image-like block (default 16/10 ratio)
+ *   - 'avatar'    → small circle
+ *   - 'card'      → composes a property-card-shaped skeleton
+ */
+interface Props {
+  variant?: 'text' | 'title' | 'media' | 'avatar' | 'card';
+  /** Tailwind-like width override, e.g. "75%" or "12rem" */
+  width?: string;
+  /** Tailwind-like height override */
+  height?: string;
+  /** Border radius override */
+  rounded?: string;
+  class?: string;
+}
+
+const {
+  variant = 'text',
+  width,
+  height,
+  rounded,
+  class: className = '',
+} = Astro.props;
+
+const styleParts: string[] = [];
+if (width) styleParts.push(`width:${width}`);
+if (height) styleParts.push(`height:${height}`);
+if (rounded) styleParts.push(`border-radius:${rounded}`);
+const style = styleParts.join(';');
+---
+
+<div
+  class={`skeleton skeleton--${variant} ${className}`}
+  style={style || undefined}
+  aria-hidden="true"
+></div>
+
+<style>
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(10, 29, 63, 0.06);
+    border-radius: var(--radius-sm);
+    isolation: isolate;
+  }
+
+  /* Dark variant when inside a dark section */
+  :where(.section--dark) .skeleton,
+  :where([data-dark]) .skeleton {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Shimmer effect: linear gradient that sweeps across */
+  .skeleton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  :where(.section--dark) .skeleton::before {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 100%
+    );
+  }
+
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(200%); }
+  }
+
+  /* Variants */
+  .skeleton--text {
+    height: 0.85rem;
+    width: 100%;
+  }
+  .skeleton--title {
+    height: 1.6rem;
+    width: 80%;
+  }
+  .skeleton--media {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+  .skeleton--avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+  }
+  .skeleton--card {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::before { animation: none; opacity: 0; }
+  }
+</style>

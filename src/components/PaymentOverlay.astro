@@ -1,0 +1,99 @@
+---
+/**
+ * PaymentOverlay — full-screen modal shown while the booking form
+ * is being submitted / while we're redirecting to Redsys.
+ *
+ * Add `data-payment-overlay-trigger` to any form; the form's submit handler
+ * should call: document.body.classList.add('payment-pending')
+ *
+ * IMPORTANT: This file is rendered conditionally by the consumer — see
+ * book/[slug].astro for the integration.
+ */
+---
+<div class="payment-overlay" data-payment-overlay aria-hidden="true">
+  <div class="payment-overlay__backdrop"></div>
+  <div class="payment-overlay__panel" role="status" aria-live="polite">
+    <div class="payment-overlay__spinner" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+        <circle cx="32" cy="32" r="28" stroke="#C8A76A" stroke-width="4" stroke-linecap="round"
+                stroke-dasharray="50 200" stroke-dashoffset="0">
+          <animateTransform attributeName="transform" type="rotate"
+                            from="0 32 32" to="360 32 32" dur="1.1s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <h2 class="payment-overlay__title">Procesando tu reserva</h2>
+    <p class="payment-overlay__desc">Te estamos redirigiendo a la pasarela de pago segura de Redsys.</p>
+    <p class="payment-overlay__note">No cierres esta ventana.</p>
+  </div>
+</div>
+
+<style>
+  .payment-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 320ms var(--ease-out);
+  }
+  .payment-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .payment-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 29, 63, 0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .payment-overlay__panel {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: var(--color-white);
+    max-width: 420px;
+    padding: 3rem 2rem;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 380ms var(--ease-out);
+  }
+  .payment-overlay.is-visible .payment-overlay__panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .payment-overlay__spinner {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+  }
+
+  .payment-overlay__title {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-white);
+  }
+  .payment-overlay__desc {
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  .payment-overlay__note {
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    font-weight: 600;
+  }
+
+  /* Body lock while paying (prevents scroll/escape on mobile) */
+  :global(body.payment-pending) {
+    overflow: hidden;
+  }
+</style>

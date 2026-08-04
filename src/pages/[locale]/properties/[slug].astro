@@ -1,0 +1,1501 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Lightbox from '../../../components/Lightbox.astro';
+import { t, supportedLocales, type Locale } from '../../../utils/i18n';
+import {
+  properties,
+  destinationLabel,
+  propertyTypeLabel,
+  amenityLabel,
+  formatPrice,
+  transactionLabel,
+  DEFAULT_IMAGE_FOCAL,
+  type DestinationId,
+} from '../../../data/properties';
+
+export async function getStaticPaths() {
+  const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
+  for (const locale of supportedLocales) {
+    for (const p of properties) {
+      paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
+    }
+  }
+  return paths;
+}
+
+const { property } = Astro.props as { property: typeof properties[number] };
+const locale = Astro.params.locale as Locale;
+const isSale = property.transaction === 'sale';
+
+const priceUnit = isSale ? '' : t(locale, 'properties.priceUnitRent');
+const ctaLabel = isSale ? t(locale, 'properties.requestInfo') : t(locale, 'properties.bookNow');
+const ctaHref = isSale ? '#inquiry' : `/${locale}/book/${property.slug}`;
+const transactionBadge = transactionLabel(property.transaction, locale);
+
+const otherProps = properties
+  .filter(p => p.destination === property.destination && p.id !== property.id)
+  .slice(0, 3);
+
+const destLabel = destinationLabel(property.destination as DestinationId, locale);
+
+// Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
+const amenityIcons: Record<string, string> = {
+  pool:        '<path d="M2 18c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1"/><path d="M6 14V9a3 3 0 0 1 6 0v5"/><path d="M12 10c1.5 0 1.5-1 3-1s1.5 1 3 1"/><path d="M12 6c1.5 0 1.5-1 3-1s1.5 1 3 1"/>',
+  wifi:        '<path d="M5 12.55a11 11 0 0 1 14 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1.5"/>',
+  ac:          '<path d="M3 7v10M21 7v10M3 12h18M7 5h10M7 19h10"/>',
+  parking:     '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h5a3 3 0 0 1 0 6h-5"/>',
+  kitchen:     '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 7l3-4h12l3 4M7 12v4M11 12v4M15 12v4M17 12v4"/>',
+  'sea-view':  '<path d="M2 18c3 0 3-2 6-2s3 2 6 2 3-2 6-2"/><path d="M2 14c3 0 3-2 6-2s3 2 6 2 3-2 6-2"/><circle cx="17" cy="5" r="2.5"/>',
+  'city-view': '<path d="M3 21h18M5 21V8h4v13M11 21V4h4v17M17 21v-9h4v9"/>',
+  garden:      '<path d="M12 2v8m-7-3l5 5m9-5l-5 5M5 14c0 4 3 7 7 7s7-3 7-7"/>',
+  terrace:     '<rect x="3" y="9" width="18" height="9" rx="1"/><path d="M3 9l9-6 9 6M8 14h2M14 14h2"/>',
+  jacuzzi:     '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="11" r="0.8"/><circle cx="13" cy="10" r="0.8"/><circle cx="15" cy="13" r="0.8"/>',
+  gym:         '<path d="M2 12h2M20 12h2M6 8v8M18 8v8M6 12h12"/>',
+  cinema:      '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v14M16 5v14"/>',
+  bbq:         '<rect x="3" y="9" width="18" height="11" rx="1"/><path d="M8 9V5a4 4 0 0 1 8 0v4M12 13v-2"/>',
+  fireplace:   '<path d="M5 21h14M5 21V8h5l2-3 2 3h5v13M12 14c-2 0-3 2-3 4s2 2 3 2 3 0 3-2-1-4-3-4z"/>',
+  'beach-access': '<path d="M3 14c1.5-2 4-2 6 0s4.5 2 6 0 4-2 6 0M2 18h20M12 4v3M11 4h2"/>',
+  concierge:   '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/>',
+  elevator:    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v4M9 11l3-3 3 3M9 16l3 3 3-3M8 6h8"/>',
+};
+
+// Aggregate rating from reviews
+const reviews = property.reviews ?? [];
+const avgRating = reviews.length > 0
+  ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+  : 0;
+const ratingLabel = avgRating >= 4.5 ? 'Excellent' : avgRating >= 3.5 ? 'Very good' : 'Good';
+
+// Format helper for the review "stayed in {month} {year}"
+function monthName(monthIdx: number, loc: Locale): string {
+  const d = new Date(2000, monthIdx, 1);
+  return d.toLocaleDateString(loc === 'es' ? 'es-ES' : 'en-GB', { month: 'long' });
+}
+---
+---
+
+<BaseLayout
+  title={property.name[locale]}
+  description={property.tagline[locale]}
+  transparentHeader={false}
+>
+  <!-- =======================================================
+       Hero: Gallery + Title (top section, full bleed)
+       ======================================================= -->
+  <section class="prop-gallery-wrap">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <nav class="prop-breadcrumb reveal" aria-label="Breadcrumb">
+        <a href={`/${locale}/`}>{t(locale, 'properties.breadcrumbHome')}</a>
+        <span aria-hidden="true">›</span>
+        <a href={`/${locale}/properties`}>{t(locale, 'properties.breadcrumbProperties')}</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{property.name[locale]}</span>
+      </nav>
+
+      <!-- Gallery -->
+      <div class="prop-gallery reveal">
+        <div
+          class="prop-gallery__main"
+          data-lightbox-trigger="property"
+          data-lightbox-group="property"
+          role="button"
+          tabindex="0"
+          aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
+        >
+          <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
+               style={`object-position: center ${property.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
+          <span class={`prop-gallery__badge prop-gallery__badge--${property.transaction}`}>{transactionBadge}</span>
+          <span class="prop-gallery__zoom" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m21 21-4.3-4.3M11 8v6M8 11h6"/>
+            </svg>
+          </span>
+        </div>
+        <div class="prop-gallery__thumbs">
+          {property.images.slice(1, 4).map(img => (
+            <div class="prop-gallery__thumb" data-lightbox-trigger="property" data-lightbox-group="property" role="button" tabindex="0" aria-label="Ver foto">
+              <img src={img} alt="" loading="lazy" />
+            </div>
+          ))}
+          {property.images.length < 4 && Array.from({ length: 4 - property.images.length }).map(() => (
+            <div class="prop-gallery__thumb prop-gallery__thumb--placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>
+              </svg>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       Body: Title + Quick specs + Sidebar booking card
+       ======================================================= -->
+  <section class="section prop-body">
+    <div class="container">
+      <div class="prop-layout">
+        <!-- ============ MAIN COLUMN ============ -->
+        <div class="prop-main">
+
+          <!-- Title -->
+          <header class="prop-title-block reveal">
+            <div class="prop-title-block__meta">
+              <span class="prop-title-block__type">{propertyTypeLabel(property.type, locale)}</span>
+              <span class="prop-title-block__dot">·</span>
+              <a href={`/${locale}/properties?dest=${property.destination}`} class="prop-title-block__city">{destLabel}</a>
+              <span class="prop-title-block__dot">·</span>
+              <span>{property.location[locale]}</span>
+            </div>
+            <h1 class="prop-title-block__title">{property.name[locale]}</h1>
+            <p class="prop-title-block__tagline">{property.tagline[locale]}</p>
+          </header>
+
+          <!-- Quick specs horizontal bar -->
+          <div class="prop-quick-specs reveal">
+            <div class="prop-quick-spec">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span><strong>{property.maxGuests}</strong> {t(locale, 'common.guests')}</span>
+            </div>
+            <div class="prop-quick-spec">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 4v16M22 4v16M2 8h20M2 16h20M6 4v16M18 4v16"/>
+              </svg>
+              <span><strong>{property.bedrooms}</strong> {t(locale, 'common.bedrooms')}</span>
+            </div>
+            <div class="prop-quick-spec">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 6L6 18h12l-3-12M9 6V4a3 3 0 0 1 6 0v2M5 21h14"/>
+              </svg>
+              <span><strong>{property.bathrooms}</strong> {t(locale, 'common.bathrooms')}</span>
+            </div>
+            <div class="prop-quick-spec">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 10h18"/>
+              </svg>
+              <span><strong>{property.sizeM2}</strong> m²</span>
+            </div>
+            {!isSale && property.minNights && (
+              <div class="prop-quick-spec">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                <span><strong>{property.minNights}</strong> {t(locale, 'properties.nights')} min</span>
+              </div>
+            )}
+          </div>
+
+          <!-- Description with collapse -->
+          <section class="prop-section reveal">
+            <h2 class="h-3 prop-section__title">{t(locale, 'properties.highlights')}</h2>
+            <div class="prop-description" data-collapse>
+              <p class="prop-description__text">{property.description[locale]}</p>
+              <p class="prop-description__extra" hidden>
+                {locale === 'es'
+                  ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
+                  : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
+              </p>
+              <button type="button" class="prop-description__toggle" data-collapse-toggle hidden>
+                <span data-collapse-label-more>{t(locale, 'properties.viewMore')}</span>
+                <span data-collapse-label-less hidden>{t(locale, 'properties.viewLess')}</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Amenities grid with icons -->
+          <section class="prop-section reveal">
+            <header class="prop-section__header">
+              <h2 class="h-3">{t(locale, 'properties.amenitiesTitle')}</h2>
+              <span class="prop-section__count">
+                {t(locale, 'properties.amenitiesCount', { n: property.amenities.length })}
+              </span>
+            </header>
+            <div class="amenities-grid">
+              {property.amenities.map(a => (
+                <div class="amenity-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" set:html={amenityIcons[a] ?? ''} />
+                  <span>{amenityLabel(a, locale)}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {!isSale && (
+            <section class="prop-section reveal">
+              <h2 class="h-3 prop-section__title">{t(locale, 'properties.houseRules')}</h2>
+              <ul class="rules-list">
+                {((t(locale, 'properties.houseRulesItems') as unknown) as string[]).map((rule: string) => (
+                  <li>{rule}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <!-- Map placeholder -->
+          <section class="prop-section reveal">
+            <header class="prop-section__header">
+              <h2 class="h-3">{t(locale, 'properties.neighborhood')}</h2>
+            </header>
+            <div class="prop-map">
+              <iframe
+                src={`https://maps.google.com/maps?q=${property.lat},${property.lng}&z=14&output=embed`}
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title={`${property.name[locale]} - ${property.location[locale]}`}
+              ></iframe>
+              <div class="prop-map__overlay">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-7 8-13a8 8 0 0 0-16 0c0 6 8 13 8 13z"/>
+                  <circle cx="12" cy="9" r="3"/>
+                </svg>
+                <div>
+                  <strong>{property.location[locale]}</strong>
+                  <span>{t(locale, 'properties.neighborhoodDesc', { city: destLabel })}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sale inquiry -->
+          {isSale && (
+            <section id="inquiry" class="prop-section prop-inquiry reveal">
+              <h2 class="h-3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
+              <p class="lead">{t(locale, 'salesInquiry.subtitle')}</p>
+
+              <form class="inquiry-form" id="inquiry-form" novalidate data-loading-on-submit>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="inquiry-name">{t(locale, 'salesInquiry.fullName')}</label>
+                    <input type="text" id="inquiry-name" name="name" class="input" required autocomplete="name" />
+                  </div>
+                  <div class="field">
+                    <label for="inquiry-email">{t(locale, 'salesInquiry.email')}</label>
+                    <input type="email" id="inquiry-email" name="email" class="input" required autocomplete="email" />
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="inquiry-phone">{t(locale, 'salesInquiry.phone')}</label>
+                    <input type="tel" id="inquiry-phone" name="phone" class="input" required autocomplete="tel" />
+                  </div>
+                  <div class="field">
+                    <label for="inquiry-nationality">{t(locale, 'salesInquiry.nationality')}</label>
+                    <input type="text" id="inquiry-nationality" name="nationality" class="input" />
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="inquiry-timeline">{t(locale, 'salesInquiry.timeline')}</label>
+                    <select id="inquiry-timeline" name="timeline" class="input">
+                      <option value="asap">{t(locale, 'salesInquiry.timelineOptions.asap')}</option>
+                      <option value="3m">{t(locale, 'salesInquiry.timelineOptions.3m')}</option>
+                      <option value="6m">{t(locale, 'salesInquiry.timelineOptions.6m')}</option>
+                      <option value="exploring" selected>{t(locale, 'salesInquiry.timelineOptions.exploring')}</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="inquiry-budget">{t(locale, 'salesInquiry.budget')}</label>
+                    <input type="text" id="inquiry-budget" name="budget" class="input" placeholder="1.000.000 € – 2.000.000 €" />
+                  </div>
+                </div>
+                <div class="field field--checkbox">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="financing" />
+                    <span>{t(locale, 'salesInquiry.financing')}</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label for="inquiry-message">{t(locale, 'salesInquiry.message')}</label>
+                  <textarea id="inquiry-message" name="message" class="textarea" rows="4"></textarea>
+                </div>
+                <p class="inquiry-form__privacy">{t(locale, 'salesInquiry.privacy')}</p>
+                <button type="submit" class="btn btn--primary inquiry-form__submit" data-magnetic="0.25">
+                  <span data-magnetic-inner>{t(locale, 'salesInquiry.submit')}</span>
+                </button>
+              </form>
+            </section>
+          )}
+
+          <!-- ===== Reviews section ===== -->
+          {reviews.length > 0 && (
+            <section class="prop-section prop-reviews reveal">
+              <header class="prop-section__header">
+                <div>
+                  <h2 class="h-3">{t(locale, 'properties.reviewsTitle')}</h2>
+                  <p class="prop-section__subtitle">{t(locale, 'properties.reviewsSubtitle')}</p>
+                </div>
+                <div class="prop-reviews__score">
+                  <div class="prop-reviews__score-num">{avgRating.toFixed(1)}</div>
+                  <div class="prop-reviews__score-meta">
+                    <div class="prop-reviews__stars">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill={i < Math.round(avgRating) ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
+                          <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <span>{t(locale, 'properties.ratingAverage')}</span>
+                    <span class="prop-reviews__score-sub">{t(locale, 'properties.reviewsBasedOn', { n: reviews.length })}</span>
+                  </div>
+                </div>
+              </header>
+
+              <div class="prop-reviews__grid" data-stagger data-stagger-step="100">
+                {reviews.map((review, i) => {
+                  const stayDate = new Date(review.date);
+                  const stayedAt = t(locale, 'properties.stayedAt', { month: monthName(stayDate.getMonth(), locale), year: String(stayDate.getFullYear()) });
+                  return (
+                    <article class="prop-review reveal reveal--fade">
+                      <div class="prop-review__stars" aria-label={`${review.rating} de 5`}>
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill={j < review.rating ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
+                            <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        ))}
+                      </div>
+                      <p class="prop-review__text">"{review.text[locale]}"</p>
+                      <footer class="prop-review__footer">
+                        <div>
+                          <strong>{review.author[locale]}</strong>
+                          <span>{review.origin[locale]}</span>
+                        </div>
+                        <span class="prop-review__date">{stayedAt}</span>
+                      </footer>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          <!-- Process timeline -->
+          <section class="prop-section reveal">
+            <header class="prop-section__header prop-section__header--center">
+              <p class="eyebrow">{t(locale, 'properties.processSubtitle')}</p>
+              <h2 class="h-2">{t(locale, 'properties.processTitle')}</h2>
+            </header>
+            <ol class="prop-process" data-stagger data-stagger-step="120">
+              {[1, 2, 3].map((num, i) => (
+                <li class="prop-process__step reveal reveal--fade">
+                  <span class="prop-process__num">{String(num).padStart(2, '0')}</span>
+                  <h3>{t(locale, `properties.processStep${num}Title`)}</h3>
+                  <p>{t(locale, `properties.processStep${num}Desc`)}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <!-- Cancellation policy (visual block, not accordion to keep it simple) -->
+          <section class="prop-cancellation reveal">
+            <h3>{t(locale, 'properties.cancellationTitle')}</h3>
+            <p class="prop-cancellation__body">
+              {locale === 'es'
+                ? 'Cancelación gratuita hasta 30 días antes de la fecha de entrada. Entre 30 y 14 días antes, reembolso del 50%. Después, se aplican las condiciones específicas del propietario. Para estancias de más de 28 días o reservas en temporada alta, consulta condiciones particulares.'
+                : 'Free cancellation up to 30 days before check-in. Between 30 and 14 days before, 50% refund. After that, owner-specific terms apply. For stays over 28 days or peak-season bookings, see specific conditions.'}
+            </p>
+          </section>
+        </div>
+
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="prop-sidebar">
+          <div class="booking-card reveal reveal--scale">
+            <div class="booking-card__top">
+              <div class={`booking-card__chip booking-card__chip--${property.transaction}`}>{transactionBadge}</div>
+              <div class="booking-card__price">
+                {!isSale && <span class="booking-card__from">{t(locale, 'common.from')}</span>}
+                <span class="booking-card__amount">{formatPrice(property.price, locale)}</span>
+                <span class="booking-card__unit">{priceUnit}</span>
+              </div>
+
+              {!isSale && property.minNights ? (
+                <!-- ===== Rental: inline datepicker ===== -->
+                <div class="booking-card__dates" data-datepicker
+                     data-price-per-night={property.price}
+                     data-cleaning-fee={property.cleaningFee ?? 0}
+                     data-min-nights={property.minNights}
+                     data-max-guests={property.maxGuests}>
+                  <div class="booking-card__field-row">
+                    <div class="booking-card__field">
+                      <label for="prop-checkin">{t(locale, 'properties.checkIn')}</label>
+                      <input type="date" id="prop-checkin" name="checkIn" class="booking-card__input" required />
+                    </div>
+                    <div class="booking-card__field">
+                      <label for="prop-checkout">{t(locale, 'properties.checkOut')}</label>
+                      <input type="date" id="prop-checkout" name="checkOut" class="booking-card__input" required />
+                    </div>
+                  </div>
+                  <div class="booking-card__field">
+                    <label for="prop-guests">{t(locale, 'properties.guestsShort')}</label>
+                    <select id="prop-guests" name="guests" class="booking-card__input">
+                      {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(n => (
+                        <option value={n}>
+                          {n} {n === 1 ? t(locale, 'properties.guestSingular') : t(locale, 'properties.guestPlural')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div class="booking-card__estimate" data-estimate>
+                    <div class="booking-card__estimate-row" data-estimate-row="nights" hidden>
+                      <span data-estimate-nights-label></span>
+                      <span data-estimate-nights-value></span>
+                    </div>
+                    <div class="booking-card__estimate-row" data-estimate-row="subtotal" hidden>
+                      <span>{t(locale, 'properties.subtotal')}</span>
+                      <span data-estimate-subtotal></span>
+                    </div>
+                    <div class="booking-card__estimate-row" data-estimate-row="cleaning" hidden>
+                      <span>{t(locale, 'properties.cleaningFee')}</span>
+                      <span data-estimate-cleaning></span>
+                    </div>
+                    <div class="booking-card__estimate-row" data-estimate-row="service" hidden>
+                      <span>{t(locale, 'properties.serviceFee')}</span>
+                      <span data-estimate-service></span>
+                    </div>
+                    <div class="booking-card__estimate-row booking-card__estimate-row--total" data-estimate-row="total" hidden>
+                      <span>{t(locale, 'properties.totalEstimate')}</span>
+                      <span data-estimate-total></span>
+                    </div>
+                    <p class="booking-card__estimate-help" data-estimate-help>
+                      {t(locale, 'properties.selectDatesHelp')}
+                    </p>
+                  </div>
+
+                  <a
+                    href={ctaHref}
+                    class="btn btn--primary booking-card__cta"
+                    data-magnetic="0.3"
+                    data-book-link
+                  >
+                    <span data-magnetic-inner data-book-label>{ctaLabel}</span>
+                  </a>
+                  <p class="booking-card__note booking-card__note--trust">
+                    🔒 {t(locale, 'booking.securePayment')}
+                  </p>
+                </div>
+              ) : (
+                <!-- ===== Sale: simple CTA ===== -->
+                <a href={ctaHref} class="btn btn--primary booking-card__cta" data-magnetic="0.3">
+                  <span data-magnetic-inner>{ctaLabel}</span>
+                </a>
+              )}
+
+              {isSale && (
+                <p class="booking-card__note booking-card__note--trust">
+                  ✓ {t(locale, 'salesInquiry.privacy')}
+                </p>
+              )}
+            </div>
+
+            <!-- Trust block (inside booking card) -->
+            <div class="booking-card__trust">
+              <h4>{t(locale, 'properties.trustTitle')}</h4>
+              <div class="trust-list">
+                <div class="trust-item">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                  </svg>
+                  <div>
+                    <strong>{t(locale, 'properties.trustGuarantee')}</strong>
+                    <span>{t(locale, 'properties.trustGuaranteeDesc')}</span>
+                  </div>
+                </div>
+                <div class="trust-item">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                  </svg>
+                  <div>
+                    <strong>{t(locale, 'properties.trustVerified')}</strong>
+                    <span>{t(locale, 'properties.trustVerifiedDesc')}</span>
+                  </div>
+                </div>
+                <div class="trust-item">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+                  </svg>
+                  <div>
+                    <strong>{t(locale, 'properties.trustSupport')}</strong>
+                    <span>{t(locale, 'properties.trustSupportDesc')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related listings -->
+  {otherProps.length > 0 && (
+    <section class="section section--subtle">
+      <div class="container">
+        <header class="section-header reveal">
+          <p class="eyebrow">{t(locale, 'properties.relatedInDestination', { city: destLabel })}</p>
+          <h2 class="h-2">{t(locale, 'properties.title')}</h2>
+        </header>
+        <div class="related-grid" data-stagger data-stagger-step="80">
+          {otherProps.map((p, i) => (
+            <a href={`/${locale}/properties/${p.slug}`} class="related-card reveal reveal--fade" data-tilt="3">
+              <div class="related-card__media">
+                <img src={p.images[0]} alt={p.name[locale]} loading="lazy" />
+                <span class={`related-card__chip related-card__chip--${p.transaction}`}>
+                  {p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge')}
+                </span>
+              </div>
+              <div class="related-card__body">
+                <span class="related-card__meta">{propertyTypeLabel(p.type, locale)} · {p.maxGuests} {t(locale, 'common.guests')}</span>
+                <h3 class="related-card__title">{p.name[locale]}</h3>
+                <span class="related-card__price">
+                  {t(locale, 'common.from')} {formatPrice(p.price, locale)}{p.transaction === 'rent' ? ` ${t(locale, 'properties.priceUnitRent')}` : ''}
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<script>
+  // Description collapse / "View more"
+  document.querySelectorAll<HTMLElement>('[data-collapse]').forEach((root) => {
+    const toggle = root.querySelector<HTMLButtonElement>('[data-collapse-toggle]');
+    const extra = root.querySelector<HTMLElement>('[data-collapse__extra], .prop-description__extra');
+    if (!toggle || !extra) return;
+    toggle.hidden = false;
+    const labelMore = toggle.querySelector<HTMLElement>('[data-collapse-label-more]');
+    const labelLess = toggle.querySelector<HTMLElement>('[data-collapse-label-less]');
+    toggle.addEventListener('click', () => {
+      const isOpen = !extra.hidden;
+      extra.hidden = isOpen;
+      if (labelMore) labelMore.hidden = !isOpen;
+      if (labelLess) labelLess.hidden = isOpen;
+    });
+  });
+
+  // ============ Inline datepicker in booking sidebar (rental only) ============
+  document.querySelectorAll<HTMLElement>('[data-datepicker]').forEach((root) => {
+    const pricePerNight = Number(root.dataset.pricePerNight ?? 0);
+    const cleaningFee = Number(root.dataset.cleaningFee ?? 0);
+    const minNights = Number(root.dataset.minNights ?? 1);
+    const checkInEl = root.querySelector<HTMLInputElement>('#prop-checkin');
+    const checkOutEl = root.querySelector<HTMLInputElement>('#prop-checkout');
+    const guestsEl = root.querySelector<HTMLSelectElement>('#prop-guests');
+    const bookLink = root.querySelector<HTMLAnchorElement>('[data-book-link]');
+    const bookLabel = root.querySelector<HTMLElement>('[data-book-label]');
+    const ctaText = bookLabel?.textContent ?? '';
+    const help = root.querySelector<HTMLElement>('[data-estimate-help]');
+
+    const estimateRows = {
+      nights:    root.querySelector<HTMLElement>('[data-estimate-row="nights"]'),
+      subtotal:  root.querySelector<HTMLElement>('[data-estimate-row="subtotal"]'),
+      cleaning:  root.querySelector<HTMLElement>('[data-estimate-row="cleaning"]'),
+      service:   root.querySelector<HTMLElement>('[data-estimate-row="service"]'),
+      total:     root.querySelector<HTMLElement>('[data-estimate-row="total"]'),
+    };
+
+    const estimateNightsLabel = root.querySelector<HTMLElement>('[data-estimate-nights-label]');
+    const estimateNightsValue = root.querySelector<HTMLElement>('[data-estimate-nights-value]');
+    const estimateSubtotal    = root.querySelector<HTMLElement>('[data-estimate-subtotal]');
+    const estimateCleaning    = root.querySelector<HTMLElement>('[data-estimate-cleaning]');
+    const estimateService     = root.querySelector<HTMLElement>('[data-estimate-service]');
+    const estimateTotal       = root.querySelector<HTMLElement>('[data-estimate-total]');
+
+    if (!checkInEl || !checkOutEl) return;
+
+    // Set min date = tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    checkInEl.min = minDate;
+    checkOutEl.min = minDate;
+
+    const compute = () => {
+      const checkIn = checkInEl.value;
+      const checkOut = checkOutEl.value;
+      const guests = parseInt(guestsEl.value, 10);
+
+      const formatCurrency = (n: number) =>
+        new Intl.NumberFormat(document.documentElement.lang === 'es' ? 'es-ES' : 'en-GB', {
+          style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
+        }).format(n);
+
+      if (!checkIn || !checkOut) {
+        // No selection — show help, hide estimate
+        Object.values(estimateRows).forEach(el => el && (el.hidden = true));
+        if (help) help.hidden = false;
+        if (bookLink) {
+          bookLink.setAttribute('href', '#book');
+          if (bookLabel) bookLabel.textContent = ctaText;
+        }
+        return;
+      }
+
+      const a = new Date(checkIn);
+      const b = new Date(checkOut);
+      const nights = Math.max(0, Math.round((b.getTime() - a.getTime()) / 86400000));
+
+      if (nights <= 0) {
+        Object.values(estimateRows).forEach(el => el && (el.hidden = true));
+        if (help) help.hidden = true;
+        if (bookLink) {
+          bookLink.setAttribute('href', '#book');
+          if (bookLabel) bookLabel.textContent = ctaText;
+        }
+        return;
+      }
+
+      const subtotal = nights * pricePerNight;
+      const service = Math.round(subtotal * 0.10);
+      const total = subtotal + cleaningFee + service;
+
+      // Show rows
+      if (estimateNightsLabel) estimateNightsLabel.textContent = `${nights} ${nights === 1 ? 'noche' : 'noches'}`;
+      if (estimateNightsValue) estimateNightsValue.textContent = formatCurrency(pricePerNight) + ' × ' + nights;
+      if (estimateSubtotal) estimateSubtotal.textContent = formatCurrency(subtotal);
+      if (estimateCleaning) estimateCleaning.textContent = formatCurrency(cleaningFee);
+      if (estimateService) estimateService.textContent = formatCurrency(service);
+      if (estimateTotal) estimateTotal.textContent = formatCurrency(total);
+      Object.values(estimateRows).forEach(el => el && (el.hidden = false));
+      if (help) help.hidden = true;
+
+      // Update booking link with query params
+      if (bookLink) {
+        const baseHref = bookLink.getAttribute('href')?.split('?')[0] ?? '#book';
+        const u = new URL(baseHref, window.location.origin + window.location.pathname);
+        u.searchParams.set('checkIn', checkIn);
+        u.searchParams.set('checkOut', checkOut);
+        u.searchParams.set('guests', String(guests));
+        bookLink.setAttribute('href', u.pathname + u.search);
+      }
+    };
+
+    [checkInEl, checkOutEl, guestsEl].forEach(el => {
+      el.addEventListener('change', () => {
+        // Update checkout min
+        if (checkInEl.value) {
+          const checkIn = new Date(checkInEl.value);
+          checkIn.setDate(checkIn.getDate() + 1);
+          checkOutEl.min = checkIn.toISOString().split('T')[0];
+          // Reset checkout if it's now invalid
+          if (checkOutEl.value && new Date(checkOutEl.value) <= new Date(checkInEl.value)) {
+            checkOutEl.value = checkIn.toISOString().split('T')[0];
+          }
+        }
+        compute();
+      });
+    });
+    compute();
+
+    // Lightbox trigger via keyboard (Enter/Space)
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const t = e.target as HTMLElement;
+      if (t.hasAttribute('data-lightbox-trigger') && document.activeElement === t) {
+        e.preventDefault();
+        t.click();
+      }
+    });
+  });
+</script>
+
+<Lightbox />
+
+<style>
+  /* ============ GALLERY SECTION (breadcrumb + images) ============ */
+  .prop-gallery-wrap {
+    padding-top: 2.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .prop-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+  .prop-breadcrumb a {
+    color: var(--text-secondary);
+    transition: color var(--dur-base) var(--ease);
+  }
+  .prop-breadcrumb a:hover { color: var(--color-gold); }
+  .prop-breadcrumb [aria-current="page"] {
+    color: var(--color-navy);
+    font-weight: 600;
+  }
+  .prop-breadcrumb span[aria-hidden] {
+    color: var(--color-gray-cool);
+    opacity: 0.6;
+  }
+
+  .prop-gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0.5rem;
+    height: clamp(360px, 50vh, 560px);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .prop-gallery__main {
+    position: relative;
+    overflow: hidden;
+  }
+  .prop-gallery__main img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    /* Focus ~60% from top — keeps the property centred and crops out sky */
+    object-position: center 62%;
+  }
+  .prop-gallery__badge {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .prop-gallery__badge--rent {
+    background: rgba(10, 29, 63, 0.92);
+    color: var(--color-gold-soft);
+  }
+  .prop-gallery__badge--sale {
+    background: var(--color-gold);
+    color: var(--color-navy);
+  }
+  .prop-gallery__main,
+  .prop-gallery__thumb { cursor: zoom-in; transition: opacity var(--dur-base) var(--ease); }
+  .prop-gallery__main:hover,
+  .prop-gallery__thumb:hover { opacity: 0.92; }
+  .prop-gallery__main:focus-visible,
+  .prop-gallery__thumb:focus-visible {
+    outline: 3px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+  .prop-gallery__zoom {
+    position: absolute;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--color-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--dur-base) var(--ease);
+  }
+  .prop-gallery__main:hover .prop-gallery__zoom { transform: scale(1.08); }
+  .prop-gallery__thumbs {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .prop-gallery__thumb {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-light);
+  }
+  .prop-gallery__thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+  .prop-gallery__thumb:hover img { transform: scale(1.05); }
+  .prop-gallery__thumb--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-gray-cool);
+    opacity: 0.4;
+  }
+
+  /* ============ TITLE BLOCK ============ */
+  .prop-title-block {
+    margin-bottom: 2rem;
+  }
+  .prop-title-block__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+  }
+  .prop-title-block__type {
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+  }
+  .prop-title-block__dot { opacity: 0.5; }
+  .prop-title-block__city {
+    color: var(--color-navy);
+    text-decoration: underline;
+    text-decoration-color: var(--color-gold);
+    text-underline-offset: 3px;
+  }
+  .prop-title-block__title {
+    font-family: var(--font-sans);
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    line-height: 1.06;
+    font-weight: 700;
+    color: var(--color-navy);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.75rem;
+  }
+  .prop-title-block__tagline {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ============ QUICK SPECS BAR ============ */
+  .prop-quick-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-light);
+    border-radius: var(--radius-md);
+    margin-bottom: 3rem;
+  }
+  .prop-quick-spec {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--color-white);
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    color: var(--text-primary);
+  }
+  .prop-quick-spec svg { color: var(--color-gold); }
+  .prop-quick-spec strong { font-weight: 700; color: var(--color-navy); margin-right: 2px; }
+
+  /* ============ SECTIONS ============ */
+  .prop-section {
+    margin-bottom: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(10, 29, 63, 0.08);
+  }
+  .prop-section__title { margin-bottom: 1.25rem; color: var(--color-navy); }
+  .prop-section__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .prop-section__header h2 { margin: 0; color: var(--color-navy); }
+  .prop-section__header--center { justify-content: center; text-align: center; flex-direction: column; align-items: center; }
+  .prop-section__count {
+    font-size: 0.78rem;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-weight: 600;
+  }
+
+  /* Description with view more */
+  .prop-description { line-height: 1.75; color: var(--text-primary); }
+  .prop-description__text,
+  .prop-description__extra { font-size: 1.0625rem; margin-bottom: 1rem; }
+  .prop-description__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    color: var(--color-navy);
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid var(--color-gold);
+    cursor: pointer;
+  }
+  .prop-description__toggle:hover { color: var(--color-gold-hover, #B89554); }
+
+  /* Amenities grid */
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    background: var(--color-light);
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    transition: background var(--dur-base) var(--ease);
+  }
+  .amenity-item:hover { background: #E8EBF0; }
+  .amenity-item svg {
+    width: 22px;
+    height: 22px;
+    color: var(--color-navy);
+    flex-shrink: 0;
+  }
+
+  /* House rules */
+  .rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    background: var(--color-light);
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-gold);
+  }
+  .rules-list li {
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-primary);
+    line-height: 1.55;
+  }
+  .rules-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--color-gold);
+    font-weight: 600;
+  }
+
+  /* ============ MAP ============ */
+  .prop-map {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    box-shadow: var(--shadow-sm);
+  }
+  .prop-map iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .prop-map__overlay {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    max-width: 360px;
+  }
+  .prop-map__overlay svg { color: var(--color-gold); flex-shrink: 0; }
+  .prop-map__overlay strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--color-navy);
+    margin-bottom: 2px;
+  }
+  .prop-map__overlay span {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* ============ INQUIRY (SALE) ============ */
+  .prop-inquiry .inquiry-form {
+    margin-top: 1.5rem;
+    background: var(--color-light);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+  }
+
+  /* ============ PROCESS TIMELINE ============ */
+  .prop-process {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    counter-reset: step;
+  }
+  .prop-process__step {
+    position: relative;
+    padding-top: 1.5rem;
+  }
+  .prop-process__step::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-gold) 0%, transparent 80%);
+  }
+  .prop-process__num {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 2.25rem;
+    color: var(--color-gold);
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+  }
+  .prop-process__step h3 {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    color: var(--color-navy);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+  .prop-process__step p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* ============ CANCELLATION ============ */
+  .prop-cancellation {
+    background: var(--color-light);
+    padding: 2rem 2.5rem;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-gold);
+  }
+  .prop-cancellation h3 {
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    color: var(--color-navy);
+    margin-bottom: 0.65rem;
+    font-weight: 600;
+  }
+  .prop-cancellation__body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* ============ INQUIRY FORM STYLES (need to keep existing) ============ */
+  .inquiry-form { display: flex; flex-direction: column; }
+  .inquiry-form .field { margin-bottom: 1rem; }
+  .inquiry-form .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .inquiry-form .field--checkbox { padding: 0.25rem 0; }
+  .inquiry-form .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+    margin-bottom: 0.4rem;
+  }
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .checkbox-label input[type='checkbox'] {
+    width: 18px; height: 18px; accent-color: var(--color-gold);
+  }
+  .inquiry-form__privacy {
+    font-size: 0.8rem; color: var(--text-secondary);
+    margin: 0.5rem 0 1rem;
+  }
+  .inquiry-form__submit { width: 100%; }
+
+  /* ============ BOOKING SIDEBAR ============ */
+  .prop-layout {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .prop-sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+  }
+  .booking-card {
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .booking-card__top {
+    padding: 2rem;
+  }
+  .booking-card__chip {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .booking-card__chip--rent {
+    background: var(--color-navy);
+    color: var(--color-gold-soft);
+  }
+  .booking-card__chip--sale {
+    background: var(--color-gold);
+    color: var(--color-navy);
+  }
+  .booking-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .booking-card__from {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .booking-card__amount {
+    font-family: var(--font-sans);
+    font-size: 2.25rem;
+    color: var(--color-gold);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  .booking-card__unit {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+  .booking-card__cta { width: 100%; margin-bottom: 1rem; }
+  .booking-card__note--trust {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0.5rem 0 0;
+  }
+
+  /* Inline datepicker (rental bookings) */
+  .booking-card__dates {
+    margin-bottom: 0;
+  }
+  .booking-card__field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .booking-card__field {
+    margin-bottom: 0.65rem;
+  }
+  .booking-card__field label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+    margin-bottom: 0.35rem;
+  }
+  .booking-card__input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.15);
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color var(--dur-base) var(--ease);
+    background-color: white;
+  }
+  .booking-card__input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+  }
+  .booking-card__input::-webkit-calendar-picker-indicator {
+    filter: invert(0.4);
+    cursor: pointer;
+  }
+  .booking-card__estimate {
+    margin: 1rem 0 1.25rem;
+    padding: 1rem 1.1rem;
+    background: var(--color-white);
+    border: 1px dashed rgba(10, 29, 63, 0.18);
+    border-radius: var(--radius-md);
+    min-height: 60px;
+  }
+  .booking-card__estimate-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+  }
+  .booking-card__estimate-row:last-of-type { margin-bottom: 0; }
+  .booking-card__estimate-row--total {
+    border-top: 1px solid rgba(10, 29, 63, 0.12);
+    padding-top: 0.6rem;
+    margin-top: 0.5rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--color-navy);
+    margin-bottom: 0;
+  }
+  .booking-card__estimate-help {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .booking-card__trust {
+    padding: 1.5rem 2rem 2rem;
+    background: var(--color-light);
+    border-top: 1px solid rgba(10, 29, 63, 0.08);
+  }
+  .booking-card__trust h4 {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  .trust-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .trust-item {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+  }
+  .trust-item svg {
+    color: var(--color-gold);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .trust-item strong {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--color-navy);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .trust-item span {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* ============ REVIEWS ============ */
+  .prop-reviews__score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-light);
+    border-radius: var(--radius-md);
+  }
+  .prop-reviews__score-num {
+    font-family: var(--font-sans);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    line-height: 1;
+  }
+  .prop-reviews__score-meta { display: flex; flex-direction: column; gap: 2px; }
+  .prop-reviews__stars {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--color-gold);
+  }
+  .prop-reviews__score-meta span {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .prop-reviews__score-sub { font-size: 0.66rem !important; }
+  .prop-section__subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .prop-reviews__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .prop-review {
+    background: var(--color-light);
+    padding: 1.75rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .prop-review__stars {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--color-gold);
+    width: fit-content;
+  }
+  .prop-review__text {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+  }
+  .prop-review__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(10, 29, 63, 0.08);
+    gap: 1rem;
+  }
+  .prop-review__footer strong {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--color-navy);
+    font-weight: 600;
+  }
+  .prop-review__footer span {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .prop-review__date {
+    font-size: 0.72rem !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ============ RELATED GRID ============ */
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .related-card {
+    background: var(--color-white);
+  .related-card {
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
+    color: var(--text-primary);
+  }
+  .related-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .related-card__media { aspect-ratio: 16/10; overflow: hidden; position: relative; }
+  .related-card__media img {
+    width: 100%; height: 100%; object-fit: cover;
+    object-position: center 65%;
+    transition: transform 1s var(--ease-out);
+  }
+  .related-card:hover .related-card__media img { transform: scale(1.05); }
+  .related-card__chip {
+    position: absolute;
+    bottom: 0.85rem;
+    left: 0.85rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .related-card__chip--rent {
+    background: rgba(10, 29, 63, 0.92);
+    color: var(--color-gold-soft);
+  }
+  .related-card__chip--sale {
+    background: var(--color-gold);
+    color: var(--color-navy);
+  }
+  .related-card__body { padding: 1.25rem; }
+  .related-card__meta {
+    font-size: 0.7rem;
+    color: var(--color-gold);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .related-card__title {
+    font-family: var(--font-sans);
+    font-size: 1.15rem;
+    color: var(--color-navy);
+    margin: 0.4rem 0 0.75rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+  .related-card__price {
+    font-size: 0.9rem;
+    color: var(--color-gold);
+    font-weight: 700;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 960px) {
+    .prop-gallery { grid-template-columns: 1fr; height: auto; }
+    .prop-gallery__main { aspect-ratio: 16/10; }
+    .prop-gallery__thumbs {
+      grid-template-rows: 1fr;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .prop-gallery__thumb { aspect-ratio: 1; }
+    .prop-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+    .prop-sidebar { position: static; }
+    .amenities-grid { grid-template-columns: repeat(2, 1fr); }
+    .prop-process { grid-template-columns: 1fr; }
+    .related-grid { grid-template-columns: 1fr; }
+    .inquiry-form .field-row { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { properties, getPropertyBySlug } from '../../../data/properties';
+
+export async function getStaticPaths() {
+  return localeParams;
+}
+
+const locale = Astro.params.locale as Locale;
+const orderRef = Astro.url.searchParams.get('ref') ?? '';
+const propertySlug = Astro.url.searchParams.get('prop') ?? '';
+const isDev = Astro.url.searchParams.get('dev') === '1';
+
+const property = propertySlug ? getPropertyBySlug(propertySlug) : undefined;
+
+const steps = ['step1Title', 'step2Title', 'step3Title'] as const;
+const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
+---
+
+<BaseLayout
+  title={t(locale, 'bookingSuccess.title')}
+  description={t(locale, 'bookingSuccess.subtitle')}
+  transparentHeader={false}
+>
+  <section class="success">
+    <div class="container">
+      <div class="success__inner reveal">
+        <div class="success__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="11"/>
+            <path d="M7 12l3 3 7-7"/>
+          </svg>
+        </div>
+
+        <p class="eyebrow">{t(locale, 'bookingSuccess.thanks')}</p>
+        <h1 class="h-1">{t(locale, 'bookingSuccess.title')}</h1>
+        <p class="lead">{t(locale, 'bookingSuccess.message')}</p>
+
+        {orderRef && (
+          <div class="success__ref">
+            <span class="success__ref-label">{t(locale, 'bookingSuccess.reference')}</span>
+            <span class="success__ref-value">{orderRef}</span>
+            {isDev && <span class="success__ref-dev">DEV MODE</span>}
+          </div>
+        )}
+
+        <div class="success__cta">
+          <a href={`/${locale}/`} class="btn btn--secondary">{t(locale, 'bookingSuccess.backHome')}</a>
+          {property && (
+            <a href={`/${locale}/properties/${property.slug}`} class="btn btn--link">
+              {t(locale, 'bookingSuccess.viewProperty')} →
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div class="next-steps reveal">
+        <h2 class="h-2">{t(locale, 'bookingSuccess.nextSteps')}</h2>
+        <ol class="next-steps__list">
+          {steps.map((step, i) => (
+            <li class="next-step">
+              <span class="next-step__num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3>{t(locale, `bookingSuccess.${step}`)}</h3>
+                <p>{t(locale, `bookingSuccess.${stepDescs[i]}`)}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .success {
+    padding: calc(var(--header-height) + 4rem) 0 6rem;
+    background: var(--color-light);
+    min-height: 100vh;
+  }
+
+  .success__inner {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 5rem;
+  }
+
+  .success__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    border-radius: 50%;
+    margin-bottom: 2rem;
+  }
+  .success__icon svg { width: 44px; height: 44px; }
+
+  .success__inner h1 { margin-bottom: 1rem; }
+  .success__inner .lead { margin-inline: auto; }
+
+  .success__ref {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2.5rem 0 2rem;
+    padding: 1.25rem 2rem;
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.08);
+    border-radius: var(--radius-md);
+  }
+  .success__ref-label {
+    font-size: 0.72rem;
+    color: var(--color-gold);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .success__ref-value {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    color: var(--color-navy);
+    letter-spacing: 0.1em;
+  }
+  .success__ref-dev {
+    font-size: 0.7rem;
+    color: #b94545;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .success__cta {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .next-steps { max-width: 880px; margin: 0 auto; }
+  .next-steps h2 { text-align: center; margin-bottom: 3rem; }
+  .next-steps__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .next-step {
+    display: flex;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-gold);
+  }
+  .next-step__num {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--color-gold);
+    font-weight: 500;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .next-step h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--color-navy);
+    margin-bottom: 0.5rem;
+  }
+  .next-step p { color: var(--text-secondary); line-height: 1.5; margin: 0; }
+</style>

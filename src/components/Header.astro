@@ -1,0 +1,261 @@
+---
+import Logo from './Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { t, localizedPath, type Locale } from '../utils/i18n';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+  /** When true, header starts transparent over a dark hero, becomes solid on scroll */
+  transparent?: boolean;
+}
+
+const { locale, currentPath, transparent = true } = Astro.props;
+
+const navItems = [
+  { key: 'nav.services', href: 'services' },
+  { key: 'nav.destinations', href: 'destinations' },
+  { key: 'nav.properties', href: 'properties' },
+  { key: 'nav.about', href: 'about' },
+  { key: 'nav.blog', href: 'blog' },
+  { key: 'nav.contact', href: 'contact' },
+].map(item => ({
+  label: t(locale, item.key),
+  href: localizedPath(locale, `/${item.href}`),
+}));
+
+const isActive = (href: string) => {
+  const cleanCurrent = currentPath.replace(/\/$/, '');
+  const cleanHref = href.replace(/\/$/, '');
+  if (cleanHref.endsWith('/blog')) return cleanCurrent.startsWith(cleanHref);
+  return cleanCurrent === cleanHref;
+};
+---
+
+<header
+  class={`site-header ${transparent ? 'site-header--transparent' : ''}`}
+  data-transparent={transparent}
+>
+  <div class="container site-header__inner">
+    <Logo locale={locale} variant={transparent ? 'white' : 'light'} withWordmark={true} />
+
+    <nav class="site-nav" aria-label="Principal">
+      <ul class="site-nav__list">
+        {navItems.map(item => (
+          <li>
+            <a
+              href={item.href}
+              class={`site-nav__link ${isActive(item.href) ? 'is-active' : ''}`}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <LanguageSwitcher locale={locale} currentPath={currentPath} variant={transparent ? 'light' : 'dark'} />
+      <a href={localizedPath(locale, '/contact')} class="btn btn--primary site-header__cta">
+        {t(locale, 'nav.cta')}
+      </a>
+    </div>
+
+    <button class="site-header__toggle" aria-label="Abrir menú" aria-expanded="false" data-menu-toggle>
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div class="site-drawer" data-menu-drawer aria-hidden="true">
+    <nav class="site-drawer__nav" aria-label="Móvil">
+      <ul>
+        {navItems.map(item => (
+          <li>
+            <a href={item.href} class="site-drawer__link">{item.label}</a>
+          </li>
+        ))}
+      </ul>
+      <a href={localizedPath(locale, '/contact')} class="btn btn--primary site-drawer__cta">
+        {t(locale, 'nav.cta')}
+      </a>
+      <div class="site-drawer__lang">
+        <LanguageSwitcher locale={locale} currentPath={currentPath} variant="dark" />
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    transition: background var(--dur-base) var(--ease),
+                box-shadow var(--dur-base) var(--ease),
+                color var(--dur-base) var(--ease),
+                border-color var(--dur-base) var(--ease);
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-header--transparent {
+    color: var(--color-white);
+    background: transparent;
+  }
+
+  .site-header.is-scrolled,
+  .site-header:not(.site-header--transparent) {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-navy);
+    border-bottom-color: rgba(10, 29, 63, 0.06);
+  }
+
+  .site-header__inner {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .site-nav__list {
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .site-nav__link {
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 0;
+    position: relative;
+    opacity: 0.9;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  .site-nav__link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--color-gold);
+    transition: width var(--dur-base) var(--ease);
+  }
+
+  .site-nav__link:hover,
+  .site-nav__link.is-active {
+    opacity: 1;
+  }
+
+  .site-nav__link:hover::after,
+  .site-nav__link.is-active::after {
+    width: 100%;
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  .site-header__cta { padding: 0.7rem 1.25rem; font-size: 0.72rem; }
+
+  .site-header__toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 20px;
+    padding: 0;
+    z-index: 110;
+  }
+  .site-header__toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease);
+  }
+  .site-header__toggle.is-open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+  .site-header__toggle.is-open span:nth-child(2) { opacity: 0; }
+  .site-header__toggle.is-open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+  .site-drawer {
+    position: fixed;
+    inset: 0;
+    background: var(--color-navy);
+    color: var(--color-white);
+    transform: translateX(100%);
+    transition: transform var(--dur-slow) var(--ease);
+    padding: calc(var(--header-height) + 2rem) 1.5rem 2rem;
+    z-index: 90;
+    overflow-y: auto;
+  }
+  .site-drawer.is-open { transform: translateX(0); }
+
+  .site-drawer__nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .site-drawer__link {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    line-height: 1.2;
+    color: var(--color-white);
+  }
+  .site-drawer__cta { width: 100%; margin-bottom: 2rem; }
+
+  .site-drawer__lang { padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.12); }
+
+  @media (max-width: 960px) {
+    .site-nav, .site-header__actions { display: none; }
+    .site-header__toggle { display: flex; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector('.site-header');
+  const toggle = document.querySelector('[data-menu-toggle]');
+  const drawer = document.querySelector('[data-menu-drawer]');
+
+  const onScroll = () => {
+    if (!header) return;
+    const transparent = header.dataset.transparent === 'true';
+    if (!transparent) return;
+    if (window.scrollY > 30) header.classList.add('is-scrolled');
+    else header.classList.remove('is-scrolled');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.classList.toggle('is-open', !open);
+    drawer?.classList.toggle('is-open', !open);
+    drawer?.setAttribute('aria-hidden', String(open));
+    document.body.style.overflow = open ? '' : 'hidden';
+  });
+
+  // Close drawer on link click
+  drawer?.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      toggle?.classList.remove('is-open');
+      toggle?.setAttribute('aria-expanded', 'false');
+      drawer.classList.remove('is-open');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    });
+  });
+</script>

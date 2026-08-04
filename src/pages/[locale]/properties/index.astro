@@ -1,0 +1,336 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { t, localeParams, type Locale } from '../../../utils/i18n';
+import {
+  properties,
+  propertyTypeLabel,
+  destinationLabel,
+  formatPrice,
+  transactionLabel,
+  DEFAULT_IMAGE_FOCAL,
+  type DestinationId,
+  type TransactionType,
+} from '../../../data/properties';
+
+export async function getStaticPaths() {
+  return localeParams;
+}
+
+const locale = Astro.params.locale as Locale;
+
+const destinationIds = Array.from(new Set(properties.map(p => p.destination))) as DestinationId[];
+const transactions: TransactionType[] = ['rent', 'sale'];
+
+const transactionFilter = (Astro.url.searchParams.get('tx') ?? '') as TransactionType | '';
+const destinationFilter = Astro.url.searchParams.get('dest') ?? '';
+const sort = Astro.url.searchParams.get('sort') ?? 'featured';
+
+let filtered = properties;
+if (transactionFilter && transactions.includes(transactionFilter)) {
+  filtered = filtered.filter(p => p.transaction === transactionFilter);
+}
+if (destinationFilter) {
+  filtered = filtered.filter(p => p.destination === destinationFilter);
+}
+
+if (sort === 'price-asc') {
+  filtered = [...filtered].sort((a, b) => a.price - b.price);
+} else if (sort === 'price-desc') {
+  filtered = [...filtered].sort((a, b) => b.price - a.price);
+} else {
+  filtered = [...filtered].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+}
+---
+
+<BaseLayout
+  title={t(locale, 'properties.title')}
+  description={t(locale, 'properties.subtitle')}
+  transparentHeader={true}
+>
+  <PageHero
+    eyebrow={t(locale, 'properties.title')}
+    title={locale === 'es' ? 'Propiedades<br/><span class="italic-serif">seleccionadas.</span>' : 'Handpicked<br/><span class="italic-serif">properties.</span>'}
+    subtitle={t(locale, 'properties.subtitle')}
+    image="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=2000&q=80"
+  />
+
+  <section class="section">
+    <div class="container">
+      <!-- Filters -->
+      <form class="filters" method="get" aria-label={locale === 'es' ? 'Filtros' : 'Filters'}>
+        <div class="filters__group">
+          <label for="tx">{t(locale, 'properties.filterTransaction')}</label>
+          <select name="tx" id="tx" class="filters__select" onchange="this.form.submit()">
+            <option value="">{t(locale, 'properties.filterAllTransactions')}</option>
+            <option value="rent" selected={transactionFilter === 'rent'}>{t(locale, 'properties.filterRent')}</option>
+            <option value="sale" selected={transactionFilter === 'sale'}>{t(locale, 'properties.filterSale')}</option>
+          </select>
+        </div>
+
+        <div class="filters__group">
+          <label for="dest">{t(locale, 'properties.filterDestination')}</label>
+          <select name="dest" id="dest" class="filters__select" onchange="this.form.submit()">
+            <option value="">{t(locale, 'properties.filterAll')}</option>
+            {destinationIds.map(id => (
+              <option value={id} selected={destinationFilter === id}>{destinationLabel(id, locale)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="filters__group">
+          <label for="sort">{t(locale, 'properties.sortBy')}</label>
+          <select name="sort" id="sort" class="filters__select" onchange="this.form.submit()">
+            <option value="featured" selected={sort === 'featured'}>{t(locale, 'properties.sortDefault')}</option>
+            <option value="price-asc" selected={sort === 'price-asc'}>{t(locale, 'properties.sortPriceAsc')}</option>
+            <option value="price-desc" selected={sort === 'price-desc'}>{t(locale, 'properties.sortPriceDesc')}</option>
+          </select>
+        </div>
+
+        {(transactionFilter || destinationFilter) && (
+          <a href={`/${locale}/properties`} class="filters__reset">× {t(locale, 'properties.filterReset')}</a>
+        )}
+      </form>
+
+      {filtered.length === 0 ? (
+        <p class="empty">{t(locale, 'properties.noResults')}</p>
+      ) : (
+        <div class="properties-grid" data-stagger data-stagger-step="80">
+          {filtered.map((p, i) => {
+            const priceUnit = p.transaction === 'rent' ? t(locale, 'properties.priceUnitRent') : t(locale, 'properties.priceUnitSale');
+            const badgeLabel = p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge');
+            const ctaLabel = p.transaction === 'sale' ? t(locale, 'properties.requestInfo') : t(locale, 'properties.bookNow');
+            const targetPath = p.transaction === 'sale'
+              ? `/${locale}/properties/${p.slug}#inquiry`
+              : `/${locale}/properties/${p.slug}`;
+            return (
+              <article class="property-card reveal reveal--fade" data-tilt="3">
+                <a href={targetPath} class="property-card__link">
+                  <div class="property-card__media">
+                    <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
+                         style={`object-position: center ${p.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
+                    <span class="property-card__type">{propertyTypeLabel(p.type, locale)}</span>
+                    {p.featured && <span class="property-card__badge">★ {locale === 'es' ? 'Destacada' : 'Featured'}</span>}
+                    <span class={`property-card__transaction property-card__transaction--${p.transaction}`}>{badgeLabel}</span>
+                  </div>
+                  <div class="property-card__body">
+                    <div class="property-card__meta">
+                      <span>{destinationLabel(p.destination, locale)}</span>
+                      <span>·</span>
+                      <span>{p.location[locale]}</span>
+                    </div>
+                    <h3 class="property-card__title">{p.name[locale]}</h3>
+                    <p class="property-card__tagline">{p.tagline[locale]}</p>
+                    <div class="property-card__specs">
+                      <span>{p.maxGuests} {t(locale, 'common.guests')}</span>
+                      <span>·</span>
+                      <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>
+                      <span>·</span>
+                      <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>
+                    </div>
+                    <div class="property-card__price">
+                      <span class="property-card__price-from">{t(locale, 'common.from')}</span>
+                      <span class="property-card__price-amount">{formatPrice(p.price, locale)}</span>
+                      <span class="property-card__price-unit">{priceUnit}</span>
+                    </div>
+                    <span class="property-card__cta">{ctaLabel} →</span>
+                  </div>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .empty {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 4rem 0;
+    font-size: 1.1rem;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--color-light);
+    border-radius: var(--radius-md);
+    margin-bottom: 3rem;
+  }
+  .filters__group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 200px; }
+  .filters__group label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+  }
+  .filters__select {
+    padding: 0.7rem 1rem;
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.15);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    color: var(--color-navy);
+    cursor: pointer;
+  }
+  .filters__select:focus { outline: 2px solid var(--color-gold); }
+  .filters__reset {
+    align-self: end;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    padding: 0.7rem 0;
+  }
+
+  .properties-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .property-card {
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.06);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
+  }
+  .property-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .property-card__link { display: block; color: var(--text-primary); text-decoration: none; }
+  .property-card__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .property-card__media img {
+    width: 100%; height: 100%; object-fit: cover;
+    object-position: center 65%;
+    transition: transform 1.2s var(--ease-out);
+  }
+  .property-card:hover .property-card__media img { transform: scale(1.06); }
+
+  .property-card__type {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--color-navy);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+  }
+  .property-card__badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+  }
+  .property-card__transaction {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+  }
+  .property-card__transaction--rent {
+    background: rgba(10, 29, 63, 0.85);
+    color: var(--color-gold-soft);
+  }
+  .property-card__transaction--sale {
+    background: var(--color-gold);
+    color: var(--color-navy);
+  }
+  .property-card__cta {
+    display: block;
+    margin-top: 1rem;
+    color: var(--color-gold);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: gap var(--dur-base) var(--ease);
+  }
+  .property-card:hover .property-card__cta { letter-spacing: 0.16em; }
+
+  .property-card__body { padding: 1.5rem; }
+  .property-card__meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--color-gold);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .property-card__title {
+    font-family: var(--font-serif);
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: var(--color-navy);
+    margin-bottom: 0.5rem;
+  }
+  .property-card__tagline {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    min-height: 2.7em;
+  }
+  .property-card__specs {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(10, 29, 63, 0.08);
+    margin-bottom: 1rem;
+  }
+
+  .property-card__price { display: flex; align-items: baseline; gap: 0.35rem; flex-wrap: wrap; }
+  .property-card__price-from {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .property-card__price-amount {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--color-gold);
+    font-weight: 500;
+  }
+  .property-card__price-unit {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 960px) { .properties-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .properties-grid { grid-template-columns: 1fr; } }
+</style>

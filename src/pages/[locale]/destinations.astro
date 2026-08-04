@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { t, localeParams, type Locale } from '../../utils/i18n';
+
+const locale = Astro.params.locale as Locale;
+
+const destinations = [
+  {
+    key: 'madrid', img: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1400&q=80',
+    desc: {
+      es: 'Barrio de Salamanca, Chamberí, Retiro. El corazón financiero y cultural de España, con la mejor oferta gastronómica y educativa del país.',
+      en: 'Salamanca, Chamberí, Retiro. Spain\'s financial and cultural heart, with the country\'s top gastronomy and education.',
+    },
+  },
+  {
+    key: 'barcelona', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1400&q=80',
+    desc: {
+      es: 'Eixample, Pedralbes, Barceloneta. Arquitectura modernista, mar Mediterráneo y un ecosistema de startups y creatividad único en el sur de Europa.',
+      en: 'Eixample, Pedralbes, Barceloneta. Modernista architecture, Mediterranean sea, and southern Europe\'s most vibrant startup scene.',
+    },
+  },
+  {
+    key: 'marbella', img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=1400&q=80',
+    desc: {
+      es: 'Milla de Oro, La Zagaleta, Puerto Banús. Lujo discreto, los mejores campos de golf de Europa, gastronomía Michelin y seguridad premium.',
+      en: 'Golden Mile, La Zagaleta, Puerto Banús. Discreet luxury, Europe\'s best golf courses, Michelin dining and premium safety.',
+    },
+  },
+  {
+    key: 'mallorca', img: 'https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=1400&q=80',
+    desc: {
+      es: 'Pollensa, Alcúdia, Son Vida. Naturaleza protegida, fincas centenarias y la combinación perfecta entre privacidad, mar y tradición.',
+      en: 'Pollensa, Alcúdia, Son Vida. Protected nature, centenary estates and the perfect blend of privacy, sea and tradition.',
+    },
+  },
+  {
+    key: 'ibiza', img: 'https://images.unsplash.com/photo-1559656914-a30970c1affd?w=1400&q=80',
+    desc: {
+      es: 'San José, Santa Eulària, Sant Joan. Reserva de la Biosfera UNESCO, las fincas más exclusivas del Mediterráneo y un lifestyle único.',
+      en: 'San José, Santa Eulària, Sant Joan. UNESCO Biosphere Reserve, the Mediterranean\'s most exclusive fincas and a unique lifestyle.',
+    },
+  },
+  {
+    key: 'canarias', img: 'https://images.unsplash.com/photo-1505939435612-a18ea96b80b3?w=1400&q=80',
+    desc: {
+      es: 'Tenerife, Gran Canaria, Lanzarote. Clima subtropical todo el año, las ventajas fiscales del REF canario y acceso aéreo a Europa y África.',
+      en: 'Tenerife, Gran Canaria, Lanzarote. Year-round subtropical climate, Canary REF tax advantages and air access to Europe and Africa.',
+    },
+  },
+];
+export async function getStaticPaths() {
+  return localeParams;
+}
+---
+
+<BaseLayout
+  title={t(locale, 'nav.destinations')}
+  transparentHeader={true}
+>
+  <PageHero
+    eyebrow={t(locale, 'destinations.eyebrow')}
+    title={t(locale, 'destinations.headline')}
+    subtitle={t(locale, 'destinations.subheadline')}
+    image="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=80"
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="dest-list">
+        {destinations.map(({ key, img, desc }, i) => (
+          <article id={key} class={`dest-row ${i % 2 === 1 ? 'dest-row--alt' : ''} reveal`}>
+            <div class="dest-row__media">
+              <img src={img} alt="" loading="lazy" />
+            </div>
+            <div class="dest-row__body">
+              <span class="eyebrow">0{i + 1}</span>
+              <h2 class="h-2">{t(locale, `destinations.items.${key}.name`)}</h2>
+              <p class="lead">{t(locale, `destinations.items.${key}.tag`)}</p>
+              <p>{desc[locale]}</p>
+              <a href={`/${locale}/contact`} class="btn btn--link">{t(locale, 'common.bookViewing')}</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="container">
+      <div class="center-cta reveal">
+        <h2 class="h-2">{t(locale, 'cta.headline')}</h2>
+        <p class="lead">{t(locale, 'cta.subheadline')}</p>
+        <a href={`/${locale}/contact`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .dest-list { display: flex; flex-direction: column; gap: 6rem; }
+  .dest-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .dest-row--alt { direction: rtl; }
+  .dest-row--alt > * { direction: ltr; }
+
+  .dest-row__media {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    box-shadow: var(--shadow-md);
+  }
+  .dest-row__media img { width: 100%; height: 100%; object-fit: cover; }
+
+  .dest-row__body h2 { margin-bottom: 1rem; }
+  .dest-row__body .lead { margin-bottom: 1.25rem; }
+
+  .center-cta {
+    text-align: center;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .center-cta .lead { margin: 1.25rem auto 2rem; }
+
+  @media (max-width: 860px) {
+    .dest-row, .dest-row--alt { grid-template-columns: 1fr; direction: ltr; gap: 2rem; }
+    .dest-list { gap: 4rem; }
+  }
+</style>

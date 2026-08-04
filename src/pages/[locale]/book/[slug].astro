@@ -1,0 +1,489 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PaymentOverlay from '../../../components/PaymentOverlay.astro';
+import { t, supportedLocales, type Locale } from '../../../utils/i18n';
+import {
+  properties,
+  destinationLabel,
+  propertyTypeLabel,
+  type DestinationId,
+} from '../../../data/properties';
+
+export async function getStaticPaths() {
+  const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
+  // Only generate booking routes for rental properties
+  for (const locale of supportedLocales) {
+    for (const p of properties.filter(prop => prop.transaction === 'rent')) {
+      paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
+    }
+  }
+  return paths;
+}
+
+const { property } = Astro.props as { property: typeof properties[number] };
+const locale = Astro.params.locale as Locale;
+---
+
+<BaseLayout
+  title={`${t(locale, 'booking.title')} — ${property.name[locale]}`}
+  description={t(locale, 'booking.subtitle')}
+  transparentHeader={false}
+>
+  <PaymentOverlay />
+
+  <section class="section">
+    <div class="container">
+      <a href={`/${locale}/properties/${property.slug}`} class="back-link">← {property.name[locale]}</a>
+
+      <header class="booking-header reveal">
+        <h1 class="h-1">{t(locale, 'booking.title')}</h1>
+        <p class="lead">{t(locale, 'booking.subtitle')}</p>
+      </header>
+
+      <div class="booking-grid">
+        <!-- LEFT: Form -->
+        <form id="booking-form" class="booking-form reveal" novalidate data-loading-on-submit>
+          <!-- Step 1: Dates & guests -->
+          <fieldset class="form-step">
+            <legend><span class="step-num">1</span> {t(locale, 'booking.step1')}</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="checkIn">{t(locale, 'booking.checkIn')}</label>
+                <input type="date" id="checkIn" name="checkIn" class="input" required />
+              </div>
+              <div class="field">
+                <label for="checkOut">{t(locale, 'booking.checkOut')}</label>
+                <input type="date" id="checkOut" name="checkOut" class="input" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="guests">{t(locale, 'booking.guests')}</label>
+              <select id="guests" name="guests" class="input" required>
+                {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(n => (
+                  <option value={n}>{n} {n === 1 ? t(locale, 'common.guests').replace(/s$/, '') : t(locale, 'common.guests')}</option>
+                ))}
+              </select>
+            </div>
+            <p id="dates-error" class="field-error" hidden></p>
+          </fieldset>
+
+          <!-- Step 2: Guest details -->
+          <fieldset class="form-step">
+            <legend><span class="step-num">2</span> {t(locale, 'booking.step2')}</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="firstName">{t(locale, 'booking.firstName')}</label>
+                <input type="text" id="firstName" name="firstName" class="input" required autocomplete="given-name" />
+              </div>
+              <div class="field">
+                <label for="lastName">{t(locale, 'booking.lastName')}</label>
+                <input type="text" id="lastName" name="lastName" class="input" required autocomplete="family-name" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="email">{t(locale, 'booking.email')}</label>
+                <input type="email" id="email" name="email" class="input" required autocomplete="email" />
+              </div>
+              <div class="field">
+                <label for="phone">{t(locale, 'booking.phone')}</label>
+                <input type="tel" id="phone" name="phone" class="input" required autocomplete="tel" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="country">{t(locale, 'booking.country')}</label>
+              <input type="text" id="country" name="country" class="input" autocomplete="country-name" />
+            </div>
+            <div class="field">
+              <label for="specialRequests">{t(locale, 'booking.specialRequests')}</label>
+              <textarea id="specialRequests" name="specialRequests" class="textarea" rows="3"></textarea>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn--primary booking-form__submit" id="submit-btn" data-magnetic="0.25">
+            <span data-magnetic-inner>{t(locale, 'booking.submitBooking')}</span>
+          </button>
+          <p class="booking-form__legal">{t(locale, 'booking.cancellationPolicy')}</p>
+        </form>
+
+        <!-- RIGHT: Summary -->
+        <aside class="booking-summary">
+          <div class="summary-card reveal">
+            <div class="summary-card__media">
+              <img src={property.images[0]} alt={property.name[locale]} />
+            </div>
+            <div class="summary-card__body">
+              <span class="summary-card__meta">{propertyTypeLabel(property.type, locale)} · {destinationLabel(property.destination as DestinationId, locale)}</span>
+              <h3 class="summary-card__title">{property.name[locale]}</h3>
+
+              <div class="summary-card__divider"></div>
+
+              <div class="summary-card__row">
+                <span data-summary="dates">{t(locale, 'booking.selectDates')}</span>
+              </div>
+              <div class="summary-card__row">
+                <span data-summary="nights">—</span>
+              </div>
+
+              <div class="summary-card__divider"></div>
+
+              <div class="summary-card__row summary-card__row--price">
+                <span>{property.pricePerNight} € × <span data-summary="nights-val">0</span></span>
+                <span data-summary="subtotal">0 €</span>
+              </div>
+              <div class="summary-card__row summary-card__row--price">
+                <span>{t(locale, 'booking.cleaningFee')}</span>
+                <span data-summary="cleaning">{property.cleaningFee} €</span>
+              </div>
+              <div class="summary-card__row summary-card__row--price">
+                <span>{t(locale, 'booking.serviceFee')} (10%)</span>
+                <span data-summary="service">0 €</span>
+              </div>
+
+              <div class="summary-card__divider"></div>
+
+              <div class="summary-card__row summary-card__row--total">
+                <span>{t(locale, 'booking.total')}</span>
+                <span data-summary="total">0 €</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-trust">
+            <p>🔒 {t(locale, 'booking.securePayment')}</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script
+  define:vars={{
+    pricePerNight: property.pricePerNight,
+    cleaningFee: property.cleaningFee,
+    minNights: property.minNights,
+    maxGuests: property.maxGuests,
+    propertyId: property.id,
+    propertySlug: property.slug,
+    locale,
+    t: {
+      errorDates: t(locale, 'booking.errorDates'),
+      errorGuests: t(locale, 'booking.errorGuests'),
+      errorMinNights: t(locale, 'booking.errorMinNights').replace('{n}', String(property.minNights)),
+      processing: locale === 'es' ? 'Procesando...' : 'Processing...',
+    },
+  }}
+>
+  const form = document.getElementById('booking-form');
+  const checkInEl = document.getElementById('checkIn');
+  const checkOutEl = document.getElementById('checkOut');
+  const guestsEl = document.getElementById('guests');
+  const errorEl = document.getElementById('dates-error');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Set min date = tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+  checkInEl.min = minDate;
+  checkOutEl.min = minDate;
+
+  function calculateNights(checkIn, checkOut) {
+    const a = new Date(checkIn);
+    const b = new Date(checkOut);
+    return Math.max(0, Math.round((b - a) / (1000 * 60 * 60 * 24)));
+  }
+
+  function fmt(amount) {
+    return new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-GB', {
+      style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
+    }).format(amount);
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function recalculate() {
+    const checkIn = checkInEl.value;
+    const checkOut = checkOutEl.value;
+    const nights = calculateNights(checkIn, checkOut);
+    const guests = parseInt(guestsEl.value, 10);
+
+    // Validate
+    let valid = true;
+    let message = '';
+
+    if (checkIn && checkOut) {
+      if (nights <= 0) {
+        valid = false;
+        message = t.errorDates;
+      } else if (nights < minNights) {
+        valid = false;
+        message = t.errorMinNights;
+      }
+    }
+    if (guests > maxGuests) {
+      valid = false;
+      message = t.errorGuests;
+    }
+
+    if (!valid) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    } else {
+      errorEl.hidden = true;
+    }
+
+    // Update summary
+    const dateLabel = checkIn && checkOut
+      ? `${fmtDate(checkIn)} → ${fmtDate(checkOut)}`
+      : (locale === 'es' ? 'Selecciona fechas' : 'Select dates');
+    document.querySelector('[data-summary="dates"]').textContent = dateLabel;
+
+    document.querySelector('[data-summary="nights"]').textContent =
+      nights > 0 ? `${nights} ${locale === 'es' ? 'noches' : 'nights'}` : '—';
+
+    const subtotal = nights * pricePerNight;
+    const service = Math.round(subtotal * 0.1);
+    const total = subtotal + cleaningFee + service;
+
+    document.querySelector('[data-summary="nights-val"]').textContent = nights;
+    document.querySelector('[data-summary="subtotal"]').textContent = fmt(subtotal);
+    document.querySelector('[data-summary="service"]').textContent = fmt(service);
+    document.querySelector('[data-summary="total"]').textContent = fmt(total);
+
+    submitBtn.disabled = !valid;
+    submitBtn.style.opacity = valid ? '1' : '0.5';
+
+    return { valid, nights, subtotal, service, total };
+  }
+
+  [checkInEl, checkOutEl, guestsEl].forEach(el => {
+    el.addEventListener('change', recalculate);
+    el.addEventListener('input', recalculate);
+  });
+  recalculate();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const { valid, nights, subtotal, service, total } = recalculate();
+    if (!valid) return;
+
+    // Loading state on the button itself
+    submitBtn.classList.add('is-loading');
+    submitBtn.setAttribute('aria-busy', 'true');
+
+    // Show full-screen overlay (delayed slightly so it doesn't flash on fast responses)
+    const overlay = document.querySelector('[data-payment-overlay]');
+    const showOverlayTimer = setTimeout(() => {
+      if (overlay) {
+        overlay.classList.add('is-visible');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('payment-pending');
+      }
+    }, 200);
+
+    const payload = {
+      propertyId,
+      propertySlug,
+      checkIn: checkInEl.value,
+      checkOut: checkOutEl.value,
+      guests: parseInt(guestsEl.value, 10),
+      nights,
+      pricePerNight,
+      cleaningFee,
+      serviceFee: service,
+      total,
+      guest: {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        country: document.getElementById('country').value,
+        specialRequests: document.getElementById('specialRequests').value,
+      },
+      locale,
+    };
+
+    const resetUi = (msg) => {
+      clearTimeout(showOverlayTimer);
+      if (overlay) {
+        overlay.classList.remove('is-visible');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('payment-pending');
+      }
+      submitBtn.classList.remove('is-loading');
+      submitBtn.removeAttribute('aria-busy');
+      submitBtn.textContent = msg || submitBtn.dataset.originalText || submitBtn.textContent;
+    };
+
+    try {
+      const res = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.redsysUrl) {
+          sessionStorage.setItem('gm_last_booking', JSON.stringify({ ...payload, orderId: data.orderId }));
+          window.location.href = data.redsysUrl;
+          return;
+        }
+      }
+
+      throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      console.warn('[booking] payment endpoint unreachable, dev fallback:', err);
+
+      const orderId = 'DEV' + Date.now().toString().slice(-8);
+      sessionStorage.setItem('gm_last_booking', JSON.stringify({ ...payload, orderId }));
+      window.location.href = `/${locale}/book/success?ref=${orderId}&prop=${propertySlug}&dev=1`;
+    }
+  });
+</script>
+
+<style>
+  .back-link {
+    display: inline-block;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin-bottom: 2rem;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+  }
+  .back-link:hover { color: var(--color-navy); }
+
+  .booking-header {
+    margin-bottom: 3rem;
+    max-width: 720px;
+  }
+
+  .booking-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .booking-form { background: var(--color-white); }
+  .form-step {
+    border: 1px solid rgba(10, 29, 63, 0.1);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .form-step legend {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-inline: 1rem;
+    margin-left: -0.5rem;
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    color: var(--color-navy);
+    font-weight: 500;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    border-radius: 50%;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .field-row .field { margin-bottom: 1.25rem; }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+  }
+  .field-error {
+    color: #b94545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .booking-form__submit { width: 100%; margin-top: 1rem; }
+  .booking-form__legal {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .booking-summary { position: sticky; top: calc(var(--header-height) + 2rem); }
+  .summary-card {
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.08);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .summary-card__media { aspect-ratio: 16/10; overflow: hidden; }
+  .summary-card__media img { width: 100%; height: 100%; object-fit: cover; }
+  .summary-card__body { padding: 1.75rem; }
+  .summary-card__meta {
+    font-size: 0.72rem;
+    color: var(--color-gold);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .summary-card__title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    color: var(--color-navy);
+    margin-top: 0.4rem;
+    margin-bottom: 0;
+  }
+  .summary-card__divider {
+    height: 1px;
+    background: rgba(10, 29, 63, 0.08);
+    margin: 1.25rem 0;
+  }
+  .summary-card__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    margin-bottom: 0.6rem;
+  }
+  .summary-card__row--price { color: var(--text-secondary); }
+  .summary-card__row--total {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--color-navy);
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+
+  .payment-trust {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 960px) {
+    .booking-grid { grid-template-columns: 1fr; }
+    .booking-summary { position: static; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>

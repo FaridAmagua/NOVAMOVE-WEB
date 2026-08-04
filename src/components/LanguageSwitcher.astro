@@ -1,0 +1,59 @@
+---
+import { languages, type Locale, swapLocaleInPath, localizedPath } from '../utils/i18n';
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+  variant?: 'dark' | 'light';
+}
+
+const { locale, currentPath, variant = 'light' } = Astro.props;
+const targetLocale: Locale = locale === 'es' ? 'en' : 'es';
+const targetPath = swapLocaleInPath(currentPath, targetLocale);
+---
+
+<a
+  href={targetPath}
+  hreflang={targetLocale}
+  class={`lang-switcher lang-switcher--${variant}`}
+  aria-label={`Switch language to ${languages[targetLocale]}`}
+>
+  <span class="lang-switcher__current">{locale.toUpperCase()}</span>
+  <span class="lang-switcher__sep" aria-hidden="true">/</span>
+  <span class="lang-switcher__alt">{targetLocale.toUpperCase()}</span>
+</a>
+
+<style>
+  .lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+  }
+  .lang-switcher--light {
+    color: var(--color-white);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  .lang-switcher--light:hover {
+    background: var(--color-white);
+    color: var(--color-navy);
+  }
+  .lang-switcher--dark {
+    color: var(--color-navy);
+    border-color: rgba(10, 29, 63, 0.25);
+  }
+  .lang-switcher--dark:hover {
+    background: var(--color-navy);
+    color: var(--color-white);
+    border-color: var(--color-navy);
+  }
+  .lang-switcher__current { opacity: 0.55; }
+  .lang-switcher__sep { opacity: 0.4; }
+  .lang-switcher__alt { opacity: 1; }
+</style>

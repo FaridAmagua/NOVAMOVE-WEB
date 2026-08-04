@@ -1,0 +1,21 @@
+---
+// Root index: redirect to the default locale (Spanish).
+// We use a plain HTML meta-refresh + JS redirect with a RELATIVE URL so it
+// works on any host (localhost in dev, the production domain in prod).
+// Astro.redirect() in static mode forces absolute URLs from `site`, so we
+// bypass it here.
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=/es/" />
+    <link rel="canonical" href="/es/" />
+    <title>Global Move</title>
+    <script>window.location.replace('/es/');</script>
+    <style>body { font: 14px system-ui, sans-serif; padding: 2rem; text-align: center; }</style>
+  </head>
+  <body>
+    <p>Redirigiendo a <a href="/es/">/es/</a>…</p>
+  </body>
+</html>

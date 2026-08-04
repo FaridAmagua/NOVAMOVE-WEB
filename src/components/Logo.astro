@@ -1,0 +1,74 @@
+---
+import { localizedPath, type Locale } from '../utils/i18n';
+
+interface Props {
+  /**
+   * Visual variant of the logo.
+   * - 'light' → dark mark, for white backgrounds (default)
+   * - 'white' → white mark, for dark backgrounds
+   */
+  variant?: 'light' | 'white';
+  /** Height of the mark in pixels. Width auto-scales preserving aspect ratio. */
+  size?: number;
+  /** Show the wordmark + tagline next to the icon. */
+  withWordmark?: boolean;
+  locale: Locale;
+}
+
+const { variant = 'light', size = 44, withWordmark = false, locale } = Astro.props;
+
+// Pick the right asset per variant. The mark-only PNGs are used in the header
+// and footer because they cleanly scale; the larger logo-light.png is reserved
+// for contexts that need the full lockup (marketing surfaces).
+const markSrc = variant === 'white' ? '/brand/logo-white.png' : '/brand/logo-dark.png';
+
+const wordmarkColor = variant === 'white' ? '#FFFFFF' : '#0A1D3F';
+const taglineColor = variant === 'white' ? 'rgba(255,255,255,0.7)' : 'rgba(10,29,63,0.7)';
+---
+
+<a href={localizedPath(locale, '/')} class="logo" aria-label="Global Move — Inicio">
+  <img
+    src={markSrc}
+    alt=""
+    width={size}
+    height={size}
+    class="logo__mark"
+    loading="eager"
+    decoding="async"
+  />
+  {withWordmark && (
+    <span class="logo__wordmark">
+      <span class="logo__name" style={`color:${wordmarkColor}`}>GLOBAL MOVE</span>
+      <span class="logo__tag" style={`color:${taglineColor}`}>RELOCATION &amp; RENTALS</span>
+    </span>
+  )}
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+  }
+  .logo__mark {
+    display: block;
+    flex-shrink: 0;
+    height: auto;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+  .logo:hover .logo__mark { opacity: 0.85; }
+  .logo__wordmark { display: flex; flex-direction: column; line-height: 1; gap: 5px; }
+  .logo__name {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+  }
+  .logo__tag {
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    letter-spacing: 0.32em;
+    font-weight: 500;
+  }
+</style>

@@ -1,0 +1,372 @@
+{
+  "site": {
+    "name": "Global Move",
+    "tagline": "Relocation & Rentals",
+    "description": "Tu socio de confianza para relocation, rentals y servicios inmobiliarios premium en los destinos más exclusivos del mundo."
+  },
+  "nav": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "destinations": "Destinos",
+    "properties": "Propiedades",
+    "about": "Sobre nosotros",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "cta": "Solicitar consulta"
+  },
+  "hero": {
+    "eyebrow": "Relocation · Rentals · Property Services",
+    "headline": "Te movemos,\nvives mejor.",
+    "subheadline": "Acompañamos a personas y familias en cada paso de su mudanza internacional. Desde la búsqueda del hogar ideal hasta la instalación completa en el destino.",
+    "primaryCta": "Empieza tu mudanza",
+    "secondaryCta": "Ver destinos"
+  },
+  "services": {
+    "eyebrow": "Nuestros servicios",
+    "headline": "Tu nueva vida en España, en cuatro pasos",
+    "subheadline": "Combinamos experiencia local con atención personalizada para que tu mudanza a España sea fluida, segura y memorable. Alquileres, ventas, relocation y concierge en un único equipo.",
+    "items": {
+      "relocation": {
+        "title": "Relocation",
+        "description": "Te acompañamos en tu mudanza a España: NIE, visados, búsqueda de colegios, alta en sanidad y apertura de cuentas. Sin estrés, sin papeleo."
+      },
+      "rentals": {
+        "title": "Alquiler vacacional",
+        "description": "Selección de villas y apartamentos premium para estancias cortas o largas. Contratos claros, check-in privado y soporte 24/7."
+      },
+      "sales": {
+        "title": "Venta de propiedades",
+        "description": "Asesoramiento completo para comprar o vender propiedades de alta gama. Acceso a房源 off-market y due diligence con abogados especializados."
+      },
+      "concierge": {
+        "title": "Concierge",
+        "description": "Atención personalizada 24/7: traslados, chef privado, reservas, recomendaciones y cualquier necesidad cotidiana durante tu estancia."
+      }
+    },
+    "cta": "Conocer todos los servicios"
+  },
+  "destinations": {
+    "eyebrow": "Destinos",
+    "headline": "España, en sus mejores enclaves",
+    "subheadline": "Operamos únicamente en España. Cubrimos los destinos más codiciados para quienes buscan calidad de vida, seguridad fiscal y oportunidades de inversión.",
+    "items": {
+      "madrid": { "name": "Madrid", "tag": "Cultura, negocios y vida urbana premium" },
+      "barcelona": { "name": "Barcelona", "tag": "Arquitectura modernista, mar y gastronomía" },
+      "marbella": { "name": "Marbella", "tag": "Lujo, golf y glamour en la Costa del Sol" },
+      "mallorca": { "name": "Mallorca", "tag": "Naturaleza, privacidad y calidad de vida" },
+      "ibiza": { "name": "Ibiza & Baleares", "tag": "Privacidad, lifestyle exclusivo y reservas naturales" },
+      "canarias": { "name": "Canarias", "tag": "Clima perfecto todo el año y ventajas fiscales" }
+    },
+    "cta": "Explorar todos los destinos"
+  },
+  "process": {
+    "eyebrow": "Nuestro proceso",
+    "headline": "Una metodología clara en cuatro pasos",
+    "subheadline": "Trabajamos con un proceso transparente y probado que te da visibilidad total en cada fase de tu mudanza.",
+    "steps": {
+      "discovery": {
+        "title": "Descubrimiento",
+        "description": "Conversamos sobre tus objetivos, prioridades y estilo de vida. Definimos el destino ideal."
+      },
+      "planning": {
+        "title": "Planificación",
+        "description": "Diseñamos un plan personalizado con timeline, presupuesto y todos los servicios necesarios."
+      },
+      "execution": {
+        "title": "Ejecución",
+        "description": "Coordinamos todos los proveedores: propiedad, mudanza, documentación, schooling."
+      },
+      "settling": {
+        "title": "Instalación",
+        "description": "Te acompañamos en tus primeros meses con soporte continuo y resolución de incidencias."
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Testimonios",
+    "headline": "Historias de quienes ya dieron el paso",
+    "items": {
+      "one": {
+        "quote": "Global Move hizo que nuestra mudanza a Marbella fuese completamente libre de estrés. Su atención al detalle y red de contactos marcaron la diferencia.",
+        "author": "Familia Müller",
+        "origin": "Berlín → Marbella"
+      },
+      "two": {
+        "quote": "Como inversor internacional, valoro la discreción y profesionalidad del equipo. Encontraron propiedades off-market que no aparecen en ningún portal.",
+        "author": "James R.",
+        "origin": "Londres → Lisboa"
+      },
+      "three": {
+        "quote": "Trasladarme a Ibiza con tres hijos parecía imposible. Gestionaron colegio, casa y todos los papeles. Solo me preocupé de disfrutar.",
+        "author": "Sophie L.",
+        "origin": "París → Ibiza"
+      }
+    }
+  },
+  "cta": {
+    "headline": "Tu nueva vida empieza con una conversación",
+    "subheadline": "Reserva una consulta gratuita de 30 minutos. Te escuchamos y te proponemos un primer plan sin compromiso.",
+    "button": "Solicitar consulta gratuita"
+  },
+  "contact": {
+    "title": "Hablemos",
+    "subtitle": "Cuéntanos tu proyecto y te contactaremos en menos de 24 horas.",
+    "form": {
+      "name": "Nombre completo",
+      "email": "Email",
+      "phone": "Teléfono",
+      "origin": "País de origen",
+      "destination": "Destino de interés",
+      "message": "Cuéntanos sobre tu proyecto",
+      "submit": "Enviar consulta",
+      "privacy": "Al enviar este formulario aceptas nuestra política de privacidad."
+    },
+    "info": {
+      "title": "Información de contacto",
+      "email": "hello@globalmove.com",
+      "phone": "+34 600 123 456",
+      "address": "Málaga · Marbella · Lisboa"
+    }
+  },
+  "footer": {
+    "tagline": "Relocation · Rentals · Property Services",
+    "rights": "Todos los derechos reservados.",
+    "legal": "Legal",
+    "privacy": "Política de privacidad",
+    "terms": "Términos y condiciones",
+    "cookies": "Cookies",
+    "company": "Empresa",
+    "resources": "Recursos",
+    "followUs": "Síguenos"
+  },
+  "blog": {
+    "title": "Blog & News",
+    "subtitle": "Guías, análisis y actualidad sobre relocation internacional.",
+    "readMore": "Leer artículo",
+    "allPosts": "Todos los artículos",
+    "publishedOn": "Publicado el",
+    "by": "por",
+    "category": "Categoría",
+    "backToBlog": "Volver al blog",
+    "minutesRead": "min de lectura",
+    "categories": {
+      "guides": "Guías",
+      "destinations": "Destinos",
+      "legal": "Legal y fiscalidad",
+      "lifestyle": "Lifestyle"
+    }
+  },
+  "about": {
+    "title": "Sobre nosotros",
+    "subtitle": "Un equipo multicultural con una misión compartida: hacer de tu mudanza internacional la mejor experiencia de tu vida.",
+    "mission": {
+      "title": "Nuestra misión",
+      "body": "Acompañar a personas y familias en su relocation internacional con un servicio premium, transparente y humano. Creemos que mudarse a un nuevo país no debe ser un trámite, sino el comienzo de una etapa emocionante."
+    },
+    "values": {
+      "title": "Nuestros valores",
+      "items": {
+        "excellence": { "title": "Excelencia", "description": "Cuidamos cada detalle. La calidad no es negociable." },
+        "trust": { "title": "Confianza", "description": "Transparencia total en procesos, costes y tiempos." },
+        "humanity": { "title": "Humanidad", "description": "Detrás de cada mudanza hay personas. Las escuchamos de verdad." },
+        "global": { "title": "Visión global", "description": "Pensamos internacional, actuamos local." }
+      }
+    },
+    "team": {
+      "title": "El equipo",
+      "body": "Profesionales de 12 nacionalidades diferentes, con experiencia en banca internacional, real estate, derecho fiscal y atención al cliente premium."
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "learnMore": "Saber más",
+    "viewAll": "Ver todo",
+    "scheduleConsultation": "Agendar consulta",
+    "bookViewing": "Reservar visita",
+    "callUs": "Llamar",
+    "sendInquiry": "Enviar consulta",
+    "viewProperties": "Ver propiedades",
+    "languageSelector": "Idioma",
+    "from": "desde",
+    "perNight": "/ noche",
+    "guests": "huéspedes",
+    "bedrooms": "habitaciones",
+    "bathrooms": "baños",
+    "amenities": "Servicios",
+    "capacity": "Capacidad",
+    "size": "Tamaño"
+  },
+  "salesInquiry": {
+    "title": "Solicitar información",
+    "subtitle": "Te enviaremos un dossier completo de la propiedad y concertaremos una visita privada.",
+    "fullName": "Nombre completo",
+    "email": "Email",
+    "phone": "Teléfono",
+    "nationality": "Nacionalidad",
+    "timeline": "Plazo estimado de compra",
+    "timelineOptions": {
+      "asap": "Lo antes posible",
+      "3m": "En 3 meses",
+      "6m": "En 6 meses",
+      "exploring": "Estoy explorando opciones"
+    },
+    "budget": "Presupuesto aproximado",
+    "financing": "Necesito financiación",
+    "message": "Mensaje (opcional)",
+    "submit": "Enviar solicitud",
+    "successTitle": "Solicitud recibida",
+    "successMessage": "Un advisor se pondrá en contacto contigo en menos de 24 horas con el dossier completo de la propiedad.",
+    "privacy": "Al enviar aceptas nuestra política de privacidad."
+  },
+  "properties": {
+    "title": "Nuestras propiedades",
+    "subtitle": "Selección curada de villas, fincas y apartamentos premium en España. Alquiler vacacional o compra.",
+    "filterTransaction": "Operación",
+    "filterAllTransactions": "Todas",
+    "filterRent": "Alquiler",
+    "filterSale": "Venta",
+    "filterDestination": "Destino",
+    "filterAll": "Todos",
+    "filterPriceRange": "Precio",
+    "filterGuests": "Huéspedes",
+    "filterAny": "Cualquiera",
+    "filterReset": "Limpiar filtros",
+    "sortBy": "Ordenar",
+    "sortDefault": "Destacados",
+    "sortPriceAsc": "Precio · menor primero",
+    "sortPriceDesc": "Precio · mayor primero",
+    "noResults": "No hay propiedades que coincidan con tus filtros.",
+    "viewProperty": "Ver propiedad",
+    "bookNow": "Reservar ahora",
+    "requestInfo": "Solicitar información",
+    "viewAll": "Ver todas las propiedades",
+    "highlights": "Lo más destacado",
+    "details": "Detalles",
+    "location": "Ubicación",
+    "minimumStay": "Estancia mínima",
+    "nights": "noches",
+    "houseRules": "Normas de la casa",
+    "houseRulesItems": [
+      "Check-in: 16:00 · Check-out: 11:00",
+      "No fumar en el interior",
+      "Mascotas bajo consulta",
+      "Fiestas y eventos no permitidos",
+      "Capacidad máxima estricta"
+    ],
+    "saleBadge": "Venta",
+    "rentBadge": "Alquiler",
+    "priceUnitRent": "/ noche",
+    "priceUnitSale": "",
+    "breadcrumbHome": "Inicio",
+    "breadcrumbProperties": "Propiedades",
+    "viewMore": "Ver más",
+    "viewLess": "Ver menos",
+    "showOnMap": "Ver en el mapa",
+    "quickSpecs": "Resumen",
+    "amenitiesTitle": "Servicios e instalaciones",
+    "amenitiesCount": "{n} servicios incluidos",
+    "neighborhood": "La zona",
+    "neighborhoodDesc": "Una de las zonas más codiciadas de {city}, con todos los servicios a pocos minutos.",
+    "trustTitle": "Reserva con confianza",
+    "trustGuarantee": "Garantía de mejor precio",
+    "trustGuaranteeDesc": "Si encuentras la misma propiedad más barata, te devolvemos la diferencia.",
+    "trustVerified": "Propiedad verificada",
+    "trustVerifiedDesc": "Hemos visitado y validado personalmente cada detalle de esta propiedad.",
+    "trustSupport": "Soporte 24/7",
+    "trustSupportDesc": "Un concierge personal disponible durante toda tu estancia.",
+    "processTitle": "Cómo funciona tu reserva",
+    "processSubtitle": "Tres pasos claros de principio a fin.",
+    "processStep1Title": "Reserva segura",
+    "processStep1Desc": "Seleccionas fechas, confirmas y pagas online con tarjeta. Recibes confirmación inmediata.",
+    "processStep2Title": "Llegada y check-in",
+    "processStep2Desc": "Nuestro concierge te recibe personalmente y hace un tour completo de la propiedad.",
+    "processStep3Title": "Disfruta tu estancia",
+    "processStep3Desc": "Te asistimos 24/7 durante toda tu estancia. Salida limpia y profesional.",
+    "cancellationTitle": "Política de cancelación",
+    "cancellationExpand": "Ver política completa",
+    "cancellationCollapse": "Ocultar",
+    "relatedInDestination": "Otras propiedades en {city}",
+    "trustTitleShort": "Reserva segura",
+    "stayDates": "Fechas de estancia",
+    "checkIn": "Entrada",
+    "checkOut": "Salida",
+    "guestsShort": "Huéspedes",
+    "guestSingular": "huésped",
+    "guestPlural": "huéspedes",
+    "nights": "noches",
+    "subtotal": "Subtotal",
+    "cleaningFee": "Limpieza",
+    "serviceFee": "Servicio",
+    "totalEstimate": "Total estimado",
+    "bookWithDates": "Reservar con estas fechas",
+    "selectDatesHelp": "Selecciona fechas para ver el total",
+    "staying": "{n} noches",
+    "reviewsTitle": "Lo que dicen nuestros huéspedes",
+    "reviewsSubtitle": "Reseñas verificadas de estancias reales.",
+    "reviewsBasedOn": "Basado en {n} reseñas verificadas",
+    "ratingAverage": "Excelente",
+    "ratingOutOf": "de 5",
+    "ratingBreakdown": "Desglose de puntuación",
+    "ratingCleanliness": "Limpieza",
+    "ratingLocation": "Ubicación",
+    "ratingCommunication": "Comunicación",
+    "ratingCheckin": "Check-in",
+    "ratingValue": "Relación calidad-precio",
+    "stayedAt": "Se alojó en {month} {year}"
+  },
+  "booking": {
+    "title": "Reservar tu estancia",
+    "subtitle": "Selecciona fechas y completa tus datos para confirmar tu reserva.",
+    "step1": "Fechas",
+    "step2": "Datos",
+    "step3": "Pago",
+    "checkIn": "Fecha de entrada",
+    "checkOut": "Fecha de salida",
+    "guests": "Huéspedes",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "email": "Email",
+    "phone": "Teléfono",
+    "country": "País de origen",
+    "specialRequests": "Peticiones especiales (opcional)",
+    "summary": "Resumen de la reserva",
+    "nights": "noches",
+    "subtotal": "Subtotal",
+    "cleaningFee": "Tarifa de limpieza",
+    "serviceFee": "Comisión de servicio",
+    "total": "Total",
+    "payNow": "Pagar con Redsys",
+    "securePayment": "Pago 100% seguro · Procesado por Redsys",
+    "cancellation": "Cancelación",
+    "cancellationPolicy": "Gratuita hasta 30 días antes de la entrada. Después, se aplican las condiciones del propietario.",
+    "estimatedTotal": "Total estimado",
+    "selectDates": "Selecciona las fechas",
+    "errorDates": "Selecciona fechas válidas",
+    "errorGuests": "El número de huéspedes no puede superar la capacidad máxima",
+    "errorMinNights": "La estancia mínima es de {n} noches",
+    "submitBooking": "Continuar al pago"
+  },
+  "bookingSuccess": {
+    "title": "¡Reserva confirmada!",
+    "subtitle": "Tu pago se ha procesado correctamente.",
+    "thanks": "Gracias por confiar en Global Move",
+    "message": "Hemos enviado los detalles de tu reserva a tu email. Nuestro equipo te contactará en las próximas 24 horas con toda la información para tu llegada.",
+    "reference": "Código de reserva",
+    "backHome": "Volver al inicio",
+    "viewProperty": "Ver la propiedad",
+    "nextSteps": "Próximos pasos",
+    "step1Title": "Confirmación por email",
+    "step1Desc": "Recibirás un email con todos los detalles y un dossier personalizado de la zona.",
+    "step2Title": "Contacto del concierge",
+    "step2Desc": "Te asignaremos un concierge personal disponible 24/7 durante tu estancia.",
+    "step3Title": "Check-in privado",
+    "step3Desc": "El día de tu llegada te esperaremos en la propiedad con welcome pack."
+  },
+  "bookingCancelled": {
+    "title": "Pago cancelado",
+    "subtitle": "No se ha realizado ningún cargo.",
+    "message": "Tu reserva no se ha completado. Si has tenido algún problema con el pago o quieres intentarlo de nuevo, puedes volver a la página de la propiedad.",
+    "tryAgain": "Volver a la propiedad",
+    "help": "¿Necesitas ayuda? Escríbenos a hello@globalmove.com"
+  }
+}

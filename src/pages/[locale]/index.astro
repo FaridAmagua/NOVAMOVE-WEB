@@ -1,0 +1,557 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t, localeParams, type Locale } from '../../utils/i18n';
+
+const locale = Astro.params.locale as Locale;
+
+// Service items with icon names
+const services = [
+  { key: 'relocation', icon: 'home',   href: '/services#relocation' },
+  { key: 'rentals',    icon: 'key',    href: '/services#rentals' },
+  { key: 'sales',      icon: 'globe',  href: '/services#sales' },
+  { key: 'concierge',  icon: 'bell',   href: '/services#concierge' },
+];
+
+const destinations = [
+  { key: 'madrid',     img: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&q=80' },
+  { key: 'barcelona',  img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=900&q=80' },
+  { key: 'marbella',   img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=80' },
+  { key: 'mallorca',   img: 'https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=900&q=80' },
+  { key: 'ibiza',      img: 'https://images.unsplash.com/photo-1559656914-a30970c1affd?w=900&q=80' },
+  { key: 'canarias',   img: 'https://images.unsplash.com/photo-1505939435612-a18ea96b80b3?w=900&q=80' },
+];
+
+const process = ['discovery', 'planning', 'execution', 'settling'] as const;
+const testimonials = ['one', 'two', 'three'] as const;
+export async function getStaticPaths() {
+  return localeParams;
+}
+---
+
+<BaseLayout transparentHeader={true}>
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero__bg" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=2000&q=80"
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        data-ken-burns
+        data-parallax="0.15"
+        style="transition: none;"
+      />
+      <div class="hero__overlay"></div>
+    </div>
+
+    <div class="container hero__content">
+      <p class="eyebrow eyebrow--light reveal reveal--blur">{t(locale, 'hero.eyebrow')}</p>
+      <h1 id="hero-heading" class="hero__title reveal" style="--reveal-delay: 120ms;">
+        {locale === 'es' ? (
+          <>Te movemos,<br/><span class="italic-serif">vives mejor.</span></>
+        ) : (
+          <>We move you,<br/><span class="italic-serif">you live better.</span></>
+        )}
+      </h1>
+      <p class="hero__lead reveal" style="--reveal-delay: 280ms;">{t(locale, 'hero.subheadline')}</p>
+      <div class="hero__ctas reveal" style="--reveal-delay: 420ms;">
+        <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.3">
+          <span data-magnetic-inner>{t(locale, 'hero.primaryCta')}</span>
+        </a>
+        <a href={`/${locale}/destinations`} class="btn btn--ghost" data-magnetic="0.3">
+          <span data-magnetic-inner>{t(locale, 'hero.secondaryCta')}</span>
+        </a>
+      </div>
+
+      <div class="hero__scroll" aria-hidden="true">
+        <span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section class="section section--services" aria-labelledby="services-heading">
+    <div class="container">
+      <header class="section-header reveal">
+        <p class="eyebrow">{t(locale, 'services.eyebrow')}</p>
+        <h2 id="services-heading" class="h-2">{t(locale, 'services.headline')}</h2>
+        <p class="lead">{t(locale, 'services.subheadline')}</p>
+      </header>
+
+      <div class="services-grid" data-stagger data-stagger-step="100">
+        {services.map(({ key, icon, href }, i) => (
+          <a href={`/${locale}${href}`} class="service-card reveal reveal--fade" data-tilt="4">
+            <span class="service-card__icon" aria-hidden="true">
+              {icon === 'home' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>}
+              {icon === 'key' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9 2 2-2 2 2 2-3 3-2-2-3 3"/></svg>}
+              {icon === 'globe' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>}
+              {icon === 'bell' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg>}
+            </span>
+            <h3 class="service-card__title">{t(locale, `services.items.${key}.title`)}</h3>
+            <p class="service-card__desc">{t(locale, `services.items.${key}.description`)}</p>
+            <span class="service-card__arrow" aria-hidden="true">→</span>
+          </a>
+        ))}
+      </div>
+
+      <div class="section-cta reveal reveal--fade">
+        <a href={`/${locale}/services`} class="btn btn--link">{t(locale, 'services.cta')}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DESTINATIONS ============ -->
+  <section class="section section--dark destinations" aria-labelledby="destinations-heading">
+    <div class="container">
+      <header class="section-header section-header--center reveal">
+        <p class="eyebrow eyebrow--light">{t(locale, 'destinations.eyebrow')}</p>
+        <h2 id="destinations-heading" class="h-2">{t(locale, 'destinations.headline')}</h2>
+        <p class="lead">{t(locale, 'destinations.subheadline')}</p>
+      </header>
+
+      <div class="destinations-grid" data-stagger data-stagger-step="80">
+        {destinations.map(({ key, img }, i) => (
+          <a href={`/${locale}/destinations#${key}`} class="destination reveal reveal--scale" data-tilt="3">
+            <div class="destination__img">
+              <img src={img} alt="" loading="lazy" />
+            </div>
+            <div class="destination__overlay"></div>
+            <div class="destination__content">
+              <h3 class="destination__name">{t(locale, `destinations.items.${key}.name`)}</h3>
+              <p class="destination__tag">{t(locale, `destinations.items.${key}.tag`)}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <div class="section-cta section-cta--center reveal">
+        <a href={`/${locale}/destinations`} class="btn btn--link btn--link-light">{t(locale, 'destinations.cta')}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section class="section" aria-labelledby="process-heading">
+    <div class="container">
+      <header class="section-header section-header--center reveal">
+        <p class="eyebrow">{t(locale, 'process.eyebrow')}</p>
+        <h2 id="process-heading" class="h-2">{t(locale, 'process.headline')}</h2>
+        <p class="lead">{t(locale, 'process.subheadline')}</p>
+      </header>
+
+      <ol class="process" data-stagger data-stagger-step="120">
+        {process.map((step, i) => (
+          <li class="process__step reveal reveal--left">
+            <span class="process__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="process__title">{t(locale, `process.steps.${step}.title`)}</h3>
+            <p class="process__desc">{t(locale, `process.steps.${step}.description`)}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="section section--subtle" aria-labelledby="testimonials-heading">
+    <div class="container">
+      <header class="section-header section-header--center reveal">
+        <p class="eyebrow">{t(locale, 'testimonials.eyebrow')}</p>
+        <h2 id="testimonials-heading" class="h-2">{t(locale, 'testimonials.headline')}</h2>
+      </header>
+
+      <div class="testimonials" data-stagger data-stagger-step="120">
+        {testimonials.map((id, i) => (
+          <figure class="testimonial reveal reveal--fade">
+            <span class="testimonial__quote" aria-hidden="true">"</span>
+            <blockquote>
+              <p>{t(locale, `testimonials.items.${id}.quote`)}</p>
+            </blockquote>
+            <figcaption>
+              <span class="testimonial__author">{t(locale, `testimonials.items.${id}.author`)}</span>
+              <span class="testimonial__origin">{t(locale, `testimonials.items.${id}.origin`)}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="section section--cta grain" aria-labelledby="cta-heading">
+    <div class="container">
+      <div class="cta-card reveal reveal--scale">
+        <div class="cta-card__bg" aria-hidden="true"></div>
+        <div class="cta-card__content">
+          <h2 id="cta-heading" class="h-2">{t(locale, 'cta.headline')}</h2>
+          <p class="lead">{t(locale, 'cta.subheadline')}</p>
+          <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.35">
+            <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    color: var(--color-white);
+    overflow: hidden;
+  }
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .hero__bg img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    animation: heroZoom 16s ease-out forwards;
+  }
+  @keyframes heroZoom {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
+  }
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(10, 29, 63, 0.85) 0%, rgba(10, 29, 63, 0.55) 60%, rgba(10, 29, 63, 0.4) 100%),
+      linear-gradient(180deg, rgba(10, 29, 63, 0.4) 0%, rgba(10, 29, 63, 0.6) 100%);
+  }
+  .hero__content {
+    padding-block: calc(var(--header-height) + 4rem) 6rem;
+    max-width: 880px;
+  }
+  .hero__title {
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 7.5vw, 6.5rem);
+    line-height: 1.02;
+    font-weight: 500;
+    color: var(--color-white);
+    margin-bottom: 1.75rem;
+    letter-spacing: -0.02em;
+  }
+  .hero__title .italic-serif {
+    color: var(--color-gold-soft);
+  }
+  .hero__lead {
+    font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 56ch;
+    margin-bottom: 2.5rem;
+  }
+  .hero__ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .hero__scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 40px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+  }
+  .hero__scroll span {
+    display: block;
+    width: 2px;
+    height: 8px;
+    background: var(--color-gold);
+    border-radius: 1px;
+    animation: scrollHint 1.6s ease-in-out infinite;
+  }
+  @keyframes scrollHint {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(14px); opacity: 0; }
+  }
+
+  /* ============ SECTION HEADER ============ */
+  .section-header { max-width: 720px; margin-bottom: 4rem; }
+  .section-header--center { margin-inline: auto; text-align: center; }
+  .section-header--center .divider { margin-inline: auto; }
+
+  /* ============ SERVICES ============ */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 2.25rem 1.75rem;
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.06);
+    border-radius: var(--radius-md);
+    transition: transform var(--dur-base) var(--ease),
+                box-shadow var(--dur-base) var(--ease),
+                border-color var(--dur-base) var(--ease);
+    color: var(--text-primary);
+  }
+  .service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-gold);
+  }
+  .service-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-700) 100%);
+    color: var(--color-gold);
+    margin-bottom: 1.5rem;
+  }
+  .service-card__icon svg { width: 28px; height: 28px; }
+  .service-card__title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    color: var(--color-navy);
+  }
+  .service-card__desc {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    flex: 1;
+    margin-bottom: 1.5rem;
+  }
+  .service-card__arrow {
+    font-size: 1.25rem;
+    color: var(--color-gold);
+    transition: transform var(--dur-base) var(--ease);
+  }
+  .service-card:hover .service-card__arrow { transform: translateX(6px); }
+
+  .section-cta { margin-top: 3rem; text-align: left; }
+  .section-cta--center { text-align: center; }
+
+  .btn--link-light {
+    color: var(--color-gold-soft);
+    border-color: var(--color-gold-soft);
+  }
+  .btn--link-light:hover { color: var(--color-white); border-color: var(--color-white); }
+
+  @media (max-width: 960px) {
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px) {
+    .services-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ DESTINATIONS ============ */
+  .destinations-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .destination {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    aspect-ratio: 4 / 5;
+    color: var(--color-white);
+  }
+  .destination__img {
+    position: absolute;
+    inset: 0;
+  }
+  .destination__img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+  .destination:hover .destination__img img { transform: scale(1.08); }
+  .destination__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(10, 29, 63, 0.85) 100%);
+  }
+  .destination__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.75rem;
+    z-index: 1;
+  }
+  .destination__name {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    color: var(--color-white);
+    margin-bottom: 0.35rem;
+  }
+  .destination__tag {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 960px) {
+    .destinations-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px) {
+    .destinations-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ PROCESS ============ */
+  .process {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    counter-reset: step;
+  }
+  .process__step {
+    position: relative;
+    padding-top: 1.5rem;
+  }
+  .process__step::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-gold) 0%, transparent 80%);
+  }
+  .process__num {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    color: var(--color-gold);
+    line-height: 1;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+  }
+  .process__title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    color: var(--color-navy);
+    margin-bottom: 0.75rem;
+  }
+  .process__desc {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 960px) {
+    .process { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 540px) {
+    .process { grid-template-columns: 1fr; }
+  }
+
+  /* ============ TESTIMONIALS ============ */
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .testimonial {
+    background: var(--color-white);
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .testimonial__quote {
+    position: absolute;
+    top: -10px;
+    left: 1.5rem;
+    font-family: var(--font-serif);
+    font-size: 5rem;
+    color: var(--color-gold);
+    line-height: 1;
+  }
+  .testimonial blockquote { margin: 0 0 1.5rem; }
+  .testimonial blockquote p {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--color-navy);
+    font-style: italic;
+  }
+  .testimonial figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(10, 29, 63, 0.08);
+  }
+  .testimonial__author {
+    font-weight: 600;
+    color: var(--color-navy);
+    font-size: 0.92rem;
+  }
+  .testimonial__origin {
+    font-size: 0.82rem;
+    color: var(--color-gold);
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 960px) {
+    .testimonials { grid-template-columns: 1fr; }
+  }
+
+  /* ============ CTA CARD ============ */
+  .section--cta { padding-block: clamp(3rem, 7vw, 6rem); }
+  .cta-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    color: var(--color-white);
+  }
+  .cta-card__bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-700) 100%),
+      radial-gradient(at top right, var(--color-gold) 0%, transparent 50%);
+    background-blend-mode: normal;
+  }
+  .cta-card__bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 90% 10%, rgba(200, 167, 106, 0.35) 0%, transparent 35%),
+      radial-gradient(circle at 10% 90%, rgba(200, 167, 106, 0.15) 0%, transparent 30%);
+  }
+  .cta-card__content {
+    position: relative;
+    padding: clamp(3rem, 6vw, 5rem);
+    text-align: center;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+  .cta-card__content h2 {
+    color: var(--color-white);
+    margin-bottom: 1rem;
+  }
+  .cta-card__content .lead {
+    color: rgba(255, 255, 255, 0.82);
+    margin-inline: auto;
+    margin-bottom: 2.25rem;
+    font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  }
+</style>

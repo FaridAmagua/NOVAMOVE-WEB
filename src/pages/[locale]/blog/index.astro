@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { getCollection } from 'astro:content';
+import { t, localeParams, type Locale } from '../../../utils/i18n';
+
+const locale = Astro.params.locale as Locale;
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter(p => p.data.locale === locale)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
+const formatDate = (d: Date, loc: Locale) =>
+  d.toLocaleDateString(loc === 'es' ? 'es-ES' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${cat}`);
+export async function getStaticPaths() {
+  return localeParams;
+}
+---
+
+<BaseLayout
+  title={t(locale, 'blog.title')}
+  description={t(locale, 'blog.subtitle')}
+  transparentHeader={true}
+>
+  <PageHero
+    eyebrow={t(locale, 'blog.title')}
+    title={locale === 'es' ? 'Blog &<br/><span class="italic-serif">News.</span>' : 'Blog &<br/><span class="italic-serif">News.</span>'}
+    subtitle={t(locale, 'blog.subtitle')}
+    image="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=80"
+    align="center"
+  />
+
+  <section class="section">
+    <div class="container">
+      {posts.length === 0 ? (
+        <p class="empty">{locale === 'es' ? 'Próximamente publicaremos artículos.' : 'Articles coming soon.'}</p>
+      ) : (
+        <div class="posts-grid">
+          {posts.map((post, i) => (
+            <article class="post-card reveal" style={`transition-delay:${i * 60}ms`}>
+              <a href={`/${locale}/blog/${post.slug.replace(/\.(es|en)$/, '')}`} class="post-card__link">
+                {post.data.cover && (
+                  <div class="post-card__media">
+                    <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />
+                  </div>
+                )}
+                <div class="post-card__body">
+                  <span class="post-card__cat">{categoryLabel(post.data.category, locale)}</span>
+                  <h2 class="post-card__title">{post.data.title}</h2>
+                  <p class="post-card__desc">{post.data.description}</p>
+                  <div class="post-card__meta">
+                    <span>{formatDate(post.data.publishDate, locale)}</span>
+                    {post.data.readTime && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span>{post.data.readTime} {t(locale, 'blog.minutesRead')}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .empty {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 4rem 0;
+    font-size: 1.1rem;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .post-card {
+    background: var(--color-white);
+    border: 1px solid rgba(10, 29, 63, 0.06);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
+  }
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+  .post-card__link {
+    display: block;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .post-card__media {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+  .post-card__media img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+  .post-card:hover .post-card__media img { transform: scale(1.06); }
+  .post-card__body { padding: 1.75rem; }
+  .post-card__cat {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin-bottom: 0.85rem;
+  }
+  .post-card__title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    line-height: 1.25;
+    color: var(--color-navy);
+    margin-bottom: 0.85rem;
+    transition: color var(--dur-base) var(--ease);
+  }
+  .post-card:hover .post-card__title { color: var(--color-gold); }
+  .post-card__desc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card__meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    padding-top: 1rem;
+    border-top: 1px solid rgba(10, 29, 63, 0.08);
+  }
+
+  @media (max-width: 960px) { .posts-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .posts-grid { grid-template-columns: 1fr; } }
+</style>

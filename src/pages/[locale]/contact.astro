@@ -1,0 +1,232 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import { t, localeParams, type Locale } from '../../utils/i18n';
+
+const locale = Astro.params.locale as Locale;
+export async function getStaticPaths() {
+  return localeParams;
+}
+---
+
+<BaseLayout
+  title={t(locale, 'nav.contact')}
+  transparentHeader={true}
+>
+  <PageHero
+    eyebrow={t(locale, 'contact.title')}
+    title={t(locale, 'contact.title')}
+    subtitle={t(locale, 'contact.subtitle')}
+    image="https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=2000&q=80"
+    align="center"
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="contact-grid">
+        <!-- Contact form -->
+        <form class="contact-form reveal" novalidate data-loading-on-submit>
+          <div class="field-row">
+            <div class="field">
+              <label for="name">{t(locale, 'contact.form.name')}</label>
+              <input class="input" type="text" id="name" name="name" required autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="email">{t(locale, 'contact.form.email')}</label>
+              <input class="input" type="email" id="email" name="email" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="phone">{t(locale, 'contact.form.phone')}</label>
+              <input class="input" type="tel" id="phone" name="phone" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="origin">{t(locale, 'contact.form.origin')}</label>
+              <input class="input" type="text" id="origin" name="origin" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="destination">{t(locale, 'contact.form.destination')}</label>
+            <input class="input" type="text" id="destination" name="destination" />
+          </div>
+          <div class="field">
+            <label for="message">{t(locale, 'contact.form.message')}</label>
+            <textarea class="textarea" id="message" name="message" required></textarea>
+          </div>
+          <p class="contact-form__privacy">{t(locale, 'contact.form.privacy')}</p>
+          <button type="submit" class="btn btn--primary contact-form__submit">
+            {t(locale, 'contact.form.submit')}
+          </button>
+        </form>
+
+        <!-- Contact info -->
+        <aside class="contact-info reveal">
+          <h2 class="h-3">{t(locale, 'contact.info.title')}</h2>
+
+          <div class="info-block">
+            <span class="info-block__label">Email</span>
+            <a href="mailto:hello@globalmove.com" class="info-block__value">hello@globalmove.com</a>
+          </div>
+
+          <div class="info-block">
+            <span class="info-block__label">{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
+            <a href="tel:+34600123456" class="info-block__value">+34 600 123 456</a>
+          </div>
+
+          <div class="info-block">
+            <span class="info-block__label">{locale === 'es' ? 'Oficinas' : 'Offices'}</span>
+            <span class="info-block__value">{t(locale, 'contact.info.address')}</span>
+          </div>
+
+          <div class="info-block info-block--hours">
+            <span class="info-block__label">{locale === 'es' ? 'Horario' : 'Hours'}</span>
+            <span class="info-block__value">
+              {locale === 'es'
+                ? 'Lunes a Viernes · 9:00 – 19:00\nConcierge 24/7'
+                : 'Monday to Friday · 9:00 – 19:00\nConcierge 24/7'}
+            </span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .contact-form {
+    background: var(--color-white);
+    padding: 2.5rem;
+    border: 1px solid rgba(10, 29, 63, 0.06);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .field-row .field { margin-bottom: 1.25rem; }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-navy);
+  }
+  .contact-form__privacy {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0.5rem 0 1.5rem;
+  }
+  .contact-form__submit { width: 100%; }
+
+  .contact-info {
+    background: var(--color-navy);
+    color: var(--color-white);
+    padding: 2.5rem;
+    border-radius: var(--radius-md);
+  }
+  .contact-info h2 {
+    color: var(--color-white);
+    margin-bottom: 2rem;
+  }
+  .info-block {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .info-block:last-child { border-bottom: 0; }
+  .info-block__label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+  }
+  .info-block__value {
+    color: var(--color-white);
+    line-height: 1.5;
+    font-size: 1.05rem;
+    white-space: pre-line;
+  }
+  .info-block--hours .info-block__value {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.85);
+  }
+  a.info-block__value:hover { color: var(--color-gold-soft); }
+
+  @media (max-width: 860px) {
+    .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const form = document.querySelector('.contact-form') as HTMLFormElement | null;
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    if (!btn) return;
+    const original = btn.textContent ?? '';
+    btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy', 'true');
+
+    // Show inline success banner above the form
+    showBanner(form, 'success', locale === 'es' ? '✓ Mensaje enviado. Te contactaremos en menos de 24 horas.' : '✓ Message sent. We\'ll get back to you within 24 hours.');
+
+    setTimeout(() => {
+      btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
+      form.reset();
+    }, 2400);
+  });
+
+  function showBanner(form: HTMLFormElement, type: 'success' | 'error', message: string) {
+    let banner = form.parentElement?.querySelector<HTMLElement>('.form-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'form-banner';
+      form.prepend(banner);
+    }
+    banner.className = `form-banner form-banner--${type}`;
+    banner.textContent = message;
+    banner.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    setTimeout(() => banner?.remove(), 6000);
+  }
+</script>
+
+<script
+  define:vars={{ locale: (Astro.params.locale as string) }}
+></script>
+
+<style is:global>
+  .form-banner {
+    padding: 0.95rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.92rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+    animation: bannerIn 320ms var(--ease-out);
+  }
+  .form-banner--success {
+    background: rgba(34, 87, 46, 0.08);
+    color: #1d5230;
+    border-color: rgba(34, 87, 46, 0.25);
+  }
+  .form-banner--error {
+    background: rgba(185, 69, 69, 0.08);
+    color: #8a2929;
+    border-color: rgba(185, 69, 69, 0.25);
+  }
+  @keyframes bannerIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+  }
+</style>

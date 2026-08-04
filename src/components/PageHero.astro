@@ -1,0 +1,86 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  image?: string;
+  align?: 'left' | 'center';
+}
+
+const {
+  eyebrow,
+  title,
+  subtitle,
+  image = 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=2000&q=80',
+  align = 'left',
+} = Astro.props;
+---
+
+<section class={`page-hero page-hero--${align}`}>
+  <div class="page-hero__bg" aria-hidden="true">
+    <img src={image} alt="" loading="eager" />
+    <div class="page-hero__overlay"></div>
+  </div>
+  <div class="container page-hero__content">
+    {eyebrow && <p class="eyebrow eyebrow--light reveal">{eyebrow}</p>}
+    <h1 class="page-hero__title reveal" set:html={title}></h1>
+    {subtitle && <p class="page-hero__subtitle reveal">{subtitle}</p>}
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    position: relative;
+    color: var(--color-white);
+    min-height: 60vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .page-hero__bg { position: absolute; inset: 0; z-index: -1; }
+  .page-hero__bg img {
+    width: 100%; height: 100%; object-fit: cover;
+    animation: heroZoom 16s ease-out forwards;
+  }
+  @keyframes heroZoom {
+    from { transform: scale(1.06); }
+    to { transform: scale(1); }
+  }
+  .page-hero__overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(10, 29, 63, 0.65) 0%,
+      rgba(10, 29, 63, 0.45) 50%,
+      rgba(10, 29, 63, 0.8) 100%);
+  }
+  .page-hero__content {
+    position: relative;
+    padding-block: calc(var(--header-height) + 5rem) 5rem;
+    max-width: 880px;
+  }
+  .page-hero--center .page-hero__content {
+    margin-inline: auto;
+    text-align: center;
+  }
+  .page-hero__title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1.05;
+    color: var(--color-white);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.015em;
+  }
+  .page-hero__title :global(.italic-serif) {
+    color: var(--color-gold-soft);
+    font-style: italic;
+  }
+  .page-hero__subtitle {
+    font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 60ch;
+    margin-bottom: 0;
+  }
+  .page-hero--center .page-hero__subtitle { margin-inline: auto; }
+</style>
