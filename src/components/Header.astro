@@ -225,19 +225,12 @@ const isActive = (href: string) => {
 </style>
 
 <script>
-  const header = document.querySelector('.site-header');
   const toggle = document.querySelector('[data-menu-toggle]');
   const drawer = document.querySelector('[data-menu-drawer]');
 
-  const onScroll = () => {
-    if (!header) return;
-    const transparent = header.dataset.transparent === 'true';
-    if (!transparent) return;
-    if (window.scrollY > 30) header.classList.add('is-scrolled');
-    else header.classList.remove('is-scrolled');
-  };
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  // The header scroll behavior (transparent → solid) lives in enhance.ts
+  // because View Transitions re-create this header element on navigation,
+  // and a captured reference would go stale. See initHeaderScroll() there.
 
   toggle?.addEventListener('click', () => {
     const open = toggle.getAttribute('aria-expanded') === 'true';

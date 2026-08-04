@@ -326,6 +326,32 @@ function initButtonLoading(): void {
 
 /* ---------- Init ---------- */
 
+/* ---------- 11. Header scroll behavior (transparent → solid) ---------- */
+/* Single global scroll listener that re-queries the current header on
+ * every scroll, so it survives Astro View Transitions (which replace
+ * the header element on each navigation). */
+let headerScrollBound = false;
+
+function initHeaderScroll(): void {
+  if (headerScrollBound) return;
+  headerScrollBound = true;
+
+  const update = () => {
+    const header = document.querySelector<HTMLElement>('.site-header');
+    if (!header) return;
+    // Only act on pages that asked for transparentHeader
+    if (header.dataset.transparent !== 'true') return;
+    if (window.scrollY > 30) header.classList.add('is-scrolled');
+    else header.classList.remove('is-scrolled');
+  };
+
+  window.addEventListener('scroll', update, { passive: true });
+  // Initial pass after DOM is ready
+  requestAnimationFrame(update);
+  // Re-run after each Astro page transition since the header is re-rendered
+  document.addEventListener('astro:page-load', () => requestAnimationFrame(update));
+}
+
 function initAll(): void {
   initScrollReveal();
   initStaggerGroups();
@@ -337,6 +363,7 @@ function initAll(): void {
   animateCounters();
   initImageFade();
   initButtonLoading();
+  initHeaderScroll();
 }
 
 // Handle reduced motion
