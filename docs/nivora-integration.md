@@ -4,84 +4,131 @@
 
 Rama: `feat/nivora-property-catalog` (sin merge a main, sin deploy)
 
-## Archivos creados
+## Contrato Nivora aplicado literal
 
-- `src/data/nivora-catalog.ts` — Cliente Nivora (fetch directo en build + cache 1h)
-- `src/data/property-source.ts` — Factory único (Nivora en prod, fixture en dev)
-- `docs/nivora-integration.md` — Este archivo
+### Endpoint
+```
+GET {NIVORA_API_URL}/v1/public/sites/{NIVORA_SITE_KEY}/properties
+
+Headers:
+  Authorization: Bearer {NIVORA_CATALOG_TOKEN}
+  Accept:        application/json
+```
+
+### Tipos consumidos (del contrato)
+
+```ts
+type LocalizedPropertyContent = {
+  title: string;
+  tagline?: string;
+  description: string;
+  publicLocation: string;
+};
+
+type PublicProperty = {
+  id: string;
+  slug: string;
+  reference: string;
+  operation: 'rent' | 'sale';
+  type: 'apartment' | 'house' | 'chalet' | 'duplex' | 'penthouse' | 'studio' | 'land' | 'commercial' | 'office' | 'garage' | 'other';
+  status: 'available' | 'reserved';
+  featured: boolean;
+  content: { es: LocalizedPropertyContent; en?: LocalizedPropertyContent };
+  pricing: { amountCents: number; currency: 'EUR'; period: 'month' | null };
+  specs: { bedrooms: number | null; bathrooms: number | null; builtAreaSqm: number | null; usableAreaSqm: number | null; plotAreaSqm: number | null };
+  features: { es: string[]; en?: string[] };
+  images: Array<{ id: string; url: string; alt: { es: string; en?: string }; width: number | null; height: number | null; isCover: boolean; position: number; focalPoint?: { x: number; y: number } }>;
+  publishedAt: string;
+  updatedAt: string;
+};
+
+type PublicCatalogResponse = {
+  schemaVersion: '1.0';
+  site: string;
+  generatedAt: string;
+  properties: PublicProperty[];
+};
+```
+
+### Validación
+
+`fetchNivoraCatalog` valida en runtime:
+- `schemaVersion === '1.0'` (falla con error explícito si no)
+- `site` presente
+- `generatedAt` presente
+- `properties` es array
+- Cada propiedad: `id` y `slug` presentes, `content.es` con `title/description/publicLocation`, `pricing.amountCents/currency === 'EUR'`, `operation` en `rent|sale`, `images` array
+
+### Variables de entorno requeridas
+
+```
+NIVORA_API_URL       https://api-nivora.decotea.es
+NIVORA_SITE_KEY      global-move
+NIVORA_CATALOG_TOKEN replace-with-real-token
+```
+
+### Mapping Nivora → Property (UI)
+
+| Nivora | Property |
+|---|---|
+| `content.es.title` | `name.es` |
+| `content.en?.title` (fallback a es) | `name.en` |
+| `content.es.tagline` | `tagline.es` |
+| `content.en?.tagline` (fallback) | `tagline.en` |
+| `content.es.description` | `description.es` |
+| `content.en?.description` (fallback) | `description.en` |
+| `content.es.publicLocation` | `destination` (y `location.es`) |
+| `content.en?.publicLocation` (fallback) | `location.en` |
+| `pricing.amountCents / 100` | `price` (€/mes) |
+| `specs.bedrooms ?? 0` | `bedrooms` |
+| `specs.bathrooms ?? 0` | `bathrooms` |
+| `specs.builtAreaSqm ?? 0` | `sizeM2` |
+| `features.es` (array) | `amenidades` |
+| `features.en` (fallback a es) | — |
+| `images` ordenadas con `isCover` primero | `images` (URLs) |
+| `images[0].focalPoint` → `center {y}% center {x}%` | `imageFocal` |
+| `featured` | `featured` |
+| `operation` | `transaction` (rent | sale) |
+| `type` (mapped a los 4 tipos que soporta la UI) | `type` |
+| `content.es.publicLocation` | `destination` (zone libre) |
+
+**No leemos** de Nivora: `publishedAt`, `updatedAt`, `reference`, `usableAreaSqm`, `plotAreaSqm`, `id` (slug), `id` (id), `width`, `height`, `alt`, `focalPoint` (excepto para la primera imagen). `maxGuests` se eliminó (no se infiere).
+
+**Catálogo vacío** es válido: `properties: []` no rompe el build.
+**Status** no se expone todavía en la UI (se guarda vía `featured` como proxy temporal).
+**focalPoint** se convierte a CSS `object-position` (`"center {y}% center {x}%"`).
+
+## Comportamientos garantizados
+
+- **Producción**: consulta Nivora. Falla con error explícito si NivoraError (red, schemaVersion, o JSON inválido). Build roto.
+- **Desarrollo** sin vars: fallback a fixture local (9 propiedades). Advertido con `console.warn`.
+- **Catálogo vacío**: válido. `getProperties()` devuelve 0 propiedades sin error.
+- **Cache**: memoización en memoria durante un mismo proceso de build. Sin disco.
 
 ## Archivos modificados
 
-- `src/data/properties.ts` — `DestinationId` ahora es `string` (zona libre, no enum)
-- `src/pages/[locale]/properties/index.astro` — Usa `getProperties()` + `zoneLabel()`
-- `src/pages/[locale]/properties/[slug].astro` — Usa `getPropertyBySlug()` + reviews condicionadas
-- `src/pages/[locale]/book/[slug].astro` — "Solicitar información" (sin booking online)
-- `src/layouts/BaseLayout.astro` — `globalmove.com` → `globalmove.agency`
-- `astro.config.mjs` — `site: 'https://globalmove.agency'`
-- `.env.example` — Variables Nivora documentadas
-- `.gitignore` — `.nivora-cache/` añadido
+- `src/data/nivora-catalog.ts` — Cliente Nivora + tipos exactos + validación runtime
+- `src/data/property-source.ts` — Mapper Nivora → Property (modelo UI)
+- `.env.example` — Variables Nivora (sin NIVORA_ENDPOINT_OVERRIDE ni NIVORA_FORCE_REFRESH)
 
-## Archivos NO modificados (por restricción del usuario)
+## Archivos no modificados (por restricción)
 
 - `netlify/functions/create-payment.ts` — Redsys (legacy, aislado)
 - `netlify/functions/redsys-notification.ts` — Redsys (legacy, aislado)
-- `src/components/PaymentOverlay.astro` — Overlay de pago (legacy, aislado)
-- `src/pages/[locale]/book/success.astro` — (no linkeado desde el nuevo flow)
-- `src/pages/[locale]/book/cancelled.astro` — (no linkeado)
+- `src/components/PaymentOverlay.astro` — Pago overlay (legacy, aislado)
 
-## Variables de entorno requeridas en Netlify
+## Tests verificados
 
-```
-NIVORA_API_URL       https://api.nivora.com
-NIVORA_SITE_KEY      <obtenida del dashboard de Nivora>
-NIVORA_CATALOG_TOKEN <obtenida del dashboard de Nivora>
-```
+| # | Escenario | Resultado |
+|---|-----------|-----------|
+| 1 | Dev sin env vars → fallback | Source: fallback, 9 properties ✓ |
+| 2 | Build con JSON del contrato (ES + EN, cover, focalPoint) | Source: nivora, 2 properties, mapping correcto ✓ |
+| 3 | Catálogo vacío | Source: nivora, 0 properties, sin error ✓ |
+| 4 | schemaVersion inválido | Error: "schemaVersion inválido: 'X' (esperado '1.0')" ✓ |
 
-Opcionales:
-- `NIVORA_ENDPOINT_OVERRIDE` — override del endpoint
-- `NIVORA_FORCE_REFRESH=1` — forzar re-fetch en cada build (ignora cache)
+## Pendiente
 
-## Asunciones sobre el contrato de Nivora
-
-⚠️ El esquema del JSON es una ASUNCIÓN. Ajustar cuando llegue el contrato real:
-
-- Endpoint: `GET {NIVORA_API_URL}/v1/properties`
-- Auth: `Authorization: Bearer {NIVORA_CATALOG_TOKEN}` + header `X-Site-Key`
-- Localización: Nivora devuelve `title.es` (siempre) y `title.en` (opcional). Fallback a ES.
-- Reviews: **NO incluidas** en el contrato inicial. La UI las oculta si no hay.
-- Zona (`location.zone`): string libre, sin enum cerrado
-- Precio: `priceMonthly` en EUR (€/mes)
-- Tipos: villa, apartment, finca, penthouse, townhouse, duplex, studio, loft (string libre también)
-- Estancia: `minMonths` opcional. Sin `cleaningFee` (larga duración lo incluye en el mensual)
-
-## Pendiente del usuario
-
-1. **Reemplazar valores placeholder en `.env.example`** con credenciales reales de Nivora
-2. **Configurar env vars en Netlify dashboard** con los valores reales
-3. **Validar el esquema JSON real** contra el código y ajustar tipos en `nivora-catalog.ts`
-4. **Probar build** en Netlify (debería pasar con credenciales reales)
-
-## Errores TypeScript pre-existentes
-
-Detectados con `npx astro check` — **NO introducidos por esta integración**:
-
-- 97 errores totales
-- 0 warnings nuevos
-- 21 hints
-
-Los errores vienen principalmente de:
-- `src/components/Lightbox.astro` y archivos con `data-astro-cid` — código de scrolling deprecado por Astro 4
-- `src/data/properties.ts` (líneas con tipos faltantes o implícitos)
-- `src/scripts/enhance.ts` — eventos DOM no tipados correctamente
-
-⚠️ **No los arreglo en este PR** — el usuario pidió explícitamente no hacer refactor general.
-
-## Tests locales
-
-- **Dev** (`astro dev`): usa el fixture local, no requiere Nivora.
-- **Build** (`astro build`): requiere credenciales Nivora reales o fallará con error explícito.
-- **Verificar antes de mergear a main**:
-  1. Crear rama temporal `feat/test-nivora-prod` y configurar las env vars reales en Netlify
-  2. Verificar que el build pasa
-  3. Verificar que las propiedades se renderizan correctamente en staging
-  4. Solo entonces mergear `feat/nivora-property-catalog` a `main`
+1. **Credenciales reales de Nivora** en `.env` (desarrollo) y en Netlify dashboard (producción).
+2. **Validar el schema** con el JSON real que devuelve Nivora (comparar contra el tipo `PublicCatalogResponse`).
+3. **Si el JSON real tiene campos extra** que no están en el tipo, el adapter los ignora silenciosamente (no rompe). Si Nivora añade campos obligatorios nuevos, hay que actualizar el tipo.
+4. **Una vez validado** en staging de Netlify → merge a main + deploy.

@@ -13,74 +13,95 @@
 //
 // Variables de entorno requeridas:
 //   NIVORA_API_URL       Base URL (ej: https://api-nivora.decotea.es)
-//   NIVORA_SITE_KEY      Identificador público del sitio
+//   NIVORA_SITE_KEY      Identificador público del sitio (ej: global-move)
 //   NIVORA_CATALOG_TOKEN Token Bearer
 //
 // Caché: memoización en memoria durante el mismo proceso de build.
 // Cada `astro build` arranca proceso nuevo, así que siempre se consulta
 // datos frescos de Nivora (no hay stale data entre deploys).
 
-// ── Tipos del contrato Nivora ─────────────────────────────────────────────
+// ── Tipos exactos del contrato Nivora ───────────────────────────────────
 
-export type NivoraLocalizedField<T = string> = {
-  es: T;
-  en?: T;
+export type LocalizedPropertyContent = {
+  title: string;
+  tagline?: string;
+  description: string;
+  publicLocation: string;
 };
 
-export type NivoraPropertyType =
-  | 'villa' | 'apartment' | 'finca' | 'penthouse'
-  | 'townhouse' | 'duplex' | 'studio' | 'loft'
-  | string;
-
-export type NivoraOperation = 'rent' | 'sale' | string;
-
-export type NivoraStatus = 'available' | 'reserved' | 'unavailable' | string;
-
-/** Estructura detallada de specs (estructura flexible, se accede por clave). */
-export type NivoraSpecs = Record<string, number | string | boolean | null | undefined>;
-
-export type NivoraImage = {
-  url: string;
-  position: number;
-  isCover?: boolean;
-  alt?: string;
-  focal?: string;
-};
-
-export interface NivoraProperty {
+export type PublicProperty = {
   id: string;
   slug: string;
+  reference: string;
+  operation: 'rent' | 'sale';
+  type:
+    | 'apartment'
+    | 'house'
+    | 'chalet'
+    | 'duplex'
+    | 'penthouse'
+    | 'studio'
+    | 'land'
+    | 'commercial'
+    | 'office'
+    | 'garage'
+    | 'other';
+  status: 'available' | 'reserved';
+  featured: boolean;
+
   content: {
-    title: NivoraLocalizedField;
-    tagline?: NivoraLocalizedField;
-    description: NivoraLocalizedField;
+    es: LocalizedPropertyContent;
+    en?: LocalizedPropertyContent;
   };
-  features: NivoraLocalizedField;
+
   pricing: {
     amountCents: number;
-    currency: string;          // ej: "EUR"
-    period: string;            // ej: "month", "week", "night"
+    currency: 'EUR';
+    period: 'month' | null;
   };
-  specs: NivoraSpecs;
-  images: NivoraImage[];
-  operation: NivoraOperation;
-  type: NivoraPropertyType;
-  status: NivoraStatus;
-  /** Opcionales según contrato. */
-  featured?: boolean;
-  lat?: number;
-  lng?: number;
-  zone?: string;
-  // Reviews no incluidas en este contrato
-}
 
-export interface NivoraCatalogResponse {
-  properties: NivoraProperty[];
-  /** Otros campos que Nivora pueda añadir — se preservan sin tocar. */
-  [key: string]: unknown;
-}
+  specs: {
+    bedrooms: number | null;
+    bathrooms: number | null;
+    builtAreaSqm: number | null;
+    usableAreaSqm: number | null;
+    plotAreaSqm: number | null;
+  };
 
-// ── Errores tipados ───────────────────────────────────────────────────────
+  features: {
+    es: string[];
+    en?: string[];
+  };
+
+  images: Array<{
+    id: string;
+    url: string;
+    alt: {
+      es: string;
+      en?: string;
+    };
+    width: number | null;
+    height: number | null;
+    isCover: boolean;
+    position: number;
+    focalPoint?: {
+      x: number;
+      y: number;
+    };
+  }>;
+
+  publishedAt: string;
+  updatedAt: string;
+};
+
+export type PublicCatalogResponse = {
+  schemaVersion: '1.0';
+  site: string;
+  generatedAt: string;
+  properties: PublicProperty[];
+};
+
+// ── Error tipado ────────────────────────────────────────────────────────
 
 export class NivoraError extends Error {
   readonly cause?: unknown;
@@ -91,7 +112,7 @@ export class NivoraError extends Error {
   }
 }
 
-// ── Fetch + caché en memoria ─────────────────────────────────────────────
+// ── Fetch + caché en memoria ────────────────────────────────────────────
 
 interface NivoraConfig {
   apiUrl: string;
@@ -100,9 +121,9 @@ interface NivoraConfig {
 }
 
 function readConfig(): NivoraConfig {
-  const apiUrl = process.env.NIVORA_API_URL?.trim();
-  const siteKey = process.env.NIVORA_SITE_KEY?.trim();
-  const token = process.env.NIVORA_CATALOG_TOKEN?.trim();
+  const apiUrl = process.env['NIVORA_API_URL']?.trim();
+  const siteKey = process.env['NIVORA_SITE_KEY']?.trim();
+  const token = process.env['NIVORA_CATALOG_TOKEN']?.trim();
   if (!apiUrl || !siteKey || !token) {
     throw new NivoraError(
       'Faltan variables de entorno de Nivora. Configura NIVORA_API_URL, NIVORA_SITE_KEY y NIVORA_CATALOG_TOKEN (en Netlify dashboard o .env local).'
@@ -116,7 +137,7 @@ function endpointUrl(cfg: NivoraConfig): string {
   return `${base}/v1/public/sites/${encodeURIComponent(cfg.siteKey)}/properties`;
 }
 
-async function callNivora(cfg: NivoraConfig): Promise<NivoraCatalogResponse> {
+async function callNivora(cfg: NivoraConfig): Promise<unknown> {
   const url = endpointUrl(cfg);
   let res: Response;
   try {
@@ -141,48 +162,88 @@ async function callNivora(cfg: NivoraConfig): Promise<NivoraCatalogResponse> {
   }
 
   try {
-    return (await res.json()) as NivoraCatalogResponse;
+    return await res.json();
   } catch (err) {
     throw new NivoraError(`La respuesta de Nivora no es JSON válido: ${(err as Error).message}`, err);
   }
 }
 
-function validateResponse(data: unknown): NivoraCatalogResponse {
-  if (!data || typeof data !== 'object' || !Array.isArray((data as NivoraCatalogResponse).properties)) {
+// ── Validación de la respuesta ─────────────────────────────────────────
+
+function validateResponse(raw: unknown): PublicCatalogResponse {
+  if (!raw || typeof raw !== 'object') {
+    throw new NivoraError('La respuesta de Nivora no es un objeto');
+  }
+  const r = raw as Partial<PublicCatalogResponse>;
+
+  if (r.schemaVersion !== '1.0') {
     throw new NivoraError(
-      `La respuesta de Nivora no contiene 'properties' como array (recibido: ${JSON.stringify(data).slice(0, 200)})`
+      `schemaVersion inválido: "${String(r.schemaVersion)}" (esperado "1.0")`
     );
   }
-  return data as NivoraCatalogResponse;
+  if (typeof r.site !== 'string' || r.site.length === 0) {
+    throw new NivoraError(`Falta o es inválido el campo "site" (recibido: ${String(r.site)})`);
+  }
+  if (typeof r.generatedAt !== 'string') {
+    throw new NivoraError(`Falta o es inválido el campo "generatedAt"`);
+  }
+  if (!Array.isArray(r.properties)) {
+    throw new NivoraError(
+      `El campo "properties" no es un array (recibido: ${typeof r.properties})`
+    );
+  }
+
+  // Validar cada propiedad estructuralmente
+  for (const p of r.properties) {
+    if (!p || typeof p !== 'object') {
+      throw new NivoraError(`Propiedad inválida en respuesta de Nivora: ${JSON.stringify(p)}`);
+    }
+    if (!p.id || !p.slug) {
+      throw new NivoraError(`Propiedad sin id/slug: ${JSON.stringify(p)}`);
+    }
+    if (!p.content?.es?.title || !p.content?.es?.description || !p.content?.es?.publicLocation) {
+      throw new NivoraError(
+        `Propiedad ${p.id} sin content.es.title/description/publicLocation`
+      );
+    }
+    if (typeof p.pricing?.amountCents !== 'number' || p.pricing?.currency !== 'EUR') {
+      throw new NivoraError(
+        `Propiedad ${p.id} sin pricing.amountCents/currency válidos`
+      );
+    }
+    if (p.operation !== 'rent' && p.operation !== 'sale') {
+      throw new NivoraError(
+        `Propiedad ${p.id} con operation inválido: "${String(p.operation)}"`
+      );
+    }
+    if (!Array.isArray(p.images)) {
+      throw new NivoraError(`Propiedad ${p.id} sin images[]`);
+    }
+  }
+
+  return r as PublicCatalogResponse;
 }
 
 // ── Memoización en memoria durante el proceso de build ───────────────────
 
 interface NivoraMemoEntry {
-  data: NivoraCatalogResponse;
+  data: PublicCatalogResponse;
   ts: number;
 }
 
 let memoCache: NivoraMemoEntry | null = null;
 
-function getMemoized(): NivoraCatalogResponse | null {
-  return memoCache?.data ?? null;
-}
+export async function fetchNivoraCatalog(): Promise<PublicProperty[]> {
+  const cached = memoCache;
+  if (cached) return cached.data.properties;
 
-function setMemoized(data: NivoraCatalogResponse): void {
-  memoCache = { data, ts: Date.now() };
+  const cfg = readConfig();
+  const raw = await callNivora(cfg);
+  const validated = validateResponse(raw);
+  memoCache = { data: validated, ts: Date.now() };
+  return validated.properties;
 }
 
 export function clearNivoraCache(): void {
   memoCache = null;
-}
-
-export async function fetchNivoraCatalog(): Promise<NivoraProperty[]> {
-  const cached = getMemoized();
-  if (cached) return cached.data.properties;
-
-  const cfg = readConfig();
-  const raw = validateResponse(await callNivora(cfg));
-  setMemoized(raw);
-  return raw.properties;
 }
