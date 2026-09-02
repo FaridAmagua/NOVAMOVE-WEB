@@ -40,10 +40,10 @@ const finalDesc = description ?? defaultDesc;
 
 // Build canonical: strip trailing slash except for the root locale path
 const normalizedPath = path.replace(/\/+$/, '') || `/${locale}`;
-const canonical = new URL(normalizedPath, Astro.site ?? 'https://globalmove.com').toString();
+const canonical = new URL(normalizedPath, Astro.site ?? 'https://globalmove.agency').toString();
 
 const restOfPath = stripLocale(path); // e.g. "/services"
-const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 'https://globalmove.com').toString();
+const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 'https://globalmove.agency').toString();
 ---
 
 <!doctype html>
@@ -64,7 +64,7 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={finalDesc} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.com').toString()} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.agency').toString()} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_US'} />
@@ -74,7 +74,7 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={finalDesc} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.com').toString()} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.agency').toString()} />
 
     <!-- Hreflang alternates -->
     {supportedLocales.map(loc => (

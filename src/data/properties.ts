@@ -1,11 +1,20 @@
 // src/data/properties.ts
-// Property catalogue.
-// Only properties in SPAIN.
-// Transactions: 'rent' (alquiler vacacional / larga estancia) or 'sale' (compraventa).
+// Modelo UI canónico + fixture para DESARROLLO.
+//
+// En PRODUCCIÓN el catálogo lo sirve Nivora (ver property-source.ts).
+// Este archivo solo se usa como fallback de desarrollo y como fuente del tipo
+// `Property` que el resto de la web consume.
+//
+// Transacciones:
+//   - 'rent': alquiler (Nivora = solo larga duración ahora)
+//   - 'sale': venta (legacy, no se usa en producción pero se mantiene el tipo)
 
 export type PropertyType = 'villa' | 'apartment' | 'finca' | 'penthouse';
 export type TransactionType = 'rent' | 'sale';
-export type DestinationId = 'madrid' | 'barcelona' | 'marbella' | 'mallorca' | 'ibiza' | 'canarias';
+/** Zona pública libre (Nivora). Mantener como tipo `string` para no limitar
+ *  futuras zonas — usar `zoneLabel(zone, locale)` desde property-source.ts
+ *  para mostrar un nombre legible. */
+export type DestinationId = string;
 
 export interface Property {
   id: string;
@@ -31,6 +40,9 @@ export interface Property {
   images: string[];
   /** Per-property focal point for the gallery main image. Expressed as % from top. */
   imageFocal?: string;
+  /** Reviews — actualmente sin uso en producción (Nivora no envía reviews en el
+   *  contrato inicial). Mantenido en el tipo para futuro uso. La UI debe ocultar
+   *  la sección de testimonios si `reviews` es undefined o está vacío. */
   reviews?: Review[];
   featured?: boolean;
   lat?: number;
@@ -416,22 +428,40 @@ export const properties: Property[] = [
   },
 ];
 
-// Convenience: get a property by slug
+// Convenience: get a property by slug (legacy; prefiere getPropertyBySlug de
+// property-source.ts para datos en vivo de Nivora)
 export function getPropertyBySlug(slug: string): Property | undefined {
   return properties.find(p => p.slug === slug);
 }
 
-// Pretty destination label (only Spain)
-export const destinationLabel = (id: DestinationId, locale: 'es' | 'en') => {
-  const labels: Record<DestinationId, { es: string; en: string }> = {
-    madrid: { es: 'Madrid', en: 'Madrid' },
-    barcelona: { es: 'Barcelona', en: 'Barcelona' },
-    marbella: { es: 'Marbella', en: 'Marbella' },
-    mallorca: { es: 'Mallorca', en: 'Mallorca' },
-    ibiza: { es: 'Ibiza', en: 'Ibiza' },
-    canarias: { es: 'Canarias', en: 'Canary Islands' },
+/**
+ * Label legible para una zona pública libre.
+ * Para zonas conocidas usamos el nombre localizado. Para zonas libres
+ * prettificamos el slug (kebab-case → Title Case).
+ *
+ * Esta función se mantiene por compatibilidad con código existente, pero
+ * la fuente de verdad para zonas dinámicas es `zoneLabel()` en
+ * `property-source.ts`.
+ */
+export const destinationLabel = (id: string, locale: 'es' | 'en') => {
+  const known: Record<string, { es: string; en: string }> = {
+    madrid:    { es: 'Madrid',           en: 'Madrid' },
+    barcelona: { es: 'Barcelona',        en: 'Barcelona' },
+    marbella:  { es: 'Marbella',         en: 'Marbella' },
+    mallorca:  { es: 'Mallorca',         en: 'Mallorca' },
+    ibiza:     { es: 'Ibiza',            en: 'Ibiza' },
+    canarias:  { es: 'Canarias',         en: 'Canary Islands' },
+    valencia:  { es: 'Valencia',         en: 'Valencia' },
+    sevilla:   { es: 'Sevilla',          en: 'Seville' },
+    malaga:    { es: 'Málaga',           en: 'Málaga' },
+    sitges:    { es: 'Sitges',           en: 'Sitges' },
   };
-  return labels[id][locale];
+  const k = known[id.toLowerCase()];
+  if (k) return k[locale] ?? k.es;
+  // Fallback: prettify slug
+  return id
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 // Amenity labels

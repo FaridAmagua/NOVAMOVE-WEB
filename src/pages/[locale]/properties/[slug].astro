@@ -3,40 +3,45 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Lightbox from '../../../components/Lightbox.astro';
 import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 import {
-  properties,
-  destinationLabel,
   propertyTypeLabel,
   amenityLabel,
   formatPrice,
-  transactionLabel,
   DEFAULT_IMAGE_FOCAL,
-  type DestinationId,
 } from '../../../data/properties';
+import { getProperties, zoneLabel, type Property } from '../../../data/property-source';
 
 export async function getStaticPaths() {
-  const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
+  const { properties } = await getProperties();
+  const paths: Array<{ params: { locale: string; slug: string; }; props: { property: Property; otherProps: Property[] } }> = [];
   for (const locale of supportedLocales) {
     for (const p of properties) {
-      paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
+      // related: misma zone (libre, ya no es enum cerrado)
+      const otherProps = properties
+        .filter((x) => x.destination === p.destination && x.id !== p.id)
+        .slice(0, 3);
+      paths.push({ params: { locale, slug: p.slug }, props: { property: p, otherProps } });
     }
   }
   return paths;
 }
 
-const { property } = Astro.props as { property: typeof properties[number] };
+const { property, otherProps } = Astro.props as { property: Property; otherProps: Property[] };
 const locale = Astro.params.locale as Locale;
-const isSale = property.transaction === 'sale';
+// Nivora = solo alquiler larga duración. El botón "Solicitar información"
+// reemplaza al antiguo booking online.
+const priceUnit = `/${locale === 'es' ? 'mes' : 'month'}`;
+const ctaLabel = t(locale, 'properties.requestInfo');
+const ctaHref = '#inquiry'; // anchor al form de solicitud en la misma página
+const transactionBadge = 'Alquiler';
 
-const priceUnit = isSale ? '' : t(locale, 'properties.priceUnitRent');
-const ctaLabel = isSale ? t(locale, 'properties.requestInfo') : t(locale, 'properties.bookNow');
-const ctaHref = isSale ? '#inquiry' : `/${locale}/book/${property.slug}`;
-const transactionBadge = transactionLabel(property.transaction, locale);
+// reviews — actualmente Nivora no envía reviews. Ocultamos la sección
+// entera si la propiedad no tiene.
+const reviews = property.reviews ?? [];
+const avgRating = reviews.length > 0
+  ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+  : 0;
 
-const otherProps = properties
-  .filter(p => p.destination === property.destination && p.id !== property.id)
-  .slice(0, 3);
-
-const destLabel = destinationLabel(property.destination as DestinationId, locale);
+const destLabel = zoneLabel(property.destination, locale);
 
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
 const amenityIcons: Record<string, string> = {
@@ -59,19 +64,6 @@ const amenityIcons: Record<string, string> = {
   elevator:    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v4M9 11l3-3 3 3M9 16l3 3 3-3M8 6h8"/>',
 };
 
-// Aggregate rating from reviews
-const reviews = property.reviews ?? [];
-const avgRating = reviews.length > 0
-  ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-  : 0;
-const ratingLabel = avgRating >= 4.5 ? 'Excellent' : avgRating >= 3.5 ? 'Very good' : 'Good';
-
-// Format helper for the review "stayed in {month} {year}"
-function monthName(monthIdx: number, loc: Locale): string {
-  const d = new Date(2000, monthIdx, 1);
-  return d.toLocaleDateString(loc === 'es' ? 'es-ES' : 'en-GB', { month: 'long' });
-}
----
 ---
 
 <BaseLayout
@@ -558,7 +550,7 @@ function monthName(monthIdx: number, loc: Locale): string {
                 <span class="related-card__meta">{propertyTypeLabel(p.type, locale)} · {p.maxGuests} {t(locale, 'common.guests')}</span>
                 <h3 class="related-card__title">{p.name[locale]}</h3>
                 <span class="related-card__price">
-                  {t(locale, 'common.from')} {formatPrice(p.price, locale)}{p.transaction === 'rent' ? ` ${t(locale, 'properties.priceUnitRent')}` : ''}
+                  {t(locale, 'common.from')} {formatPrice(p.price, locale)} /{locale === 'es' ? 'mes' : 'month'}
                 </span>
               </div>
             </a>
