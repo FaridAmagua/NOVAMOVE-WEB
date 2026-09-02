@@ -1,95 +1,97 @@
+/// <reference types="node" />
 // src/data/nivora-catalog.ts
 //
-// Cliente Nivora: consulta el catálogo de propiedades directamente desde
-// código ejecutado durante el build de Astro (Node).
+// Cliente Nivora para NOVAMOVE-WEB.
+// Se invoca desde código ejecutado durante el build de Astro (Node).
+//
+// Endpoint (exacto, del contrato):
+//   GET {NIVORA_API_URL}/v1/public/sites/{NIVORA_SITE_KEY}/properties
+//
+// Headers:
+//   Authorization: Bearer {NIVORA_CATALOG_TOKEN}
+//   Accept:        application/json
 //
 // Variables de entorno requeridas:
-//   NIVORA_API_URL       Base URL de la API (ej: https://api.nivora.com)
+//   NIVORA_API_URL       Base URL (ej: https://api-nivora.decotea.es)
 //   NIVORA_SITE_KEY      Identificador público del sitio
-//   NIVORA_CATALOG_TOKEN Token de autenticación
+//   NIVORA_CATALOG_TOKEN Token Bearer
 //
-// Endpoint asumido: GET {NIVORA_API_URL}/v1/properties
-// Headers:
-//   Authorization:    Bearer {NIVORA_CATALOG_TOKEN}
-//   X-Site-Key:       {NIVORA_SITE_KEY}
-//   Accept:           application/json
-//
-// ⚠️ El esquema del JSON y la ruta exacta del endpoint son ASUNCIONES.
-// Ajustar NIVORA_ENDPOINT_OVERRIDE (env var opcional) si Nivora expone
-// otra ruta. Cuando llegue el contrato real, validar contra este esquema.
+// Caché: memoización en memoria durante el mismo proceso de build.
+// Cada `astro build` arranca proceso nuevo, así que siempre se consulta
+// datos frescos de Nivora (no hay stale data entre deploys).
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+// ── Tipos del contrato Nivora ─────────────────────────────────────────────
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const CACHE_DIR = resolve(__dirname, '../../.nivora-cache');
-const CACHE_FILE = resolve(CACHE_DIR, 'catalog.json');
-const CACHE_TTL_MS = 1000 * 60 * 60; // 1h
-
-export class NivoraError extends Error {
-  constructor(message: string, public override readonly cause?: unknown) {
-    super(message);
-    this.name = 'NivoraError';
-  }
-}
-
-// ── Tipos ──────────────────────────────────────────────────────────────────
-
-export type NivoraPropertyType =
-  | 'villa'
-  | 'apartment'
-  | 'finca'
-  | 'penthouse'
-  | 'townhouse'
-  | 'duplex'
-  | 'studio'
-  | 'loft'
-  | string;
-
-export interface NivoraLocalizedField<T = string> {
+export type NivoraLocalizedField<T = string> = {
   es: T;
   en?: T;
-}
+};
 
-export interface NivoraLocation {
-  zone: string;                              // zona pública libre (ej: "Marbella East")
-  address: NivoraLocalizedField;
-}
+export type NivoraPropertyType =
+  | 'villa' | 'apartment' | 'finca' | 'penthouse'
+  | 'townhouse' | 'duplex' | 'studio' | 'loft'
+  | string;
+
+export type NivoraOperation = 'rent' | 'sale' | string;
+
+export type NivoraStatus = 'available' | 'reserved' | 'unavailable' | string;
+
+/** Estructura detallada de specs (estructura flexible, se accede por clave). */
+export type NivoraSpecs = Record<string, number | string | boolean | null | undefined>;
+
+export type NivoraImage = {
+  url: string;
+  position: number;
+  isCover?: boolean;
+  alt?: string;
+  focal?: string;
+};
 
 export interface NivoraProperty {
   id: string;
-  slug?: string;                             // fallback → id
+  slug: string;
+  content: {
+    title: NivoraLocalizedField;
+    tagline?: NivoraLocalizedField;
+    description: NivoraLocalizedField;
+  };
+  features: NivoraLocalizedField;
+  pricing: {
+    amountCents: number;
+    currency: string;          // ej: "EUR"
+    period: string;            // ej: "month", "week", "night"
+  };
+  specs: NivoraSpecs;
+  images: NivoraImage[];
+  operation: NivoraOperation;
   type: NivoraPropertyType;
-  title: NivoraLocalizedField;
-  tagline?: NivoraLocalizedField;
-  description: NivoraLocalizedField;
-  location: NivoraLocation;
-  bedrooms: number;
-  bathrooms: number;
-  sizeM2: number;
-  /** Precio mensual en EUR (alquiler larga duración). */
-  priceMonthly: number;
-  minMonths?: number;
-  maxGuests?: number;
-  status: 'available' | 'reserved' | 'unavailable';
-  availableFrom?: string;                    // ISO date
-  images: string[];
-  amenities: string[];
-  primaryImageFocal?: string;                // ej: "62%"
+  status: NivoraStatus;
+  /** Opcionales según contrato. */
   featured?: boolean;
   lat?: number;
   lng?: number;
+  zone?: string;
+  // Reviews no incluidas en este contrato
 }
 
-interface NivoraCatalogResponse {
+export interface NivoraCatalogResponse {
   properties: NivoraProperty[];
-  generatedAt?: string;
   /** Otros campos que Nivora pueda añadir — se preservan sin tocar. */
   [key: string]: unknown;
 }
 
-// ── Fetch ──────────────────────────────────────────────────────────────────
+// ── Errores tipados ───────────────────────────────────────────────────────
+
+export class NivoraError extends Error {
+  readonly cause?: unknown;
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'NivoraError';
+    this.cause = cause;
+  }
+}
+
+// ── Fetch + caché en memoria ─────────────────────────────────────────────
 
 interface NivoraConfig {
   apiUrl: string;
@@ -109,21 +111,18 @@ function readConfig(): NivoraConfig {
   return { apiUrl, siteKey, token };
 }
 
-function endpointUrl(apiUrl: string): string {
-  // Permite override explícito si Nivora expone otra ruta
-  const override = process.env.NIVORA_ENDPOINT_OVERRIDE?.trim();
-  if (override) return override;
-  return `${apiUrl.replace(/\/$/, '')}/v1/properties`;
+function endpointUrl(cfg: NivoraConfig): string {
+  const base = cfg.apiUrl.replace(/\/$/, '');
+  return `${base}/v1/public/sites/${encodeURIComponent(cfg.siteKey)}/properties`;
 }
 
-async function callNivora(cfg: NivoraConfig): Promise<NivoraProperty[]> {
-  const url = endpointUrl(cfg.apiUrl);
+async function callNivora(cfg: NivoraConfig): Promise<NivoraCatalogResponse> {
+  const url = endpointUrl(cfg);
   let res: Response;
   try {
     res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${cfg.token}`,
-        'X-Site-Key': cfg.siteKey,
         Accept: 'application/json',
       },
     });
@@ -141,74 +140,49 @@ async function callNivora(cfg: NivoraConfig): Promise<NivoraProperty[]> {
     );
   }
 
-  let data: NivoraCatalogResponse | NivoraProperty[];
   try {
-    data = (await res.json()) as NivoraCatalogResponse | NivoraProperty[];
+    return (await res.json()) as NivoraCatalogResponse;
   } catch (err) {
     throw new NivoraError(`La respuesta de Nivora no es JSON válido: ${(err as Error).message}`, err);
   }
+}
 
-  const properties = Array.isArray(data) ? data : data.properties;
-  if (!Array.isArray(properties)) {
+function validateResponse(data: unknown): NivoraCatalogResponse {
+  if (!data || typeof data !== 'object' || !Array.isArray((data as NivoraCatalogResponse).properties)) {
     throw new NivoraError(
-      `La respuesta de Nivora no contiene un array 'properties' (recibido: ${JSON.stringify(data).slice(0, 200)})`
+      `La respuesta de Nivora no contiene 'properties' como array (recibido: ${JSON.stringify(data).slice(0, 200)})`
     );
   }
-
-  return properties;
+  return data as NivoraCatalogResponse;
 }
 
-function loadFromCache(): { properties: NivoraProperty[]; fetchedAt: number } | null {
-  if (!existsSync(CACHE_FILE)) return null;
-  try {
-    const raw = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
-    if (!raw || typeof raw.fetchedAt !== 'number' || !Array.isArray(raw.properties)) return null;
-    return raw;
-  } catch {
-    return null;
-  }
+// ── Memoización en memoria durante el proceso de build ───────────────────
+
+interface NivoraMemoEntry {
+  data: NivoraCatalogResponse;
+  ts: number;
 }
 
-function writeCache(properties: NivoraProperty[]): void {
-  try {
-    if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
-    writeFileSync(
-      CACHE_FILE,
-      JSON.stringify({ properties, fetchedAt: Date.now() }, null, 2)
-    );
-  } catch (err) {
-    console.warn(`[nivora] no se pudo escribir cache en ${CACHE_FILE}: ${(err as Error).message}`);
-  }
+let memoCache: NivoraMemoEntry | null = null;
+
+function getMemoized(): NivoraCatalogResponse | null {
+  return memoCache?.data ?? null;
 }
 
-export async function fetchNivoraCatalog(opts: { forceRefresh?: boolean } = {}): Promise<NivoraProperty[]> {
-  const cfg = readConfig();
-
-  // 1) Cache fresca si existe (acelera builds repetidos)
-  if (!opts.forceRefresh) {
-    const cached = loadFromCache();
-    if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-      return cached.properties;
-    }
-  }
-
-  // 2) Fetch a Nivora (puede fallar — siempre propaga el error)
-  const properties = await callNivora(cfg);
-
-  // 3) Cache para el próximo build
-  writeCache(properties);
-
-  return properties;
+function setMemoized(data: NivoraCatalogResponse): void {
+  memoCache = { data, ts: Date.now() };
 }
 
-// Helper de un solo uso para limpiar cache (útil si Nivora cambia el esquema)
 export function clearNivoraCache(): void {
-  try {
-    if (existsSync(CACHE_FILE)) {
-      const { unlinkSync } = require('node:fs');
-      unlinkSync(CACHE_FILE);
-    }
-  } catch {
-    /* noop */
-  }
+  memoCache = null;
+}
+
+export async function fetchNivoraCatalog(): Promise<NivoraProperty[]> {
+  const cached = getMemoized();
+  if (cached) return cached.data.properties;
+
+  const cfg = readConfig();
+  const raw = validateResponse(await callNivora(cfg));
+  setMemoized(raw);
+  return raw.properties;
 }

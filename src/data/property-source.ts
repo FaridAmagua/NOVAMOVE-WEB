@@ -1,16 +1,13 @@
+/// <reference types="node" />
 // src/data/property-source.ts
 //
 // Fuente única de propiedades para NOVAMOVE-WEB.
 //
 // Reglas:
-//   - Producción (NODE_ENV=production | CONTEXT=production | CI=true):
-//     consulta Nivora. Si falla → el build debe fallar (no fallback silencioso).
-//   - Desarrollo (todo lo demás):
-//     intenta Nivora, si falla usa el fixture local para no bloquear el dev server.
-//   - El fixture solo existe para desarrollo. En producción, build roto.
-//
-// Para forzar re-fetch:
-//   NIVORA_FORCE_REFRESH=1
+//   - Producción: consulta Nivora. Si falla → build roto.
+//   - Desarrollo: intenta Nivora; si no hay variables o hay NivoraError,
+//     cae al fixture local para no bloquear el dev server.
+//   - Catálogo vacío: válido en cualquier entorno. No lanza error.
 
 import {
   properties as fallbackProperties,
@@ -19,10 +16,13 @@ import {
 } from './properties';
 import {
   fetchNivoraCatalog,
+  NivoraError,
+  type NivoraImage,
   type NivoraProperty,
-  type NivoraPropertyType,
+  type NivoraSpecs,
 } from './nivora-catalog';
 
+export type { Property, PropertyType } from './properties';
 export type SourceName = 'nivora' | 'fallback';
 
 export interface PropertySource {
@@ -32,9 +32,9 @@ export interface PropertySource {
 }
 
 const IS_PRODUCTION = ['production', 'prod'].includes(
-  (process.env.NODE_ENV ?? '').toLowerCase()
-) || ['production', 'prod'].includes((process.env.CONTEXT ?? '').toLowerCase())
-  || !!process.env.CI;
+  (process.env['NODE_ENV'] ?? '').toLowerCase()
+) || ['production', 'prod'].includes((process.env['CONTEXT'] ?? '').toLowerCase())
+  || !!process.env['CI'];
 
 const KNOWN_PROPERTY_TYPES = new Set<PropertyType>([
   'villa', 'apartment', 'finca', 'penthouse',
@@ -47,22 +47,36 @@ const KNOWN_ZONES: Record<string, { es: string; en: string }> = {
   mallorca:  { es: 'Mallorca',         en: 'Mallorca' },
   ibiza:     { es: 'Ibiza',            en: 'Ibiza' },
   canarias:  { es: 'Canarias',         en: 'Canary Islands' },
-  // Zonas adicionales probables — añadir según vaya apareciendo en Nivora
   valencia:  { es: 'Valencia',         en: 'Valencia' },
   sevilla:   { es: 'Sevilla',          en: 'Seville' },
   malaga:    { es: 'Málaga',           en: 'Málaga' },
   sitges:    { es: 'Sitges',           en: 'Sitges' },
 };
 
-function localize<T>(field: { es: T; en?: T } | undefined, fallback: T): T {
-  if (!field) return fallback;
-  return field.en ?? field.es ?? fallback;
+/**
+ * Lee un campo localizado de Nivora.
+ * `field` puede ser:
+ *   - el objeto `{ es, en? }` del contrato (lo normal)
+ *   - un valor crudo (string, number, etc.) si Nivora no localizó
+ *   - undefined si el campo no existe
+ */
+function pick<T>(
+  field: { es: T; en?: T } | T | undefined | null,
+  fallback: T,
+  preferEn = false
+): T {
+  if (field === undefined || field === null) return fallback;
+  if (typeof field !== 'object' || !('es' in (field as object))) {
+    return field as T;
+  }
+  const { es, en } = field as { es: T; en?: T };
+  if (preferEn && en !== undefined && en !== null) return en;
+  if (en !== undefined && en !== null) return en;
+  if (es !== undefined && es !== null) return es;
+  return fallback;
 }
 
 function prettyZone(zone: string): string {
-  const known = KNOWN_ZONES[zone.toLowerCase()];
-  if (known) return known.es;
-  // Fallback: "marbella-east" → "Marbella East"
   return zone
     .replace(/[-_]/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -71,72 +85,136 @@ function prettyZone(zone: string): string {
 export function zoneLabel(zone: string, locale: 'es' | 'en'): string {
   const known = KNOWN_ZONES[zone.toLowerCase()];
   if (known) return known[locale] ?? known.es;
-  // Para zonas libres: prettify y devuelve igual en ambos idiomas
   return prettyZone(zone);
 }
 
-/**
- * Mapea una propiedad de Nivora al modelo UI canónico (Property).
- * Garantiza fallback ES → EN para textos localizados.
- */
-export function fromNivora(np: NivoraProperty): Property {
+// ── Helpers de Nivora ────────────────────────────────────────────────────
+
+function readSpecNumber(specs: NivoraSpecs | undefined, key: string): number | undefined {
+  if (!specs) return undefined;
+  const v = specs[key];
+  if (typeof v === 'number' && !Number.isNaN(v)) return v;
+  if (typeof v === 'string') {
+    const n = Number(v);
+    return Number.isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}
+
+function readSpecString(specs: NivoraSpecs | undefined, key: string): string | undefined {
+  if (!specs) return undefined;
+  const v = specs[key];
+  return typeof v === 'string' && v.length > 0 ? v : undefined;
+}
+
+function splitFeatures(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(/[,\n;]/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+function orderImages(images: NivoraImage[] | undefined): string[] {
+  if (!images || images.length === 0) return [];
+  const sorted = [...images].sort((a, b) => a.position - b.position);
+  return sorted.map((i) => i.url);
+}
+
+// ── Mapper Nivora → Property ────────────────────────────────────────────
+
+function fromNivora(np: NivoraProperty): Property {
   const propertyType: PropertyType = KNOWN_PROPERTY_TYPES.has(np.type as PropertyType)
     ? (np.type as PropertyType)
-    : 'villa'; // fallback seguro
+    : 'villa';
+
+  const transaction: Property['transaction'] = np.operation === 'sale' ? 'sale' : 'rent';
+
+  // Precio: amountCents (entero) → euros (decimal)
+  const priceEuros = np.pricing.amountCents / 100;
+
+  // Specs: leer campos tipados con fallback seguro
+  const bedrooms = readSpecNumber(np.specs, 'bedrooms') ?? readSpecNumber(np.specs, 'rooms') ?? 0;
+  const bathrooms = readSpecNumber(np.specs, 'bathrooms') ?? 0;
+  const sizeM2 = readSpecNumber(np.specs, 'sizeM2') ?? readSpecNumber(np.specs, 'area') ?? 0;
+  const maxGuests = readSpecNumber(np.specs, 'maxGuests') ?? readSpecNumber(np.specs, 'guests') ?? 2;
+
+  // Features: Nivora devuelve `{es, en}` como string (separado por comas).
+  const featuresEsRaw = pick(np.features?.es, '');
+  const featuresEnRaw = pick(np.features?.en, featuresEsRaw);
+  const featuresES = splitFeatures(typeof featuresEsRaw === 'string' ? featuresEsRaw : '');
+  const featuresEN = splitFeatures(typeof featuresEnRaw === 'string' ? featuresEnRaw : '');
+  const amenities = featuresEN.length > 0 ? featuresEN : featuresES;
+
+  // Imágenes ordenadas por position
+  const images = orderImages(np.images);
 
   return {
     id: np.id,
-    slug: np.slug ?? np.id,
+    slug: np.slug,
     type: propertyType,
-    transaction: 'rent', // Nivora = solo alquiler (larga duración)
-    destination: np.location.zone,
+    transaction,
+    destination: np.zone ?? 'spain',
     name: {
-      es: np.title.es,
-      en: localize(np.title.en, np.title.es),
+      es: pick(np.content?.title?.es, ''),
+      en: pick(np.content?.title?.en, np.content?.title?.es ?? ''),
     },
     tagline: {
-      es: np.tagline?.es ?? '',
-      en: localize(np.tagline?.en, np.tagline?.es ?? ''),
+      es: pick(np.content?.tagline?.es, ''),
+      en: pick(np.content?.tagline?.en, np.content?.tagline?.es ?? ''),
     },
     description: {
-      es: np.description.es,
-      en: localize(np.description.en, np.description.es),
+      es: pick(np.content?.description?.es, ''),
+      en: pick(np.content?.description?.en, np.content?.description?.es ?? ''),
     },
     location: {
-      es: np.location.address.es,
-      en: localize(np.location.address.en, np.location.address.es),
+      es: readSpecString(np.specs, 'addressEs') ?? readSpecString(np.specs, 'address') ?? '',
+      en: readSpecString(np.specs, 'addressEn') ?? readSpecString(np.specs, 'address') ?? '',
     },
-    price: np.priceMonthly, // €/mes — semántica del campo cambia, ver UI
-    bedrooms: np.bedrooms,
-    bathrooms: np.bathrooms,
-    sizeM2: np.sizeM2,
-    amenities: np.amenities ?? [],
-    images: np.images ?? [],
-    imageFocal: np.primaryImageFocal ?? '62%',
+    price: priceEuros,
+    bedrooms,
+    bathrooms,
+    sizeM2,
+    maxGuests,
+    amenities,
+    images,
+    imageFocal: '62%',
     featured: np.featured,
     lat: np.lat,
     lng: np.lng,
-    // Sin reviews, sin cleaningFee, sin minNights, sin maxGuests
-    // (alquiler de larga duración — la UI ya no usa estos campos)
   };
 }
 
-/**
- * Devuelve todas las propiedades para el build.
- * Producción: consulta Nivora o falla (build roto).
- * Desarrollo: intenta Nivora, fallback al fixture local si falla.
- */
-export async function getProperties(): Promise<PropertySource> {
-  const nivoraProps = await fetchNivoraCatalog({
-    forceRefresh: process.env.NIVORA_FORCE_REFRESH === '1',
-  });
+// ── Fixture loader ──────────────────────────────────────────────────────
 
-  if (nivoraProps.length === 0 && IS_PRODUCTION) {
-    throw new Error(
-      'Nivora devolvió un catálogo vacío. El build no puede continuar con 0 propiedades.'
-    );
+async function loadFixture(): Promise<Property[]> {
+  return fallbackProperties;
+}
+
+// ── API pública ──────────────────────────────────────────────────────────
+
+export async function getProperties(): Promise<PropertySource> {
+  if (!IS_PRODUCTION) {
+    try {
+      const nivoraProps = await fetchNivoraCatalog();
+      return {
+        name: 'nivora',
+        properties: nivoraProps.map(fromNivora),
+        fetchedAt: Date.now(),
+      };
+    } catch (err) {
+      if (!(err instanceof NivoraError)) throw err;
+      console.warn(`[properties] Nivora no disponible (${err.message}), usando fixture local.`);
+      return {
+        name: 'fallback',
+        properties: await loadFixture(),
+        fetchedAt: Date.now(),
+      };
+    }
   }
 
+  // Producción: Nivora o build roto. Catálogo vacío es válido.
+  const nivoraProps = await fetchNivoraCatalog();
   return {
     name: 'nivora',
     properties: nivoraProps.map(fromNivora),
@@ -144,17 +222,11 @@ export async function getProperties(): Promise<PropertySource> {
   };
 }
 
-/**
- * Devuelve una propiedad por slug.
- */
 export async function getPropertyBySlug(slug: string): Promise<Property | undefined> {
   const { properties } = await getProperties();
   return properties.find((p) => p.slug === slug);
 }
 
-/**
- * Devuelve la lista única de zonas (libres, no enum) presentes en el catálogo.
- */
 export async function getUniqueZones(): Promise<string[]> {
   const { properties } = await getProperties();
   const zones = new Set<string>();
@@ -164,21 +236,12 @@ export async function getUniqueZones(): Promise<string[]> {
   return Array.from(zones).sort();
 }
 
-// ── Modo desarrollo: helper para usar fixture sin Nivora ───────────────────
-
-/**
- * SOLO en desarrollo: devuelve el fixture local sin tocar Nivora.
- * Útil para iterar UI offline. En producción lanza error.
- */
 export async function getFixtureProperties(): Promise<PropertySource> {
   if (IS_PRODUCTION) {
-    throw new Error(
-      'getFixtureProperties() no está disponible en producción. ' +
-      'Usa getProperties() que consulta Nivora.'
-    );
+    throw new Error('getFixtureProperties() no está disponible en producción.');
   }
   return {
     name: 'fallback',
-    properties: fallbackProperties,
+    properties: await loadFixture(),
   };
 }

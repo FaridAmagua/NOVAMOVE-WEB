@@ -34,13 +34,6 @@ const ctaLabel = t(locale, 'properties.requestInfo');
 const ctaHref = '#inquiry'; // anchor al form de solicitud en la misma página
 const transactionBadge = 'Alquiler';
 
-// reviews — actualmente Nivora no envía reviews. Ocultamos la sección
-// entera si la propiedad no tiene.
-const reviews = property.reviews ?? [];
-const avgRating = reviews.length > 0
-  ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-  : 0;
-
 const destLabel = zoneLabel(property.destination, locale);
 
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
@@ -319,59 +312,6 @@ const amenityIcons: Record<string, string> = {
             </section>
           )}
 
-          <!-- ===== Reviews section ===== -->
-          {reviews.length > 0 && (
-            <section class="prop-section prop-reviews reveal">
-              <header class="prop-section__header">
-                <div>
-                  <h2 class="h3">{t(locale, 'properties.reviewsTitle')}</h2>
-                  <p class="prop-section__subtitle">{t(locale, 'properties.reviewsSubtitle')}</p>
-                </div>
-                <div class="prop-reviews__score">
-                  <div class="prop-reviews__score-num">{avgRating.toFixed(1)}</div>
-                  <div class="prop-reviews__score-meta">
-                    <div class="prop-reviews__stars">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill={i < Math.round(avgRating) ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
-                          <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                      ))}
-                    </div>
-                    <span>{t(locale, 'properties.ratingAverage')}</span>
-                    <span class="prop-reviews__score-sub">{t(locale, 'properties.reviewsBasedOn', { n: reviews.length })}</span>
-                  </div>
-                </div>
-              </header>
-
-              <div class="prop-reviews__grid" data-stagger data-stagger-step="100">
-                {reviews.map((review, i) => {
-                  const stayDate = new Date(review.date);
-                  const stayedAt = t(locale, 'properties.stayedAt', { month: monthName(stayDate.getMonth(), locale), year: String(stayDate.getFullYear()) });
-                  return (
-                    <article class="prop-review reveal reveal--fade">
-                      <div class="prop-review__stars" aria-label={`${review.rating} de 5`}>
-                        {Array.from({ length: 5 }).map((_, j) => (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill={j < review.rating ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
-                            <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        ))}
-                      </div>
-                      <p class="prop-review__text">"{review.text[locale]}"</p>
-                      <footer class="prop-review__footer">
-                        <div>
-                          <strong>{review.author[locale]}</strong>
-                          <span>{review.origin[locale]}</span>
-                        </div>
-                        <span class="prop-review__date">{stayedAt}</span>
-                      </footer>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          <!-- Process timeline -->
           <section class="prop-section reveal">
             <header class="prop-section__header prop-section__header--center">
               <p class="eyebrow">{t(locale, 'properties.processSubtitle')}</p>
