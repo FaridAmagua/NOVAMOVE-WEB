@@ -97,10 +97,23 @@ function pickEnWithFallback(
   return fromEn || pickLocalized(fallback, key);
 }
 
-function isKnownType(t: PublicProperty['type']): t is PropertyType {
-  return (['villa', 'apartment', 'finca', 'penthouse'] as PublicProperty['type'][]).includes(
-    t as PropertyType
-  );
+/** Convierte un type de Nivora al PropertyType soportado. Si no
+ *  coincide exactamente con uno de los 11 valores, NO convertimos — se
+ *  propaga una excepción para que el caller decida qué hacer. */
+function requireKnownType(
+  np: PublicProperty
+): PropertyType {
+  const allowed: PublicProperty['type'][] = [
+    'apartment', 'house', 'chalet', 'duplex', 'penthouse',
+    'studio', 'land', 'commercial', 'office', 'garage', 'other',
+  ];
+  if (!(allowed as string[]).includes(np.type)) {
+    throw new Error(
+      `Tipo de Nivora no soportado: "${np.type}" para ${np.id}. ` +
+      `Permitidos: ${allowed.join(', ')}`
+    );
+  }
+  return np.type as PropertyType;
 }
 
 // ── Orden de imágenes: isCover primero, luego position ascendente ─────
@@ -117,21 +130,21 @@ function orderImages(images: PublicProperty['images']): string[] {
 
 // ── Focal point a object-position ──────────────────────────────────────
 
+/** Devuelve CSS `object-position` a partir de `focalPoint` (0-100, 0-100).
+ *  Nivora: (x=0, y=0) = top-left. CSS: (x%, y%) donde x=0% = left.
+ *  Formato final: `${x}% ${y}%` (sin "center" redundante). */
 function focalPointToObjectPosition(
   focalPoint: { x: number; y: number } | undefined
 ): string | null {
   if (!focalPoint) return null;
-  // Nivora usa coordenadas 0-100 (0,0 = top-left, 100,100 = bottom-right)
-  // CSS object-position usa porcentajes con mismo significado
-  return `center ${focalPoint.y}% center ${focalPoint.x}%`;
+  return `${focalPoint.x}% ${focalPoint.y}%`;
 }
 
 // ── Mapper Nivora → Property (modelo UI) ────────────────────────────
 
 function fromNivora(np: PublicProperty): Property {
-  // Type: mapping explícito. Si Nivora devuelve un type no soportado por
-  // la UI, caemos a 'villa' (legacy). En el futuro añadiríamos 'house'/'chalet'.
-  const propertyType: PropertyType = isKnownType(np.type) ? np.type : 'villa';
+  // Type: si Nivora devuelve un type no soportado, propagamos error.
+  const propertyType: PropertyType = requireKnownType(np);
 
   // Operación: Nivora ya devuelve 'rent' | 'sale' literales.
   const transaction: Property['transaction'] = np.operation;
@@ -139,22 +152,31 @@ function fromNivora(np: PublicProperty): Property {
   // Precio: amountCents (entero) → euros (decimal).
   const priceEuros = np.pricing.amountCents / 100;
 
+  // Features: copiar ES/EN del contrato. Nivora garantiza `es` presente.
+  // Si el contrato de Nivora no trae `en` en features, mantenemos lo que
+  // llegue. El caller (UI) hará fallback a es si en está vacío.
+  const features: Property['features'] = {
+    es: Array.isArray(np.features.es) ? np.features.es : [],
+    en: Array.isArray(np.features.en) ? np.features.en : [],
+  };
+
   // Imágenes: isCover primero, luego position ascendente.
   const images = orderImages(np.images);
 
-  // Focal point de la imagen de portada (la primera del array ordenado).
+  // imagePosition: desde el focalPoint de la imagen de portada (la
+  // primera del array ordenado). Si no hay focalPoint, default.
   const coverImage = images.length > 0 ? np.images.find((i) => i.isCover) : null;
-  const imageFocal = coverImage?.focalPoint
+  const imagePosition = coverImage?.focalPoint
     ? focalPointToObjectPosition(coverImage.focalPoint)
-    : null;
+    : undefined;
 
-  // No inventamos maxGuests, no leemos address/area/usableAreaSqm/plotAreaSqm.
-  // Solo lo que el contrato envía explícitamente.
   return {
     id: np.id,
     slug: np.slug,
+    reference: np.reference,
     type: propertyType,
     transaction,
+    status: np.status,
     destination: np.content.es.publicLocation,
     name: {
       es: pickLocalized(np.content.es, 'title'),
@@ -173,15 +195,13 @@ function fromNivora(np: PublicProperty): Property {
       en: pickEnWithFallback(np.content.en, np.content.es, 'publicLocation'),
     },
     price: priceEuros,
+    features,
     bedrooms: np.specs.bedrooms ?? 0,
     bathrooms: np.specs.bathrooms ?? 0,
     sizeM2: np.specs.builtAreaSqm ?? 0,
-    amenidades: np.features.es ?? [],
     images,
-    imageFocal: imageFocal ?? '62%',
+    imagePosition,
     featured: np.featured,
-    // No incluimos publishedAt/updatedAt en el modelo Property — la UI
-    // actual no los expone. Si la UI los muestra, se añade el campo.
   };
 }
 

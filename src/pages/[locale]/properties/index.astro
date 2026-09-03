@@ -5,7 +5,7 @@ import { t, localeParams, type Locale } from '../../../utils/i18n';
 import {
   propertyTypeLabel,
   formatPrice,
-  DEFAULT_IMAGE_FOCAL,
+  statusLabel,
 } from '../../../data/properties';
 import { getProperties, getUniqueZones, zoneLabel } from '../../../data/property-source';
 
@@ -19,14 +19,10 @@ const locale = Astro.params.locale as Locale;
 const { properties } = await getProperties();
 const uniqueZones = await getUniqueZones();
 
-const transactionFilter = Astro.url.searchParams.get('tx') ?? '';
 const destinationFilter = Astro.url.searchParams.get('dest') ?? '';
 const sort = Astro.url.searchParams.get('sort') ?? 'featured';
 
 let filtered = properties;
-if (transactionFilter === 'rent') {
-  filtered = filtered.filter((p) => p.transaction === 'rent');
-}
 if (destinationFilter) {
   filtered = filtered.filter((p) => p.destination === destinationFilter);
 }
@@ -59,18 +55,6 @@ if (sort === 'price-asc') {
       <!-- Filters -->
       <form class="flex flex-wrap items-end gap-4 md:gap-6 p-6 bg-cream rounded-lg mb-12" method="get" aria-label={locale === 'es' ? 'Filtros' : 'Filters'}>
         <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
-          <label for="tx" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
-            {t(locale, 'properties.filterTransaction')}
-          </label>
-          <select name="tx" id="tx"
-            class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
-            onchange="this.form.submit()">
-            <option value="">{t(locale, 'properties.filterAllTransactions')}</option>
-            <option value="rent" selected={transactionFilter === 'rent'}>{t(locale, 'properties.filterRent')}</option>
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
           <label for="dest" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
             {t(locale, 'properties.filterDestination')}
           </label>
@@ -97,7 +81,7 @@ if (sort === 'price-asc') {
           </select>
         </div>
 
-        {(transactionFilter || destinationFilter) && (
+        {destinationFilter && (
           <a href={`/${locale}/properties`}
             class="self-end text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-gold py-2.5 hover:opacity-80">
             × {t(locale, 'properties.filterReset')}
@@ -109,19 +93,21 @@ if (sort === 'price-asc') {
         <p class="text-center text-text-secondary py-16 text-lg">{t(locale, 'properties.noResults')}</p>
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="80">
-          {filtered.map((p, i) => {
+          {filtered.map((p) => {
             // Nivora = solo alquiler larga duración
-            const isSale = false;
-            const priceUnit = t(locale, 'properties.priceUnitRent');
             const ctaLabel = t(locale, 'properties.bookNow');
             const targetPath = `/${locale}/properties/${p.slug}`;
             return (
               <article class="reveal reveal--fade bg-white border border-navy/5 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" data-tilt="3">
                 <a href={targetPath} class="block text-text-primary no-underline">
                   <div class="relative aspect-[4/3] overflow-hidden">
-                    <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
-                         class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.06]"
-                         style={`object-position: center ${p.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
+                    <img
+                      src={p.images[0]}
+                      alt={p.name[locale]}
+                      loading="lazy"
+                      class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.06]"
+                      style={`object-position: ${p.imagePosition ?? 'center 62%'};`}
+                    />
                     <span class="absolute top-4 left-4 bg-white/95 text-navy text-[0.7rem] font-semibold tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-full">
                       {propertyTypeLabel(p.type, locale)}
                     </span>
@@ -130,8 +116,14 @@ if (sort === 'price-asc') {
                         ★ {locale === 'es' ? 'Destacada' : 'Featured'}
                       </span>
                     )}
-                    <span class="absolute bottom-4 left-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase px-3.5 py-1.5 rounded-full bg-navy/85 text-gold-soft">
-                      {locale === 'es' ? 'Alquiler' : 'For rent'}
+                    <span class={`absolute bottom-4 left-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase px-3.5 py-1.5 rounded-full ${
+                      p.status === 'available'
+                        ? 'bg-navy/85 text-gold-soft'
+                        : 'bg-gold text-navy'
+                    }`}>
+                      {p.status === 'available'
+                        ? (locale === 'es' ? 'Disponible' : 'Available')
+                        : (locale === 'es' ? 'Reservado' : 'Reserved')}
                     </span>
                   </div>
                   <div class="p-6">
