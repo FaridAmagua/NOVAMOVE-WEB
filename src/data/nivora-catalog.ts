@@ -96,7 +96,11 @@ export type PublicProperty = {
 
 export type PublicCatalogResponse = {
   schemaVersion: '1.0';
-  site: string;
+  site: {
+    key: string;
+    name: string;
+    domain?: string;
+  };
   generatedAt: string;
   properties: PublicProperty[];
 };
@@ -181,7 +185,12 @@ function validateResponse(raw: unknown): PublicCatalogResponse {
       `schemaVersion inválido: "${String(r.schemaVersion)}" (esperado "1.0")`
     );
   }
-  if (typeof r.site !== 'string' || r.site.length === 0) {
+  if (
+    !r.site ||
+    typeof r.site !== 'object' ||
+    typeof (r.site as { key?: unknown }).key !== 'string' ||
+    typeof (r.site as { name?: unknown }).name !== 'string'
+  ) {
     throw new NivoraError(`Falta o es inválido el campo "site" (recibido: ${String(r.site)})`);
   }
   if (typeof r.generatedAt !== 'string') {

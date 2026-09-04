@@ -2,13 +2,13 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { t, localeParams, type Locale } from '../../../utils/i18n';
 import { getProperties, zoneLabel, type Property } from '../../../data/property-source';
-import { propertyTypeLabel } from '../../../data/properties';
+import { propertyTypeLabel, formatPrice } from '../../../data/properties';
 
 export async function getStaticPaths() {
   const { properties } = await getProperties();
   // Solo propiedades en alquiler (larga duración)
   const paths: Array<{ params: { locale: string; slug: string }; props: { property: Property } }> = [];
-  for (const locale of localeParams) {
+  for (const { params: { locale } } of localeParams) {
     for (const p of properties.filter((x) => x.transaction === 'rent')) {
       paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
     }
