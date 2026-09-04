@@ -5,7 +5,6 @@ import { t, localeParams, type Locale } from '../../../utils/i18n';
 import {
   propertyTypeLabel,
   formatPrice,
-  statusLabel,
 } from '../../../data/properties';
 import { getProperties, getUniqueZones, zoneLabel } from '../../../data/property-source';
 
@@ -95,8 +94,11 @@ if (sort === 'price-asc') {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="80">
           {filtered.map((p) => {
             // Nivora = solo alquiler larga duración
-            const ctaLabel = t(locale, 'properties.bookNow');
+            const ctaLabel = locale === 'es' ? 'Ver propiedad' : 'View property';
             const targetPath = `/${locale}/properties/${p.slug}`;
+            const zone = zoneLabel(p.destination, locale);
+            const location = p.location[locale]?.trim();
+            const showLocation = Boolean(location && location.localeCompare(zone, undefined, { sensitivity: 'accent' }) !== 0);
             return (
               <article class="reveal reveal--fade bg-white border border-navy/5 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" data-tilt="3">
                 <a href={targetPath} class="block text-text-primary no-underline">
@@ -128,19 +130,21 @@ if (sort === 'price-asc') {
                   </div>
                   <div class="p-6">
                     <div class="flex gap-2 text-[0.78rem] text-gold font-semibold tracking-[0.08em] uppercase mb-2">
-                      <span>{zoneLabel(p.destination, locale)}</span>
-                      <span>·</span>
-                      <span>{p.location[locale]}</span>
+                      <span>{zone}</span>
+                      {showLocation && <span>·</span>}
+                      {showLocation && <span>{location}</span>}
                     </div>
                     <h3 class="font-serif text-[1.45rem] leading-tight text-navy mb-2">{p.name[locale]}</h3>
                     <p class="text-[0.9rem] text-text-secondary leading-relaxed mb-4 min-h-[2.7em]">{p.tagline[locale]}</p>
-                    <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
-                      <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>
-                      <span>·</span>
-                      <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>
-                      <span>·</span>
-                      <span>{p.sizeM2} m²</span>
-                    </div>
+                    {(p.bedrooms || p.bathrooms || p.sizeM2) && (
+                      <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
+                        {p.bedrooms && <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>}
+                        {p.bedrooms && p.bathrooms && <span>·</span>}
+                        {p.bathrooms && <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>}
+                        {(p.bedrooms || p.bathrooms) && p.sizeM2 && <span>·</span>}
+                        {p.sizeM2 && <span>{p.sizeM2} m²</span>}
+                      </div>
+                    )}
                     <div class="flex items-baseline gap-2 flex-wrap">
                       <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
                       <span class="font-serif text-2xl text-gold font-medium">{formatPrice(p.price, locale)}</span>

@@ -42,9 +42,9 @@ export interface Property {
   /** Características. UI usa features.es en ES, features.en (fallback a es
    *  si vacío) en EN. */
   features: { es: string[]; en: string[] };
-  bedrooms: number;
-  bathrooms: number;
-  sizeM2: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  sizeM2: number | null;
   images: string[];
   /** CSS object-position. */
   imagePosition?: string;
@@ -72,7 +72,7 @@ export const properties: Property[] = [
     id: 'villa-mediterranea-marbella',
     slug: 'villa-mediterranea-marbella',
     reference: 'GLOBAL-MOVE-MAR-001',
-    type: 'villa' as PropertyType,
+    type: 'chalet',
     transaction: 'rent',
     status: 'available',
     destination: 'marbella',
@@ -122,7 +122,7 @@ export const propertyTypeLabel = (type: PropertyType, locale: 'es' | 'en') => {
     garage:     { es: 'Garaje',           en: 'Garage' },
     other:      { es: 'Otro',             en: 'Other' },
   };
-  return labels[type]?.[locale] ?? labels[type].es;
+  return labels[type]?.[locale] ?? labels.other[locale];
 };
 
 // Etiquetas de status

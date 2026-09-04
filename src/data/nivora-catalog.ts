@@ -13,7 +13,7 @@
 //
 // Variables de entorno requeridas:
 //   NIVORA_API_URL       Base URL (ej: https://api-nivora.decotea.es)
-//   NIVORA_SITE_KEY      Identificador público del sitio (ej: global-move)
+//   NIVORA_SITE_KEY      Identificador público del sitio (ej: glovalmove)
 //   NIVORA_CATALOG_TOKEN Token Bearer
 //
 // Caché: memoización en memoria durante el mismo proceso de build.
@@ -76,18 +76,11 @@ export type PublicProperty = {
   images: Array<{
     id: string;
     url: string;
-    alt: {
-      es: string;
-      en?: string;
-    };
-    width: number | null;
-    height: number | null;
+    alt: string;
+    width: number;
+    height: number;
     isCover: boolean;
     position: number;
-    focalPoint?: {
-      x: number;
-      y: number;
-    };
   }>;
 
   publishedAt: string;

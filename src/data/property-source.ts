@@ -122,18 +122,6 @@ export function orderImages(images: PublicProperty['images']): string[] {
   return sorted.map((i) => i.url);
 }
 
-// ── Focal point a object-position ──────────────────────────────────────
-
-/** Devuelve CSS `object-position` a partir de `focalPoint` (0-100, 0-100).
- *  Nivora: (x=0, y=0) = top-left. CSS: (x%, y%) donde x=0% = left.
- *  Formato final: `${x}% ${y}%` (sin "center" redundante). */
-export function focalPointToObjectPosition(
-  focalPoint: { x: number; y: number } | undefined
-): string | null {
-  if (!focalPoint) return null;
-  return `${focalPoint.x}% ${focalPoint.y}%`;
-}
-
 // ── Mapper Nivora → Property (modelo UI) ────────────────────────────
 
 export function fromNivora(np: PublicProperty): Property {
@@ -158,13 +146,6 @@ export function fromNivora(np: PublicProperty): Property {
 
   // Imágenes: isCover primero, luego position ascendente.
   const images = orderImages(np.images);
-
-  // imagePosition: desde el focalPoint de la imagen de portada (la
-  // primera del array ordenado). Si no hay focalPoint, default.
-  const coverImage = images.length > 0 ? np.images.find((i) => i.isCover) : null;
-  const imagePosition = coverImage?.focalPoint
-    ? focalPointToObjectPosition(coverImage.focalPoint)
-    : undefined;
 
   return {
     id: np.id,
@@ -192,11 +173,10 @@ export function fromNivora(np: PublicProperty): Property {
     },
     price: priceEuros,
     features,
-    bedrooms: np.specs.bedrooms ?? 0,
-    bathrooms: np.specs.bathrooms ?? 0,
-    sizeM2: np.specs.builtAreaSqm ?? 0,
+    bedrooms: np.specs.bedrooms,
+    bathrooms: np.specs.bathrooms,
+    sizeM2: np.specs.builtAreaSqm,
     images,
-    imagePosition,
     featured: np.featured,
   };
 }

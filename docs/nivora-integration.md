@@ -63,7 +63,7 @@ type PublicCatalogResponse = {
 
 ```
 NIVORA_API_URL       https://api-nivora.decotea.es
-NIVORA_SITE_KEY      global-move
+NIVORA_SITE_KEY      glovalmove
 NIVORA_CATALOG_TOKEN replace-with-real-token
 ```
 

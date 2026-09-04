@@ -84,13 +84,13 @@ const inquirySubject = encodeURIComponent(
 
               <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
-                <span>{property.bedrooms} {t(locale, 'common.bedrooms')}</span>
-                <span>·</span>
-                <span>{property.bathrooms} {t(locale, 'common.bathrooms')}</span>
-                <span>·</span>
-                <span>{property.sizeM2} m²</span>
-              </div>
+              {(property.bedrooms || property.bathrooms || property.sizeM2) && (
+                <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
+                  {property.bedrooms && <span>{property.bedrooms} {t(locale, 'common.bedrooms')}</span>}
+                  {property.bathrooms && <span>{property.bathrooms} {t(locale, 'common.bathrooms')}</span>}
+                  {property.sizeM2 && <span>{property.sizeM2} m²</span>}
+                </div>
+              )}
 
               <div class="h-px bg-navy/5 my-5"></div>
 

@@ -1,7 +1,7 @@
 // scripts/test-nivora-mapper.mts
 // Tests unitarios del mapper Nivora → Property.
 // NO hace fetch a Nivora — solo prueba la lógica pura del mapper
-// (fromNivora, pickLocalized, focalPointToObjectPosition, orderImages, etc.)
+// (fromNivora, pickLocalized, orderImages, etc.)
 // contra fixtures del contrato.
 //
 // Ejecutar con:
@@ -13,12 +13,9 @@ import {
   fromNivora,
   pickLocalized,
   pickEnWithFallback,
-  focalPointToObjectPosition,
   orderImages,
   requireKnownType,
 } from '../src/data/property-source.ts';
-import { NivoraError } from '../src/data/nivora-catalog.ts';
-
 // Fixture: propiedad completa del contrato
 // Usamos 'house' (NO 'villa') — 'villa' no está en la lista de tipos
 // del contrato Nivora. El mapper rechaza 'villa' (Test 6).
@@ -48,9 +45,9 @@ const fullFixture = {
   specs: { bedrooms: 5, bathrooms: 4, builtAreaSqm: 420, usableAreaSqm: 380, plotAreaSqm: 1200 },
   features: { es: ['Pool', 'Wi-Fi'], en: ['Pool EN', 'Wi-Fi EN'] },
   images: [
-    { id: 'i1', url: 'https://x.com/c.jpg', alt: { es: 'a' }, width: 100, height: 100, isCover: true, position: 0, focalPoint: { x: 60, y: 50 } },
-    { id: 'i2', url: 'https://x.com/b.jpg', alt: { es: 'b' }, width: 100, height: 100, isCover: false, position: 2 },
-    { id: 'i3', url: 'https://x.com/a.jpg', alt: { es: 'c' }, width: 100, height: 100, isCover: false, position: 1 },
+    { id: 'i1', url: 'https://x.com/c.jpg', alt: 'a', width: 100, height: 100, isCover: true, position: 0 },
+    { id: 'i2', url: 'https://x.com/b.jpg', alt: 'b', width: 100, height: 100, isCover: false, position: 2 },
+    { id: 'i3', url: 'https://x.com/a.jpg', alt: 'c', width: 100, height: 100, isCover: false, position: 1 },
   ],
   publishedAt: '2026-09-01T00:00:00Z',
   updatedAt: '2026-09-30T00:00:00Z',
@@ -86,7 +83,6 @@ try {
   test('features.es (2)', p.features.es?.length === 2);
   test('features.en (2)', p.features.en?.length === 2);
   test('images ordenadas con cover primero', p.images[0] === 'https://x.com/c.jpg' && p.images[1] === 'https://x.com/a.jpg' && p.images[2] === 'https://x.com/b.jpg');
-  test('imagePosition del focalPoint 60,50', p.imagePosition === '60% 50%');
 } catch (e: any) {
   console.error('  ERROR Test 1:', e.message);
   failed++;
@@ -157,21 +153,12 @@ try {
   failed++;
 }
 
-console.log('\n=== Test 8: focalPoint x=60 y=50 → imagePosition: 60% 50% ===\n');
-try {
-  const p = fromNivora(fullFixture as any);
-  expect(p.imagePosition, '60% 50%', 'imagePosition');
-} catch (e: any) {
-  console.error('  ERROR Test 8:', e.message);
-  failed++;
-}
-
-console.log('\n=== Test 9: sin focalPoint → imagePosition undefined ===\n');
+console.log('\n=== Test 8: sin recorte específico → imagePosition undefined ===\n');
 try {
   const fixture = {
     ...fullFixture,
     images: [
-      { id: 'i1', url: 'https://x.com/a.jpg', alt: { es: 'a' }, width: 100, height: 100, isCover: true, position: 0 },
+      { id: 'i1', url: 'https://x.com/a.jpg', alt: 'a', width: 100, height: 100, isCover: true, position: 0 },
     ],
   };
   const p = fromNivora(fixture as any);
@@ -181,7 +168,7 @@ try {
   failed++;
 }
 
-console.log('\n=== Test 10: helpers puros ===\n');
+console.log('\n=== Test 9: helpers puros ===\n');
 try {
   // pickLocalized lee key directa del objeto
   test('pickLocalized lee title de content.es',
@@ -201,18 +188,11 @@ try {
     pickEnWithFallback({} as any, { title: 'es1' } as any, 'title') === 'es1'
   );
 
-  // focalPointToObjectPosition
-  test('focalPointToObjectPosition 60,50 → "60% 50%"',
-    focalPointToObjectPosition({ x: 60, y: 50 }) === '60% 50%'
-  );
-  test('focalPointToObjectPosition 0,0 → "0% 0%"', focalPointToObjectPosition({ x: 0, y: 0 }) === '0% 0%');
-  test('focalPointToObjectPosition undefined → null', focalPointToObjectPosition(undefined) === null);
-
   // orderImages: cover primero, luego position
   const imgs = [
-    { id: 'c', url: 'c.jpg', alt: { es: '' }, width: 1, height: 1, isCover: true, position: 0, focalPoint: { x: 50, y: 50 } },
-    { id: 'b', url: 'b.jpg', alt: { es: '' }, width: 1, height: 1, isCover: false, position: 2 },
-    { id: 'a', url: 'a.jpg', alt: { es: '' }, width: 1, height: 1, isCover: false, position: 1 },
+    { id: 'c', url: 'c.jpg', alt: '', width: 1, height: 1, isCover: true, position: 0 },
+    { id: 'b', url: 'b.jpg', alt: '', width: 1, height: 1, isCover: false, position: 2 },
+    { id: 'a', url: 'a.jpg', alt: '', width: 1, height: 1, isCover: false, position: 1 },
   ];
   const ordered = orderImages(imgs as any);
   test('orderImages: cover (c) primero, luego position ascendente', ordered[0] === 'c.jpg' && ordered[1] === 'a.jpg' && ordered[2] === 'b.jpg');
@@ -229,7 +209,7 @@ try {
   failed++;
 }
 
-console.log('\n=== Test 11: NivoraError propagado en features no-array ===\n');
+console.log('\n=== Test 10: NivoraError propagado en features no-array ===\n');
 try {
   // Features debería ser array pero NivoraError solo se lanza en tipos. El test
   // verifica que features null se maneja con fallback a [].
