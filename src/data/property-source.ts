@@ -70,37 +70,31 @@ export function zoneLabel(zone: string, locale: 'es' | 'en'): string {
 
 type Localized = { es: string; en?: string };
 
-function pickLocalized(
+/** Lee una key (title, tagline, description, publicLocation) del campo
+ *  localizado de Nivora. Acepta el objeto content completo (content.es,
+ *  content.en) o un sub-objeto (es/en). Si no existe o no es string, ''. */
+export function pickLocalized(
   field: LocalizedPropertyContent | Localized | undefined,
   key: keyof LocalizedPropertyContent | keyof Localized
 ): string {
-  if (!field) return '';
-  // 1) Si el campo es el objeto Nivora (content), leer la key solicitada
-  if (typeof field === 'object' && 'title' in field && 'description' in field) {
-    const value = (field as LocalizedPropertyContent)[key as keyof LocalizedPropertyContent];
-    return typeof value === 'string' ? value : '';
-  }
-  // 2) Compatibilidad: si es un Localized plano, leer por la key
-  if (typeof field === 'object' && key in (field as Localized)) {
-    const v = (field as Localized)[key as keyof Localized];
-    return typeof v === 'string' ? v : '';
-  }
-  return '';
+  if (!field || typeof field !== 'object') return '';
+  const f = field as Record<string, unknown>;
+  const v = f[key as string];
+  return typeof v === 'string' ? v : '';
 }
 
-function pickEnWithFallback(
+export function pickEnWithFallback(
   en: LocalizedPropertyContent | undefined,
   fallback: LocalizedPropertyContent,
   key: keyof LocalizedPropertyContent
 ): string {
-  const fromEn = pickLocalized(en, key);
-  return fromEn || pickLocalized(fallback, key);
+  return pickLocalized(en, key) || pickLocalized(fallback, key);
 }
 
 /** Convierte un type de Nivora al PropertyType soportado. Si no
  *  coincide exactamente con uno de los 11 valores, NO convertimos — se
  *  propaga una excepción para que el caller decida qué hacer. */
-function requireKnownType(
+export function requireKnownType(
   np: PublicProperty
 ): PropertyType {
   const allowed: PublicProperty['type'][] = [
@@ -118,7 +112,7 @@ function requireKnownType(
 
 // ── Orden de imágenes: isCover primero, luego position ascendente ─────
 
-function orderImages(images: PublicProperty['images']): string[] {
+export function orderImages(images: PublicProperty['images']): string[] {
   if (!images || images.length === 0) return [];
   const sorted = [...images].sort((a, b) => {
     if (a.isCover && !b.isCover) return -1;
@@ -133,7 +127,7 @@ function orderImages(images: PublicProperty['images']): string[] {
 /** Devuelve CSS `object-position` a partir de `focalPoint` (0-100, 0-100).
  *  Nivora: (x=0, y=0) = top-left. CSS: (x%, y%) donde x=0% = left.
  *  Formato final: `${x}% ${y}%` (sin "center" redundante). */
-function focalPointToObjectPosition(
+export function focalPointToObjectPosition(
   focalPoint: { x: number; y: number } | undefined
 ): string | null {
   if (!focalPoint) return null;
@@ -142,7 +136,7 @@ function focalPointToObjectPosition(
 
 // ── Mapper Nivora → Property (modelo UI) ────────────────────────────
 
-function fromNivora(np: PublicProperty): Property {
+export function fromNivora(np: PublicProperty): Property {
   // Type: si Nivora devuelve un type no soportado, propagamos error.
   const propertyType: PropertyType = requireKnownType(np);
 
@@ -155,9 +149,11 @@ function fromNivora(np: PublicProperty): Property {
   // Features: copiar ES/EN del contrato. Nivora garantiza `es` presente.
   // Si el contrato de Nivora no trae `en` en features, mantenemos lo que
   // llegue. El caller (UI) hará fallback a es si en está vacío.
+  // Si `np.features` es null/undefined (error en el contrato), fallback seguro.
+  const npFeatures = np.features ?? { es: [], en: [] };
   const features: Property['features'] = {
-    es: Array.isArray(np.features.es) ? np.features.es : [],
-    en: Array.isArray(np.features.en) ? np.features.en : [],
+    es: Array.isArray(npFeatures.es) ? npFeatures.es : [],
+    en: Array.isArray(npFeatures.en) ? npFeatures.en : [],
   };
 
   // Imágenes: isCover primero, luego position ascendente.
