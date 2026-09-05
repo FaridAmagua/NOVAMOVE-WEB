@@ -12,8 +12,8 @@
 //   Accept:        application/json
 //
 // Variables de entorno requeridas:
-//   NIVORA_API_URL       Base URL (ej: https://api-nivora.decotea.es)
-//   NIVORA_SITE_KEY      Identificador público del sitio (ej: glovalmove)
+//   NIVORA_API_URL       Base URL (ej: https://<host>.example.com)
+//   NIVORA_SITE_KEY      Identificador público del sitio (ej: <your-site-key>)
 //   NIVORA_CATALOG_TOKEN Token Bearer
 //
 // Caché: memoización en memoria durante el mismo proceso de build.

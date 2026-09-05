@@ -62,8 +62,8 @@ type PublicCatalogResponse = {
 ### Variables de entorno requeridas
 
 ```
-NIVORA_API_URL       https://api-nivora.decotea.es
-NIVORA_SITE_KEY      glovalmove
+NIVORA_API_URL       <your-nivora-api-url>
+NIVORA_SITE_KEY      <your-nivora-site-key>
 NIVORA_CATALOG_TOKEN replace-with-real-token
 ```
 
