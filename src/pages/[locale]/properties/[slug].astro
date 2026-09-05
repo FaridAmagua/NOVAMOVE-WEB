@@ -372,7 +372,7 @@ function featureIcon(feature: string) {
                 <a href={ctaHref} class="btn btn--primary w-full text-base">
                   {ctaLabel}
                 </a>
-                <a href={visitHref} class="btn btn--secondary w-full text-base">
+                <a href={visitHref} class="btn btn--secondary booking-card__visit-cta w-full text-base">
                   {visitLabel}
                 </a>
               </div>
@@ -958,6 +958,19 @@ function featureIcon(feature: string) {
     color: var(--text-secondary);
   }
   .booking-card__cta { width: 100%; margin-bottom: 1rem; }
+  .booking-card__visit-cta {
+    background: var(--color-navy);
+    color: var(--text-on-dark);
+    border-color: var(--color-navy);
+    box-shadow: 0 8px 20px rgba(10, 29, 63, 0.14);
+  }
+  .booking-card__visit-cta:hover {
+    background: var(--color-white);
+    color: var(--color-navy);
+    border-color: var(--color-navy);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
   .booking-card__note--trust {
     text-align: center;
     font-size: 0.82rem;
