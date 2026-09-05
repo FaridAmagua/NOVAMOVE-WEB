@@ -48,7 +48,7 @@ const features = (() => {
 const destLabel = zoneLabel(property.destination, locale);
 const detailedLocation = property.location[locale]?.trim();
 const showDetailedLocation = Boolean(
-  detailedLocation && detailedLocation.localeCompare(destLabel, undefined, { sensitivity: 'accent' }) !== 0
+  detailedLocation && detailedLocation.localeCompare(destLabel, undefined, { sensitivity: 'base' }) !== 0
 );
 const processSteps = locale === 'es'
   ? [

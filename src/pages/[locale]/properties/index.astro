@@ -98,7 +98,7 @@ if (sort === 'price-asc') {
             const targetPath = `/${locale}/properties/${p.slug}`;
             const zone = zoneLabel(p.destination, locale);
             const location = p.location[locale]?.trim();
-            const showLocation = Boolean(location && location.localeCompare(zone, undefined, { sensitivity: 'accent' }) !== 0);
+            const showLocation = Boolean(location && location.localeCompare(zone, undefined, { sensitivity: 'base' }) !== 0);
             return (
               <article class="reveal reveal--fade bg-white border border-navy/5 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" data-tilt="3">
                 <a href={targetPath} class="block text-text-primary no-underline">
