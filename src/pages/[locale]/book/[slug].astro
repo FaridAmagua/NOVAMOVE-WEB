@@ -40,7 +40,7 @@ const inquirySubject = encodeURIComponent(
 
       <header class="reveal max-w-2xl mb-12">
         <p class="eyebrow">{t(locale, 'properties.requestInfo')}</p>
-        <h1 class="h-1">{property.name[locale]}</h1>
+        <h1 class="h1">{property.name[locale]}</h1>
         <p class="lead">{property.tagline[locale]}</p>
         <p class="mt-6 text-text-secondary">
           {locale === 'es'
@@ -82,17 +82,19 @@ const inquirySubject = encodeURIComponent(
               </span>
               <h3 class="font-serif text-[1.35rem] text-navy mt-1.5 mb-0">{property.name[locale]}</h3>
 
-              <div class="h-px bg-navy/5 my-5"></div>
-
               {(property.bedrooms || property.bathrooms || property.sizeM2) && (
-                <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
-                  {property.bedrooms && <span>{property.bedrooms} {t(locale, 'common.bedrooms')}</span>}
-                  {property.bathrooms && <span>{property.bathrooms} {t(locale, 'common.bathrooms')}</span>}
-                  {property.sizeM2 && <span>{property.sizeM2} m²</span>}
-                </div>
-              )}
+                <>
+                  <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="h-px bg-navy/5 my-5"></div>
+                  <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
+                    {property.bedrooms && <span>{property.bedrooms} {t(locale, 'common.bedrooms')}</span>}
+                    {property.bathrooms && <span>{property.bathrooms} {t(locale, 'common.bathrooms')}</span>}
+                    {property.sizeM2 && <span>{property.sizeM2} m²</span>}
+                  </div>
+
+                  <div class="h-px bg-navy/5 my-5"></div>
+                </>
+              )}
 
               <div class="flex items-baseline gap-2 flex-wrap">
                 <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>

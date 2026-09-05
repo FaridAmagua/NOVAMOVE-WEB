@@ -278,7 +278,7 @@ p { margin: 0; }
   letter-spacing: -0.025em;
 }
 
-.h-1 {
+.h1 {
   font-size: clamp(2.25rem, 5vw, 4rem);
   line-height: 1.08;
   font-weight: 600;
