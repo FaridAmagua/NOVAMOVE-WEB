@@ -3,40 +3,64 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Lightbox from '../../../components/Lightbox.astro';
 import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 import {
-  properties,
-  destinationLabel,
   propertyTypeLabel,
-  amenityLabel,
+  statusLabel,
   formatPrice,
-  transactionLabel,
-  DEFAULT_IMAGE_FOCAL,
-  type DestinationId,
 } from '../../../data/properties';
+import { getProperties, zoneLabel, type Property } from '../../../data/property-source';
 
 export async function getStaticPaths() {
-  const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
+  const { properties } = await getProperties();
+  const paths: Array<{ params: { locale: string; slug: string; }; props: { property: Property; otherProps: Property[] } }> = [];
   for (const locale of supportedLocales) {
     for (const p of properties) {
-      paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
+      // related: misma zone (libre, ya no es enum cerrado)
+      const otherProps = properties
+        .filter((x) => x.destination === p.destination && x.id !== p.id)
+        .slice(0, 3);
+      paths.push({ params: { locale, slug: p.slug }, props: { property: p, otherProps } });
     }
   }
   return paths;
 }
 
-const { property } = Astro.props as { property: typeof properties[number] };
+const { property, otherProps } = Astro.props as { property: Property; otherProps: Property[] };
 const locale = Astro.params.locale as Locale;
-const isSale = property.transaction === 'sale';
 
-const priceUnit = isSale ? '' : t(locale, 'properties.priceUnitRent');
-const ctaLabel = isSale ? t(locale, 'properties.requestInfo') : t(locale, 'properties.bookNow');
-const ctaHref = isSale ? '#inquiry' : `/${locale}/book/${property.slug}`;
-const transactionBadge = transactionLabel(property.transaction, locale);
+// Nivora = solo alquiler larga duración. CTA = "Solicitar información".
+// Versión de precio: €/mes (Nivora envía amountCents/mes).
+const priceUnit = `/${locale === 'es' ? 'mes' : 'month'}`;
+const ctaLabel = t(locale, 'properties.requestInfo');
+const ctaHref = '#inquiry';
+const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
+const visitHref = `/${locale}/book/${property.slug}`;
 
-const otherProps = properties
-  .filter(p => p.destination === property.destination && p.id !== property.id)
-  .slice(0, 3);
+// Features por idioma: en ES usa features.es; en EN usa features.en con
+// fallback a features.es si está vacío.
+const features = (() => {
+  const es = property.features.es ?? [];
+  const enRaw = property.features.en ?? [];
+  const en = enRaw.length > 0 ? enRaw : es;
+  if (locale === 'es') return es;
+  return en;
+})();
 
-const destLabel = destinationLabel(property.destination as DestinationId, locale);
+const destLabel = zoneLabel(property.destination, locale);
+const detailedLocation = property.location[locale]?.trim();
+const showDetailedLocation = Boolean(
+  detailedLocation && detailedLocation.localeCompare(destLabel, undefined, { sensitivity: 'accent' }) !== 0
+);
+const processSteps = locale === 'es'
+  ? [
+      ['Solicita información', 'Cuéntanos qué necesitas y resolveremos tus dudas sobre la vivienda.'],
+      ['Concertamos una visita', 'Coordinamos contigo el mejor día y hora para conocer la propiedad.'],
+      ['Preparamos el alquiler', 'Te acompañamos con las condiciones, documentación y siguientes pasos.'],
+    ]
+  : [
+      ['Request information', 'Tell us what you need and we will answer your questions about the property.'],
+      ['Schedule a viewing', 'We coordinate the best day and time for you to visit the property.'],
+      ['Prepare the tenancy', 'We guide you through the terms, documents and next steps.'],
+    ];
 
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
 const amenityIcons: Record<string, string> = {
@@ -58,20 +82,6 @@ const amenityIcons: Record<string, string> = {
   concierge:   '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/>',
   elevator:    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v4M9 11l3-3 3 3M9 16l3 3 3-3M8 6h8"/>',
 };
-
-// Aggregate rating from reviews
-const reviews = property.reviews ?? [];
-const avgRating = reviews.length > 0
-  ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-  : 0;
-const ratingLabel = avgRating >= 4.5 ? 'Excellent' : avgRating >= 3.5 ? 'Very good' : 'Good';
-
-// Format helper for the review "stayed in {month} {year}"
-function monthName(monthIdx: number, loc: Locale): string {
-  const d = new Date(2000, monthIdx, 1);
-  return d.toLocaleDateString(loc === 'es' ? 'es-ES' : 'en-GB', { month: 'long' });
-}
----
 ---
 
 <BaseLayout
@@ -104,8 +114,10 @@ function monthName(monthIdx: number, loc: Locale): string {
           aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
         >
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
-               style={`object-position: center ${property.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
-          <span class={`prop-gallery__badge prop-gallery__badge--${property.transaction}`}>{transactionBadge}</span>
+               style={`object-position: ${property.imagePosition ?? 'center 62%'};`} />
+          <span class={`prop-gallery__badge prop-gallery__badge--${property.status === 'available' ? 'rent' : 'sale'}`}>
+            {statusLabel(property.status, locale)}
+          </span>
           <span class="prop-gallery__zoom" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="7"/>
@@ -134,7 +146,7 @@ function monthName(monthIdx: number, loc: Locale): string {
   </section>
 
   <!-- =======================================================
-       Body: Title + Quick specs + Sidebar booking card
+       Body: Title + Specs + Sidebar CTA + Inquiry form
        ======================================================= -->
   <section class="section prop-body">
     <div class="container">
@@ -148,52 +160,52 @@ function monthName(monthIdx: number, loc: Locale): string {
               <span class="prop-title-block__type">{propertyTypeLabel(property.type, locale)}</span>
               <span class="prop-title-block__dot">·</span>
               <a href={`/${locale}/properties?dest=${property.destination}`} class="prop-title-block__city">{destLabel}</a>
-              <span class="prop-title-block__dot">·</span>
-              <span>{property.location[locale]}</span>
+              {showDetailedLocation && <span class="prop-title-block__dot">·</span>}
+              {showDetailedLocation && <span>{detailedLocation}</span>}
+              {property.reference && (
+                <>
+                  <span class="prop-title-block__dot">·</span>
+                  <span class="prop-title-block__reference">Ref. {property.reference}</span>
+                </>
+              )}
             </div>
             <h1 class="prop-title-block__title">{property.name[locale]}</h1>
             <p class="prop-title-block__tagline">{property.tagline[locale]}</p>
           </header>
 
           <!-- Quick specs horizontal bar -->
-          <div class="prop-quick-specs reveal">
-            <div class="prop-quick-spec">
+          {(property.bedrooms || property.bathrooms || property.sizeM2) && <div class="prop-quick-specs reveal">
+            {property.bedrooms && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
-              <span><strong>{property.maxGuests}</strong> {t(locale, 'common.guests')}</span>
-            </div>
-            <div class="prop-quick-spec">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M2 4v16M22 4v16M2 8h20M2 16h20M6 4v16M18 4v16"/>
-              </svg>
               <span><strong>{property.bedrooms}</strong> {t(locale, 'common.bedrooms')}</span>
-            </div>
-            <div class="prop-quick-spec">
+            </div>}
+            {property.bathrooms && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M9 6L6 18h12l-3-12M9 6V4a3 3 0 0 1 6 0v2M5 21h14"/>
               </svg>
               <span><strong>{property.bathrooms}</strong> {t(locale, 'common.bathrooms')}</span>
-            </div>
-            <div class="prop-quick-spec">
+            </div>}
+            {property.sizeM2 && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <path d="M3 10h18"/>
               </svg>
               <span><strong>{property.sizeM2}</strong> m²</span>
+            </div>}
+            <div class="prop-quick-spec">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+              <span class={property.status === 'available' ? 'text-emerald-700' : 'text-amber-700'}>
+                {statusLabel(property.status, locale)}
+              </span>
             </div>
-            {!isSale && property.minNights && (
-              <div class="prop-quick-spec">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-                <span><strong>{property.minNights}</strong> {t(locale, 'properties.nights')} min</span>
-              </div>
-            )}
-          </div>
+          </div>}
 
           <!-- Description with collapse -->
           <section class="prop-section reveal">
@@ -212,38 +224,27 @@ function monthName(monthIdx: number, loc: Locale): string {
             </div>
           </section>
 
-          <!-- Amenities grid with icons -->
-          <section class="prop-section reveal">
+          <!-- Features (amenities) — ES/EN con fallback -->
+          {features.length > 0 && <section class="prop-section reveal">
             <header class="prop-section__header">
               <h2 class="h3">{t(locale, 'properties.amenitiesTitle')}</h2>
               <span class="prop-section__count">
-                {t(locale, 'properties.amenitiesCount', { n: property.amenities.length })}
+                {locale === 'es' ? `${features.length} servicios incluidos` : `${features.length} services included`}
               </span>
             </header>
             <div class="amenities-grid">
-              {property.amenities.map(a => (
+              {features.map(a => (
                 <div class="amenity-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                        stroke-linecap="round" stroke-linejoin="round" set:html={amenityIcons[a] ?? ''} />
-                  <span>{amenityLabel(a, locale)}</span>
+                  <span>{a}</span>
                 </div>
               ))}
             </div>
-          </section>
-
-          {!isSale && (
-            <section class="prop-section reveal">
-              <h2 class="h3 prop-section__title">{t(locale, 'properties.houseRules')}</h2>
-              <ul class="rules-list">
-                {((t(locale, 'properties.houseRulesItems') as unknown) as string[]).map((rule: string) => (
-                  <li>{rule}</li>
-                ))}
-              </ul>
-            </section>
-          )}
+          </section>}
 
           <!-- Map placeholder -->
-          <section class="prop-section reveal">
+          {property.lat != null && property.lng != null && <section class="prop-section reveal">
             <header class="prop-section__header">
               <h2 class="h3">{t(locale, 'properties.neighborhood')}</h2>
             </header>
@@ -261,275 +262,104 @@ function monthName(monthIdx: number, loc: Locale): string {
                 </svg>
                 <div>
                   <strong>{property.location[locale]}</strong>
-                  <span>{t(locale, 'properties.neighborhoodDesc', { city: destLabel })}</span>
+                  <span>{locale === 'es'
+                    ? `Zona de ${destLabel}, con servicios a pocos minutos.`
+                    : `${destLabel} area, with local services just minutes away.`}</span>
                 </div>
               </div>
             </div>
-          </section>
+          </section>}
 
-          <!-- Sale inquiry -->
-          {isSale && (
-            <section id="inquiry" class="prop-section prop-inquiry reveal">
-              <h2 class="h3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
-              <p class="lead">{t(locale, 'salesInquiry.subtitle')}</p>
+          <!-- Inquiry form (Solicitar información) -->
+          <section id="inquiry" class="prop-section prop-inquiry reveal">
+            <h2 class="h3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
+            <p class="lead">{t(locale, 'salesInquiry.subtitle')}</p>
 
-              <form class="inquiry-form" id="inquiry-form" novalidate data-loading-on-submit>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="inquiry-name">{t(locale, 'salesInquiry.fullName')}</label>
-                    <input type="text" id="inquiry-name" name="name" class="input" required autocomplete="name" />
-                  </div>
-                  <div class="field">
-                    <label for="inquiry-email">{t(locale, 'salesInquiry.email')}</label>
-                    <input type="email" id="inquiry-email" name="email" class="input" required autocomplete="email" />
-                  </div>
-                </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="inquiry-phone">{t(locale, 'salesInquiry.phone')}</label>
-                    <input type="tel" id="inquiry-phone" name="phone" class="input" required autocomplete="tel" />
-                  </div>
-                  <div class="field">
-                    <label for="inquiry-nationality">{t(locale, 'salesInquiry.nationality')}</label>
-                    <input type="text" id="inquiry-nationality" name="nationality" class="input" />
-                  </div>
-                </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="inquiry-timeline">{t(locale, 'salesInquiry.timeline')}</label>
-                    <select id="inquiry-timeline" name="timeline" class="input">
-                      <option value="asap">{t(locale, 'salesInquiry.timelineOptions.asap')}</option>
-                      <option value="3m">{t(locale, 'salesInquiry.timelineOptions.3m')}</option>
-                      <option value="6m">{t(locale, 'salesInquiry.timelineOptions.6m')}</option>
-                      <option value="exploring" selected>{t(locale, 'salesInquiry.timelineOptions.exploring')}</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="inquiry-budget">{t(locale, 'salesInquiry.budget')}</label>
-                    <input type="text" id="inquiry-budget" name="budget" class="input" placeholder="1.000.000 € – 2.000.000 €" />
-                  </div>
-                </div>
-                <div class="field field--checkbox">
-                  <label class="checkbox-label">
-                    <input type="checkbox" name="financing" />
-                    <span>{t(locale, 'salesInquiry.financing')}</span>
-                  </label>
+            <form class="inquiry-form" id="inquiry-form" name="property-inquiry" method="POST" action={`/${locale}/contact/`} data-netlify="true" novalidate data-loading-on-submit>
+              <input type="hidden" name="form-name" value="property-inquiry" />
+              <input type="hidden" name="property" value={property.name[locale]} />
+              <input type="hidden" name="reference" value={property.reference} />
+              <input type="hidden" name="locale" value={locale} />
+              <div class="field-row">
+                <div class="field">
+                  <label for="inquiry-name">{t(locale, 'salesInquiry.fullName')}</label>
+                  <input type="text" id="inquiry-name" name="name" class="input" required autocomplete="name" />
                 </div>
                 <div class="field">
-                  <label for="inquiry-message">{t(locale, 'salesInquiry.message')}</label>
-                  <textarea id="inquiry-message" name="message" class="textarea" rows="4"></textarea>
+                  <label for="inquiry-email">{t(locale, 'salesInquiry.email')}</label>
+                  <input type="email" id="inquiry-email" name="email" class="input" required autocomplete="email" />
                 </div>
-                <p class="inquiry-form__privacy">{t(locale, 'salesInquiry.privacy')}</p>
-                <button type="submit" class="btn btn--primary inquiry-form__submit" data-magnetic="0.25">
-                  <span data-magnetic-inner>{t(locale, 'salesInquiry.submit')}</span>
-                </button>
-              </form>
-            </section>
-          )}
-
-          <!-- ===== Reviews section ===== -->
-          {reviews.length > 0 && (
-            <section class="prop-section prop-reviews reveal">
-              <header class="prop-section__header">
-                <div>
-                  <h2 class="h3">{t(locale, 'properties.reviewsTitle')}</h2>
-                  <p class="prop-section__subtitle">{t(locale, 'properties.reviewsSubtitle')}</p>
-                </div>
-                <div class="prop-reviews__score">
-                  <div class="prop-reviews__score-num">{avgRating.toFixed(1)}</div>
-                  <div class="prop-reviews__score-meta">
-                    <div class="prop-reviews__stars">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill={i < Math.round(avgRating) ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
-                          <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                      ))}
-                    </div>
-                    <span>{t(locale, 'properties.ratingAverage')}</span>
-                    <span class="prop-reviews__score-sub">{t(locale, 'properties.reviewsBasedOn', { n: reviews.length })}</span>
-                  </div>
-                </div>
-              </header>
-
-              <div class="prop-reviews__grid" data-stagger data-stagger-step="100">
-                {reviews.map((review, i) => {
-                  const stayDate = new Date(review.date);
-                  const stayedAt = t(locale, 'properties.stayedAt', { month: monthName(stayDate.getMonth(), locale), year: String(stayDate.getFullYear()) });
-                  return (
-                    <article class="prop-review reveal reveal--fade">
-                      <div class="prop-review__stars" aria-label={`${review.rating} de 5`}>
-                        {Array.from({ length: 5 }).map((_, j) => (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill={j < review.rating ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.5">
-                            <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                          </svg>
-                        ))}
-                      </div>
-                      <p class="prop-review__text">"{review.text[locale]}"</p>
-                      <footer class="prop-review__footer">
-                        <div>
-                          <strong>{review.author[locale]}</strong>
-                          <span>{review.origin[locale]}</span>
-                        </div>
-                        <span class="prop-review__date">{stayedAt}</span>
-                      </footer>
-                    </article>
-                  );
-                })}
               </div>
-            </section>
-          )}
+              <div class="field-row">
+                <div class="field">
+                  <label for="inquiry-phone">{t(locale, 'salesInquiry.phone')}</label>
+                  <input type="tel" id="inquiry-phone" name="phone" class="input" required autocomplete="tel" />
+                </div>
+                <div class="field">
+                  <label for="inquiry-country">{locale === 'es' ? 'País' : 'Country'}</label>
+                  <input type="text" id="inquiry-country" name="country" class="input" autocomplete="country-name" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="inquiry-message">{t(locale, 'salesInquiry.message')}</label>
+                <textarea id="inquiry-message" name="message" class="textarea" rows="4"></textarea>
+              </div>
+              <p class="inquiry-form__privacy">{t(locale, 'salesInquiry.privacy')}</p>
+              <button type="submit" class="btn btn--primary inquiry-form__submit" data-magnetic="0.25">
+                <span data-magnetic-inner>{t(locale, 'salesInquiry.submit')}</span>
+              </button>
+            </form>
+          </section>
 
-          <!-- Process timeline -->
           <section class="prop-section reveal">
             <header class="prop-section__header prop-section__header--center">
-              <p class="eyebrow">{t(locale, 'properties.processSubtitle')}</p>
-              <h2 class="h2">{t(locale, 'properties.processTitle')}</h2>
+              <p class="eyebrow">{locale === 'es' ? 'Alquiler de larga duración' : 'Long-term rental'}</p>
+              <h2 class="h2">{locale === 'es' ? 'Tu próxima vivienda, paso a paso' : 'Your next home, step by step'}</h2>
             </header>
             <ol class="prop-process" data-stagger data-stagger-step="120">
-              {[1, 2, 3].map((num, i) => (
+              {processSteps.map(([title, description], index) => (
                 <li class="prop-process__step reveal reveal--fade">
-                  <span class="prop-process__num">{String(num).padStart(2, '0')}</span>
-                  <h3>{t(locale, `properties.processStep${num}Title`)}</h3>
-                  <p>{t(locale, `properties.processStep${num}Desc`)}</p>
+                  <span class="prop-process__num">{String(index + 1).padStart(2, '0')}</span>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
                 </li>
               ))}
             </ol>
           </section>
 
-          <!-- Cancellation policy (visual block, not accordion to keep it simple) -->
-          <section class="prop-cancellation reveal">
-            <h3>{t(locale, 'properties.cancellationTitle')}</h3>
-            <p class="prop-cancellation__body">
-              {locale === 'es'
-                ? 'Cancelación gratuita hasta 30 días antes de la fecha de entrada. Entre 30 y 14 días antes, reembolso del 50%. Después, se aplican las condiciones específicas del propietario. Para estancias de más de 28 días o reservas en temporada alta, consulta condiciones particulares.'
-                : 'Free cancellation up to 30 days before check-in. Between 30 and 14 days before, 50% refund. After that, owner-specific terms apply. For stays over 28 days or peak-season bookings, see specific conditions.'}
-            </p>
-          </section>
         </div>
 
-        <!-- ============ SIDEBAR ============ -->
+        <!-- ============ SIDEBAR (Solicitar info + Concertar visita) ============ -->
         <aside class="prop-sidebar">
           <div class="booking-card reveal reveal--scale">
             <div class="booking-card__top">
-              <div class={`booking-card__chip booking-card__chip--${property.transaction}`}>{transactionBadge}</div>
+              <div class={`booking-card__chip booking-card__chip--${property.status === 'available' ? 'rent' : 'sale'}`}>
+                {statusLabel(property.status, locale)}
+              </div>
               <div class="booking-card__price">
-                {!isSale && <span class="booking-card__from">{t(locale, 'common.from')}</span>}
+                <span class="booking-card__from">{t(locale, 'common.from')}</span>
                 <span class="booking-card__amount">{formatPrice(property.price, locale)}</span>
                 <span class="booking-card__unit">{priceUnit}</span>
               </div>
-
-              {!isSale && property.minNights ? (
-                <!-- ===== Rental: inline datepicker ===== -->
-                <div class="booking-card__dates" data-datepicker
-                     data-price-per-night={property.price}
-                     data-cleaning-fee={property.cleaningFee ?? 0}
-                     data-min-nights={property.minNights}
-                     data-max-guests={property.maxGuests}>
-                  <div class="booking-card__field-row">
-                    <div class="booking-card__field">
-                      <label for="prop-checkin">{t(locale, 'properties.checkIn')}</label>
-                      <input type="date" id="prop-checkin" name="checkIn" class="booking-card__input" required />
-                    </div>
-                    <div class="booking-card__field">
-                      <label for="prop-checkout">{t(locale, 'properties.checkOut')}</label>
-                      <input type="date" id="prop-checkout" name="checkOut" class="booking-card__input" required />
-                    </div>
-                  </div>
-                  <div class="booking-card__field">
-                    <label for="prop-guests">{t(locale, 'properties.guestsShort')}</label>
-                    <select id="prop-guests" name="guests" class="booking-card__input">
-                      {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(n => (
-                        <option value={n}>
-                          {n} {n === 1 ? t(locale, 'properties.guestSingular') : t(locale, 'properties.guestPlural')}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div class="booking-card__estimate" data-estimate>
-                    <div class="booking-card__estimate-row" data-estimate-row="nights" hidden>
-                      <span data-estimate-nights-label></span>
-                      <span data-estimate-nights-value></span>
-                    </div>
-                    <div class="booking-card__estimate-row" data-estimate-row="subtotal" hidden>
-                      <span>{t(locale, 'properties.subtotal')}</span>
-                      <span data-estimate-subtotal></span>
-                    </div>
-                    <div class="booking-card__estimate-row" data-estimate-row="cleaning" hidden>
-                      <span>{t(locale, 'properties.cleaningFee')}</span>
-                      <span data-estimate-cleaning></span>
-                    </div>
-                    <div class="booking-card__estimate-row" data-estimate-row="service" hidden>
-                      <span>{t(locale, 'properties.serviceFee')}</span>
-                      <span data-estimate-service></span>
-                    </div>
-                    <div class="booking-card__estimate-row booking-card__estimate-row--total" data-estimate-row="total" hidden>
-                      <span>{t(locale, 'properties.totalEstimate')}</span>
-                      <span data-estimate-total></span>
-                    </div>
-                    <p class="booking-card__estimate-help" data-estimate-help>
-                      {t(locale, 'properties.selectDatesHelp')}
-                    </p>
-                  </div>
-
-                  <a
-                    href={ctaHref}
-                    class="btn btn--primary booking-card__cta"
-                    data-magnetic="0.3"
-                    data-book-link
-                  >
-                    <span data-magnetic-inner data-book-label>{ctaLabel}</span>
-                  </a>
-                  <p class="booking-card__note booking-card__note--trust">
-                    🔒 {t(locale, 'booking.securePayment')}
-                  </p>
-                </div>
-              ) : (
-                <!-- ===== Sale: simple CTA ===== -->
-                <a href={ctaHref} class="btn btn--primary booking-card__cta" data-magnetic="0.3">
-                  <span data-magnetic-inner>{ctaLabel}</span>
-                </a>
-              )}
-
-              {isSale && (
-                <p class="booking-card__note booking-card__note--trust">
-                  ✓ {t(locale, 'salesInquiry.privacy')}
+              {property.reference && (
+                <p class="booking-card__ref">
+                  <span class="booking-card__ref-label">{locale === 'es' ? 'Referencia' : 'Reference'}</span>
+                  <span class="booking-card__ref-value">{property.reference}</span>
                 </p>
               )}
-            </div>
-
-            <!-- Trust block (inside booking card) -->
-            <div class="booking-card__trust">
-              <h4>{t(locale, 'properties.trustTitle')}</h4>
-              <div class="trust-list">
-                <div class="trust-item">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
-                  </svg>
-                  <div>
-                    <strong>{t(locale, 'properties.trustGuarantee')}</strong>
-                    <span>{t(locale, 'properties.trustGuaranteeDesc')}</span>
-                  </div>
-                </div>
-                <div class="trust-item">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
-                  </svg>
-                  <div>
-                    <strong>{t(locale, 'properties.trustVerified')}</strong>
-                    <span>{t(locale, 'properties.trustVerifiedDesc')}</span>
-                  </div>
-                </div>
-                <div class="trust-item">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
-                  </svg>
-                  <div>
-                    <strong>{t(locale, 'properties.trustSupport')}</strong>
-                    <span>{t(locale, 'properties.trustSupportDesc')}</span>
-                  </div>
-                </div>
+              <div class="booking-card__cta-group">
+                <a href={ctaHref} class="btn btn--primary w-full text-base">
+                  {ctaLabel}
+                </a>
+                <a href={visitHref} class="btn btn--secondary w-full text-base">
+                  {visitLabel}
+                </a>
               </div>
+              <p class="booking-card__note booking-card__note--trust">
+                🔒 {locale === 'es'
+                  ? 'Tus datos solo se usan para esta consulta · Sin compromiso'
+                  : 'Your data is only used for this inquiry · No commitment'}
+              </p>
             </div>
           </div>
         </aside>
@@ -542,23 +372,24 @@ function monthName(monthIdx: number, loc: Locale): string {
     <section class="section section--subtle">
       <div class="container">
         <header class="section-header reveal">
-          <p class="eyebrow">{t(locale, 'properties.relatedInDestination', { city: destLabel })}</p>
+              <p class="eyebrow">{locale === 'es' ? `Otras propiedades en ${destLabel}` : `Other properties in ${destLabel}`}</p>
           <h2 class="h2">{t(locale, 'properties.title')}</h2>
         </header>
         <div class="related-grid" data-stagger data-stagger-step="80">
-          {otherProps.map((p, i) => (
+          {otherProps.map((p) => (
             <a href={`/${locale}/properties/${p.slug}`} class="related-card reveal reveal--fade" data-tilt="3">
               <div class="related-card__media">
-                <img src={p.images[0]} alt={p.name[locale]} loading="lazy" />
-                <span class={`related-card__chip related-card__chip--${p.transaction}`}>
+                <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
+                     style={`object-position: ${p.imagePosition ?? 'center 62%'};`} />
+                <span class={`related-card__chip related-card__chip--${p.transaction === 'sale' ? 'sale' : 'rent'}`}>
                   {p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge')}
                 </span>
               </div>
               <div class="related-card__body">
-                <span class="related-card__meta">{propertyTypeLabel(p.type, locale)} · {p.maxGuests} {t(locale, 'common.guests')}</span>
+                <span class="related-card__meta">{propertyTypeLabel(p.type, locale)}</span>
                 <h3 class="related-card__title">{p.name[locale]}</h3>
                 <span class="related-card__price">
-                  {t(locale, 'common.from')} {formatPrice(p.price, locale)}{p.transaction === 'rent' ? ` ${t(locale, 'properties.priceUnitRent')}` : ''}
+                  {t(locale, 'common.from')} {formatPrice(p.price, locale)} /{locale === 'es' ? 'mes' : 'month'}
                 </span>
               </div>
             </a>
@@ -567,21 +398,20 @@ function monthName(monthIdx: number, loc: Locale): string {
       </div>
     </section>
   )}
-</BaseLayout>
+<Lightbox />
 
-{!isSale && property.minNights && (
-  <!-- Mobile sticky bottom CTA bar (visible only on mobile) -->
-  <div class="prop-mobile-cta" data-mobile-cta>
-    <div class="prop-mobile-cta__price">
-      <span class="prop-mobile-cta__from">{t(locale, 'common.from')}</span>
-      <span class="prop-mobile-cta__amount">{formatPrice(property.price, locale)}</span>
-      <span class="prop-mobile-cta__unit">{priceUnit}</span>
-    </div>
-    <a href={ctaHref} class="btn btn--primary prop-mobile-cta__btn" data-magnetic="0.25">
-      <span data-magnetic-inner>{ctaLabel}</span>
-    </a>
+<!-- Mobile sticky bottom CTA bar (visible only on mobile) -->
+<div class="prop-mobile-cta" data-mobile-cta>
+  <div class="prop-mobile-cta__price">
+    <span class="prop-mobile-cta__from">{t(locale, 'common.from')}</span>
+    <span class="prop-mobile-cta__amount">{formatPrice(property.price, locale)}</span>
+    <span class="prop-mobile-cta__unit">{priceUnit}</span>
   </div>
-)}
+  <a href={ctaHref} class="btn btn--primary prop-mobile-cta__btn" data-magnetic="0.25">
+    <span data-magnetic-inner>{ctaLabel}</span>
+  </a>
+</div>
+</BaseLayout>
 
 <script>
   // Description collapse / "View more"
@@ -599,136 +429,9 @@ function monthName(monthIdx: number, loc: Locale): string {
       if (labelLess) labelLess.hidden = isOpen;
     });
   });
-
-  // ============ Inline datepicker in booking sidebar (rental only) ============
-  document.querySelectorAll<HTMLElement>('[data-datepicker]').forEach((root) => {
-    const pricePerNight = Number(root.dataset.pricePerNight ?? 0);
-    const cleaningFee = Number(root.dataset.cleaningFee ?? 0);
-    const minNights = Number(root.dataset.minNights ?? 1);
-    const checkInEl = root.querySelector<HTMLInputElement>('#prop-checkin');
-    const checkOutEl = root.querySelector<HTMLInputElement>('#prop-checkout');
-    const guestsEl = root.querySelector<HTMLSelectElement>('#prop-guests');
-    const bookLink = root.querySelector<HTMLAnchorElement>('[data-book-link]');
-    const bookLabel = root.querySelector<HTMLElement>('[data-book-label]');
-    const ctaText = bookLabel?.textContent ?? '';
-    const help = root.querySelector<HTMLElement>('[data-estimate-help]');
-
-    const estimateRows = {
-      nights:    root.querySelector<HTMLElement>('[data-estimate-row="nights"]'),
-      subtotal:  root.querySelector<HTMLElement>('[data-estimate-row="subtotal"]'),
-      cleaning:  root.querySelector<HTMLElement>('[data-estimate-row="cleaning"]'),
-      service:   root.querySelector<HTMLElement>('[data-estimate-row="service"]'),
-      total:     root.querySelector<HTMLElement>('[data-estimate-row="total"]'),
-    };
-
-    const estimateNightsLabel = root.querySelector<HTMLElement>('[data-estimate-nights-label]');
-    const estimateNightsValue = root.querySelector<HTMLElement>('[data-estimate-nights-value]');
-    const estimateSubtotal    = root.querySelector<HTMLElement>('[data-estimate-subtotal]');
-    const estimateCleaning    = root.querySelector<HTMLElement>('[data-estimate-cleaning]');
-    const estimateService     = root.querySelector<HTMLElement>('[data-estimate-service]');
-    const estimateTotal       = root.querySelector<HTMLElement>('[data-estimate-total]');
-
-    if (!checkInEl || !checkOutEl) return;
-
-    // Set min date = tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minDate = tomorrow.toISOString().split('T')[0];
-    checkInEl.min = minDate;
-    checkOutEl.min = minDate;
-
-    const compute = () => {
-      const checkIn = checkInEl.value;
-      const checkOut = checkOutEl.value;
-      const guests = parseInt(guestsEl.value, 10);
-
-      const formatCurrency = (n: number) =>
-        new Intl.NumberFormat(document.documentElement.lang === 'es' ? 'es-ES' : 'en-GB', {
-          style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
-        }).format(n);
-
-      if (!checkIn || !checkOut) {
-        // No selection — show help, hide estimate
-        Object.values(estimateRows).forEach(el => el && (el.hidden = true));
-        if (help) help.hidden = false;
-        if (bookLink) {
-          bookLink.setAttribute('href', '#book');
-          if (bookLabel) bookLabel.textContent = ctaText;
-        }
-        return;
-      }
-
-      const a = new Date(checkIn);
-      const b = new Date(checkOut);
-      const nights = Math.max(0, Math.round((b.getTime() - a.getTime()) / 86400000));
-
-      if (nights <= 0) {
-        Object.values(estimateRows).forEach(el => el && (el.hidden = true));
-        if (help) help.hidden = true;
-        if (bookLink) {
-          bookLink.setAttribute('href', '#book');
-          if (bookLabel) bookLabel.textContent = ctaText;
-        }
-        return;
-      }
-
-      const subtotal = nights * pricePerNight;
-      const service = Math.round(subtotal * 0.10);
-      const total = subtotal + cleaningFee + service;
-
-      // Show rows
-      if (estimateNightsLabel) estimateNightsLabel.textContent = `${nights} ${nights === 1 ? 'noche' : 'noches'}`;
-      if (estimateNightsValue) estimateNightsValue.textContent = formatCurrency(pricePerNight) + ' × ' + nights;
-      if (estimateSubtotal) estimateSubtotal.textContent = formatCurrency(subtotal);
-      if (estimateCleaning) estimateCleaning.textContent = formatCurrency(cleaningFee);
-      if (estimateService) estimateService.textContent = formatCurrency(service);
-      if (estimateTotal) estimateTotal.textContent = formatCurrency(total);
-      Object.values(estimateRows).forEach(el => el && (el.hidden = false));
-      if (help) help.hidden = true;
-
-      // Update booking link with query params
-      if (bookLink) {
-        const baseHref = bookLink.getAttribute('href')?.split('?')[0] ?? '#book';
-        const u = new URL(baseHref, window.location.origin + window.location.pathname);
-        u.searchParams.set('checkIn', checkIn);
-        u.searchParams.set('checkOut', checkOut);
-        u.searchParams.set('guests', String(guests));
-        bookLink.setAttribute('href', u.pathname + u.search);
-      }
-    };
-
-    [checkInEl, checkOutEl, guestsEl].forEach(el => {
-      el.addEventListener('change', () => {
-        // Update checkout min
-        if (checkInEl.value) {
-          const checkIn = new Date(checkInEl.value);
-          checkIn.setDate(checkIn.getDate() + 1);
-          checkOutEl.min = checkIn.toISOString().split('T')[0];
-          // Reset checkout if it's now invalid
-          if (checkOutEl.value && new Date(checkOutEl.value) <= new Date(checkInEl.value)) {
-            checkOutEl.value = checkIn.toISOString().split('T')[0];
-          }
-        }
-        compute();
-      });
-    });
-    compute();
-
-    // Lightbox trigger via keyboard (Enter/Space)
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      const t = e.target as HTMLElement;
-      if (t.hasAttribute('data-lightbox-trigger') && document.activeElement === t) {
-        e.preventDefault();
-        t.click();
-      }
-    });
-  });
 </script>
 
-<Lightbox />
-
-<style>
+<style is:global>
   /* ============ GALLERY SECTION (breadcrumb + images) ============ */
   .prop-gallery-wrap {
     padding-top: 2.5rem;
@@ -1625,5 +1328,4 @@ function monthName(monthIdx: number, loc: Locale): string {
   .booking-card__amount {
     font-size: 1.75rem; /* smaller mobile so 3 elements fit */
   }
-</style>
 </style>

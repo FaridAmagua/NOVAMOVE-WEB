@@ -3,15 +3,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHero from '../../../components/PageHero.astro';
 import { t, localeParams, type Locale } from '../../../utils/i18n';
 import {
-  properties,
   propertyTypeLabel,
-  destinationLabel,
   formatPrice,
-  transactionLabel,
-  DEFAULT_IMAGE_FOCAL,
-  type DestinationId,
-  type TransactionType,
 } from '../../../data/properties';
+import { getProperties, getUniqueZones, zoneLabel } from '../../../data/property-source';
 
 export async function getStaticPaths() {
   return localeParams;
@@ -19,19 +14,16 @@ export async function getStaticPaths() {
 
 const locale = Astro.params.locale as Locale;
 
-const destinationIds = Array.from(new Set(properties.map(p => p.destination))) as DestinationId[];
-const transactions: TransactionType[] = ['rent', 'sale'];
+// Fuente única: Nivora en producción, fixture en dev (lanza error si falla en prod)
+const { properties } = await getProperties();
+const uniqueZones = await getUniqueZones();
 
-const transactionFilter = (Astro.url.searchParams.get('tx') ?? '') as TransactionType | '';
 const destinationFilter = Astro.url.searchParams.get('dest') ?? '';
 const sort = Astro.url.searchParams.get('sort') ?? 'featured';
 
 let filtered = properties;
-if (transactionFilter && transactions.includes(transactionFilter)) {
-  filtered = filtered.filter(p => p.transaction === transactionFilter);
-}
 if (destinationFilter) {
-  filtered = filtered.filter(p => p.destination === destinationFilter);
+  filtered = filtered.filter((p) => p.destination === destinationFilter);
 }
 
 if (sort === 'price-asc') {
@@ -39,7 +31,9 @@ if (sort === 'price-asc') {
 } else if (sort === 'price-desc') {
   filtered = [...filtered].sort((a, b) => b.price - a.price);
 } else {
-  filtered = [...filtered].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+  filtered = [...filtered].sort(
+    (a, b) => Number(!!b.featured) - Number(!!a.featured)
+  );
 }
 ---
 
@@ -60,19 +54,6 @@ if (sort === 'price-asc') {
       <!-- Filters -->
       <form class="flex flex-wrap items-end gap-4 md:gap-6 p-6 bg-cream rounded-lg mb-12" method="get" aria-label={locale === 'es' ? 'Filtros' : 'Filters'}>
         <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
-          <label for="tx" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
-            {t(locale, 'properties.filterTransaction')}
-          </label>
-          <select name="tx" id="tx"
-            class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
-            onchange="this.form.submit()">
-            <option value="">{t(locale, 'properties.filterAllTransactions')}</option>
-            <option value="rent" selected={transactionFilter === 'rent'}>{t(locale, 'properties.filterRent')}</option>
-            <option value="sale" selected={transactionFilter === 'sale'}>{t(locale, 'properties.filterSale')}</option>
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1.5 flex-1 min-w-[180px]">
           <label for="dest" class="text-[0.7rem] font-semibold tracking-[0.16em] uppercase text-navy">
             {t(locale, 'properties.filterDestination')}
           </label>
@@ -80,8 +61,8 @@ if (sort === 'price-asc') {
             class="px-4 py-2.5 bg-white border border-navy/15 rounded text-[0.95rem] text-navy cursor-pointer focus:outline-2 focus:outline-gold"
             onchange="this.form.submit()">
             <option value="">{t(locale, 'properties.filterAll')}</option>
-            {destinationIds.map(id => (
-              <option value={id} selected={destinationFilter === id}>{destinationLabel(id, locale)}</option>
+            {uniqueZones.map((id) => (
+              <option value={id} selected={destinationFilter === id}>{zoneLabel(id, locale)}</option>
             ))}
           </select>
         </div>
@@ -99,7 +80,7 @@ if (sort === 'price-asc') {
           </select>
         </div>
 
-        {(transactionFilter || destinationFilter) && (
+        {destinationFilter && (
           <a href={`/${locale}/properties`}
             class="self-end text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-gold py-2.5 hover:opacity-80">
             × {t(locale, 'properties.filterReset')}
@@ -111,20 +92,24 @@ if (sort === 'price-asc') {
         <p class="text-center text-text-secondary py-16 text-lg">{t(locale, 'properties.noResults')}</p>
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="80">
-          {filtered.map((p, i) => {
-            const priceUnit = p.transaction === 'rent' ? t(locale, 'properties.priceUnitRent') : t(locale, 'properties.priceUnitSale');
-            const badgeLabel = p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge');
-            const ctaLabel = p.transaction === 'sale' ? t(locale, 'properties.requestInfo') : t(locale, 'properties.bookNow');
-            const targetPath = p.transaction === 'sale'
-              ? `/${locale}/properties/${p.slug}#inquiry`
-              : `/${locale}/properties/${p.slug}`;
+          {filtered.map((p) => {
+            // Nivora = solo alquiler larga duración
+            const ctaLabel = locale === 'es' ? 'Ver propiedad' : 'View property';
+            const targetPath = `/${locale}/properties/${p.slug}`;
+            const zone = zoneLabel(p.destination, locale);
+            const location = p.location[locale]?.trim();
+            const showLocation = Boolean(location && location.localeCompare(zone, undefined, { sensitivity: 'accent' }) !== 0);
             return (
               <article class="reveal reveal--fade bg-white border border-navy/5 rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl" data-tilt="3">
                 <a href={targetPath} class="block text-text-primary no-underline">
                   <div class="relative aspect-[4/3] overflow-hidden">
-                    <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
-                         class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.06]"
-                         style={`object-position: center ${p.imageFocal ?? DEFAULT_IMAGE_FOCAL};`} />
+                    <img
+                      src={p.images[0]}
+                      alt={p.name[locale]}
+                      loading="lazy"
+                      class="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.06]"
+                      style={`object-position: ${p.imagePosition ?? 'center 62%'};`}
+                    />
                     <span class="absolute top-4 left-4 bg-white/95 text-navy text-[0.7rem] font-semibold tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-full">
                       {propertyTypeLabel(p.type, locale)}
                     </span>
@@ -134,32 +119,36 @@ if (sort === 'price-asc') {
                       </span>
                     )}
                     <span class={`absolute bottom-4 left-4 text-[0.7rem] font-bold tracking-[0.16em] uppercase px-3.5 py-1.5 rounded-full ${
-                      p.transaction === 'rent'
+                      p.status === 'available'
                         ? 'bg-navy/85 text-gold-soft'
                         : 'bg-gold text-navy'
                     }`}>
-                      {badgeLabel}
+                      {p.status === 'available'
+                        ? (locale === 'es' ? 'Disponible' : 'Available')
+                        : (locale === 'es' ? 'Reservado' : 'Reserved')}
                     </span>
                   </div>
                   <div class="p-6">
                     <div class="flex gap-2 text-[0.78rem] text-gold font-semibold tracking-[0.08em] uppercase mb-2">
-                      <span>{destinationLabel(p.destination, locale)}</span>
-                      <span>·</span>
-                      <span>{p.location[locale]}</span>
+                      <span>{zone}</span>
+                      {showLocation && <span>·</span>}
+                      {showLocation && <span>{location}</span>}
                     </div>
                     <h3 class="font-serif text-[1.45rem] leading-tight text-navy mb-2">{p.name[locale]}</h3>
                     <p class="text-[0.9rem] text-text-secondary leading-relaxed mb-4 min-h-[2.7em]">{p.tagline[locale]}</p>
-                    <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
-                      <span>{p.maxGuests} {t(locale, 'common.guests')}</span>
-                      <span>·</span>
-                      <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>
-                      <span>·</span>
-                      <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>
-                    </div>
+                    {(p.bedrooms || p.bathrooms || p.sizeM2) && (
+                      <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
+                        {p.bedrooms && <span>{p.bedrooms} {t(locale, 'common.bedrooms')}</span>}
+                        {p.bedrooms && p.bathrooms && <span>·</span>}
+                        {p.bathrooms && <span>{p.bathrooms} {t(locale, 'common.bathrooms')}</span>}
+                        {(p.bedrooms || p.bathrooms) && p.sizeM2 && <span>·</span>}
+                        {p.sizeM2 && <span>{p.sizeM2} m²</span>}
+                      </div>
+                    )}
                     <div class="flex items-baseline gap-2 flex-wrap">
                       <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
                       <span class="font-serif text-2xl text-gold font-medium">{formatPrice(p.price, locale)}</span>
-                      <span class="text-[0.82rem] text-text-secondary">{priceUnit}</span>
+                      <span class="text-[0.82rem] text-text-secondary">/{locale === 'es' ? 'mes' : 'month'}</span>
                     </div>
                     <span class="block mt-4 text-gold text-[0.78rem] font-semibold tracking-[0.12em] uppercase transition-all duration-300 group-hover:tracking-[0.16em]">
                       {ctaLabel} →

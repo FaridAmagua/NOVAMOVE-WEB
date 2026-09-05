@@ -1,118 +1,76 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import PaymentOverlay from '../../../components/PaymentOverlay.astro';
-import { t, supportedLocales, type Locale } from '../../../utils/i18n';
-import {
-  properties,
-  destinationLabel,
-  propertyTypeLabel,
-  type DestinationId,
-} from '../../../data/properties';
+import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { getProperties, zoneLabel, type Property } from '../../../data/property-source';
+import { propertyTypeLabel, formatPrice } from '../../../data/properties';
 
 export async function getStaticPaths() {
-  const paths: Array<{ params: { locale: string; slug: string }; props: { property: typeof properties[number] } }> = [];
-  for (const locale of supportedLocales) {
-    for (const p of properties.filter(prop => prop.transaction === 'rent')) {
+  const { properties } = await getProperties();
+  // Solo propiedades en alquiler (larga duración)
+  const paths: Array<{ params: { locale: string; slug: string }; props: { property: Property } }> = [];
+  for (const { params: { locale } } of localeParams) {
+    for (const p of properties.filter((x) => x.transaction === 'rent')) {
       paths.push({ params: { locale, slug: p.slug }, props: { property: p } });
     }
   }
   return paths;
 }
 
-const { property } = Astro.props as { property: typeof properties[number] };
+const { property } = Astro.props as { property: Property };
 const locale = Astro.params.locale as Locale;
+const propertyUrl = `/${locale}/properties/${property.slug}`;
+const inquirySubject = encodeURIComponent(
+  locale === 'es'
+    ? `Solicitud de información: ${property.name.es}`
+    : `Information request: ${property.name.en}`
+);
 ---
 
 <BaseLayout
-  title={`${t(locale, 'booking.title')} — ${property.name[locale]}`}
-  description={t(locale, 'booking.subtitle')}
+  title={`${t(locale, 'properties.requestInfo')} — ${property.name[locale]}`}
+  description={property.tagline[locale]}
   transparentHeader={false}
 >
-  <PaymentOverlay />
-
   <section class="section">
     <div class="container">
-      <a href={`/${locale}/properties/${property.slug}`}
+      <a href={propertyUrl}
          class="inline-block text-xs tracking-[0.14em] uppercase text-gold mb-8 border-b border-current pb-0.5 hover:text-navy transition-colors">
         ← {property.name[locale]}
       </a>
 
       <header class="reveal max-w-2xl mb-12">
-        <h1 class="h-1">{t(locale, 'booking.title')}</h1>
-        <p class="lead">{t(locale, 'booking.subtitle')}</p>
+        <p class="eyebrow">{t(locale, 'properties.requestInfo')}</p>
+        <h1 class="h-1">{property.name[locale]}</h1>
+        <p class="lead">{property.tagline[locale]}</p>
+        <p class="mt-6 text-text-secondary">
+          {locale === 'es'
+            ? 'Esta propiedad está disponible para alquiler de larga duración. Envíanos una solicitud y un advisor te contactará en menos de 24 horas con disponibilidad, condiciones exactas y opciones de personalización.'
+            : 'This property is available for long-term rental. Send us a request and an advisor will contact you within 24 hours with availability, exact terms and customisation options.'}
+        </p>
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-12 items-start">
-        <!-- LEFT: Form -->
-        <form id="booking-form" class="reveal bg-white" novalidate data-loading-on-submit>
-          <fieldset class="border border-navy/10 rounded-lg p-6 md:p-8 mb-6">
-            <legend class="flex items-center gap-3 px-4 -ml-2 font-serif text-xl text-navy font-medium">
-              <span class="inline-flex items-center justify-center w-7 h-7 bg-gold text-navy rounded-full font-sans text-sm font-bold">1</span>
-              {t(locale, 'booking.step1')}
-            </legend>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
-              <div class="flex flex-col gap-1.5">
-                <label for="checkIn" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.checkIn')}</label>
-                <input type="date" id="checkIn" name="checkIn" class="input" required />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="checkOut" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.checkOut')}</label>
-                <input type="date" id="checkOut" name="checkOut" class="input" required />
-              </div>
-            </div>
-            <div class="flex flex-col gap-1.5 mt-5">
-              <label for="guests" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.guests')}</label>
-              <select id="guests" name="guests" class="input" required>
-                {Array.from({ length: property.maxGuests }, (_, i) => i + 1).map(n => (
-                  <option value={n}>{n} {n === 1 ? t(locale, 'common.guests').replace(/s$/, '') : t(locale, 'common.guests')}</option>
-                ))}
-              </select>
-            </div>
-            <p id="dates-error" class="text-red-700 text-sm mt-2" hidden></p>
-          </fieldset>
+        <div class="reveal bg-white border border-navy/10 rounded-lg p-6 md:p-8">
+          <a
+            href={`/${locale}/contact?subject=${inquirySubject}&property=${property.slug}`}
+            class="btn btn--primary w-full text-base"
+            data-magnetic="0.25"
+          >
+            <span data-magnetic-inner>{t(locale, 'properties.requestInfo')}</span>
+          </a>
+          <a
+            href={`/${locale}/contact?subject=${inquirySubject}&visit=1&property=${property.slug}`}
+            class="mt-3 block text-center text-[0.85rem] tracking-[0.14em] uppercase text-gold border border-gold/40 rounded px-4 py-3 hover:bg-gold hover:text-navy transition-colors"
+          >
+            {locale === 'es' ? 'Concertar visita' : 'Schedule a viewing'}
+          </a>
+          <p class="text-xs text-text-secondary mt-4 text-center">
+            {locale === 'es'
+              ? 'Sin compromiso · Respuesta en <24h · Asesor personal'
+              : 'No commitment · Reply in <24h · Personal advisor'}
+          </p>
+        </div>
 
-          <fieldset class="border border-navy/10 rounded-lg p-6 md:p-8 mb-6">
-            <legend class="flex items-center gap-3 px-4 -ml-2 font-serif text-xl text-navy font-medium">
-              <span class="inline-flex items-center justify-center w-7 h-7 bg-gold text-navy rounded-full font-sans text-sm font-bold">2</span>
-              {t(locale, 'booking.step2')}
-            </legend>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
-              <div class="flex flex-col gap-1.5">
-                <label for="firstName" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.firstName')}</label>
-                <input type="text" id="firstName" name="firstName" class="input" required autocomplete="given-name" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="lastName" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.lastName')}</label>
-                <input type="text" id="lastName" name="lastName" class="input" required autocomplete="family-name" />
-              </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
-              <div class="flex flex-col gap-1.5">
-                <label for="email" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.email')}</label>
-                <input type="email" id="email" name="email" class="input" required autocomplete="email" />
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="phone" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.phone')}</label>
-                <input type="tel" id="phone" name="phone" class="input" required autocomplete="tel" />
-              </div>
-            </div>
-            <div class="flex flex-col gap-1.5 mt-5">
-              <label for="country" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.country')}</label>
-              <input type="text" id="country" name="country" class="input" autocomplete="country-name" />
-            </div>
-            <div class="flex flex-col gap-1.5 mt-5">
-              <label for="specialRequests" class="text-xs font-semibold tracking-[0.1em] uppercase text-navy">{t(locale, 'booking.specialRequests')}</label>
-              <textarea id="specialRequests" name="specialRequests" class="textarea" rows="3"></textarea>
-            </div>
-          </fieldset>
-
-          <button type="submit" class="btn btn--primary w-full mt-4" id="submit-btn" data-magnetic="0.25">
-            <span data-magnetic-inner>{t(locale, 'booking.submitBooking')}</span>
-          </button>
-          <p class="text-xs text-text-secondary mt-4 text-center">{t(locale, 'booking.cancellationPolicy')}</p>
-        </form>
-
-        <!-- RIGHT: Summary -->
         <aside class="lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
           <div class="reveal bg-white border border-navy/5 rounded-lg overflow-hidden shadow-md">
             <div class="aspect-[16/10] overflow-hidden">
@@ -120,233 +78,42 @@ const locale = Astro.params.locale as Locale;
             </div>
             <div class="p-7">
               <span class="text-[0.72rem] text-gold font-semibold tracking-[0.12em] uppercase">
-                {propertyTypeLabel(property.type, locale)} · {destinationLabel(property.destination as DestinationId, locale)}
+                {propertyTypeLabel(property.type, locale)} · {zoneLabel(property.destination, locale)}
               </span>
               <h3 class="font-serif text-[1.35rem] text-navy mt-1.5 mb-0">{property.name[locale]}</h3>
 
               <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
-                <span data-summary="dates">{t(locale, 'booking.selectDates')}</span>
-              </div>
-              <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
-                <span data-summary="nights">—</span>
-              </div>
+              {(property.bedrooms || property.bathrooms || property.sizeM2) && (
+                <div class="flex justify-between text-[0.92rem] text-text-primary mb-2.5">
+                  {property.bedrooms && <span>{property.bedrooms} {t(locale, 'common.bedrooms')}</span>}
+                  {property.bathrooms && <span>{property.bathrooms} {t(locale, 'common.bathrooms')}</span>}
+                  {property.sizeM2 && <span>{property.sizeM2} m²</span>}
+                </div>
+              )}
 
               <div class="h-px bg-navy/5 my-5"></div>
 
-              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
-                <span>{property.pricePerNight} € × <span data-summary="nights-val">0</span></span>
-                <span data-summary="subtotal">0 €</span>
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
+                <span class="font-serif text-2xl text-gold font-medium">{formatPrice(property.price, locale)}</span>
+                <span class="text-[0.82rem] text-text-secondary">/{locale === 'es' ? 'mes' : 'month'}</span>
               </div>
-              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
-                <span>{t(locale, 'booking.cleaningFee')}</span>
-                <span data-summary="cleaning">{property.cleaningFee} €</span>
-              </div>
-              <div class="flex justify-between text-[0.92rem] text-text-secondary mb-2.5">
-                <span>{t(locale, 'booking.serviceFee')} (10%)</span>
-                <span data-summary="service">0 €</span>
-              </div>
-
-              <div class="h-px bg-navy/5 my-5"></div>
-
-              <div class="flex justify-between font-serif text-xl text-navy font-medium">
-                <span>{t(locale, 'booking.total')}</span>
-                <span data-summary="total">0 €</span>
-              </div>
+              <p class="text-[0.75rem] text-text-secondary mt-2">
+                {locale === 'es'
+                  ? '*Estancia mínima y gastos adicionales a confirmar con el advisor.'
+                  : '*Minimum stay and additional fees to confirm with the advisor.'}
+              </p>
             </div>
           </div>
 
           <div class="mt-6 text-center text-[0.82rem] text-text-secondary">
-            🔒 {t(locale, 'booking.securePayment')}
+            🔒 {locale === 'es'
+              ? 'Tus datos solo se usan para esta consulta · Sin compromiso'
+              : 'Your data is only used for this inquiry · No commitment'}
           </div>
         </aside>
       </div>
     </div>
   </section>
 </BaseLayout>
-
-<script
-  define:vars={{
-    pricePerNight: property.pricePerNight,
-    cleaningFee: property.cleaningFee,
-    minNights: property.minNights,
-    maxGuests: property.maxGuests,
-    propertyId: property.id,
-    propertySlug: property.slug,
-    locale,
-    t: {
-      errorDates: t(locale, 'booking.errorDates'),
-      errorGuests: t(locale, 'booking.errorGuests'),
-      errorMinNights: t(locale, 'booking.errorMinNights').replace('{n}', String(property.minNights)),
-      processing: locale === 'es' ? 'Procesando...' : 'Processing...',
-    },
-  }}
->
-  const form = document.getElementById('booking-form');
-  const checkInEl = document.getElementById('checkIn');
-  const checkOutEl = document.getElementById('checkOut');
-  const guestsEl = document.getElementById('guests');
-  const errorEl = document.getElementById('dates-error');
-  const submitBtn = document.getElementById('submit-btn');
-
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
-  checkInEl.min = minDate;
-  checkOutEl.min = minDate;
-
-  function calculateNights(checkIn, checkOut) {
-    const a = new Date(checkIn);
-    const b = new Date(checkOut);
-    return Math.max(0, Math.round((b - a) / (1000 * 60 * 60 * 24)));
-  }
-
-  function fmt(amount) {
-    return new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-GB', {
-      style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0,
-    }).format(amount);
-  }
-
-  function fmtDate(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  function recalculate() {
-    const checkIn = checkInEl.value;
-    const checkOut = checkOutEl.value;
-    const nights = calculateNights(checkIn, checkOut);
-    const guests = parseInt(guestsEl.value, 10);
-
-    let valid = true;
-    let message = '';
-
-    if (checkIn && checkOut) {
-      if (nights <= 0) {
-        valid = false;
-        message = t.errorDates;
-      } else if (nights < minNights) {
-        valid = false;
-        message = t.errorMinNights;
-      }
-    }
-    if (guests > maxGuests) {
-      valid = false;
-      message = t.errorGuests;
-    }
-
-    if (!valid) {
-      errorEl.textContent = message;
-      errorEl.hidden = false;
-    } else {
-      errorEl.hidden = true;
-    }
-
-    const dateLabel = checkIn && checkOut
-      ? `${fmtDate(checkIn)} → ${fmtDate(checkOut)}`
-      : (locale === 'es' ? 'Selecciona fechas' : 'Select dates');
-    document.querySelector('[data-summary="dates"]').textContent = dateLabel;
-
-    document.querySelector('[data-summary="nights"]').textContent =
-      nights > 0 ? `${nights} ${locale === 'es' ? 'noches' : 'nights'}` : '—';
-
-    const subtotal = nights * pricePerNight;
-    const service = Math.round(subtotal * 0.1);
-    const total = subtotal + cleaningFee + service;
-
-    document.querySelector('[data-summary="nights-val"]').textContent = nights;
-    document.querySelector('[data-summary="subtotal"]').textContent = fmt(subtotal);
-    document.querySelector('[data-summary="service"]').textContent = fmt(service);
-    document.querySelector('[data-summary="total"]').textContent = fmt(total);
-
-    submitBtn.disabled = !valid;
-    submitBtn.style.opacity = valid ? '1' : '0.5';
-
-    return { valid, nights, subtotal, service, total };
-  }
-
-  [checkInEl, checkOutEl, guestsEl].forEach(el => {
-    el.addEventListener('change', recalculate);
-    el.addEventListener('input', recalculate);
-  });
-  recalculate();
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const { valid, nights, subtotal, service, total } = recalculate();
-    if (!valid) return;
-
-    submitBtn.classList.add('is-loading');
-    submitBtn.setAttribute('aria-busy', 'true');
-
-    const overlay = document.querySelector('[data-payment-overlay]');
-    const showOverlayTimer = setTimeout(() => {
-      if (overlay) {
-        overlay.classList.add('is-visible');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('payment-pending');
-      }
-    }, 200);
-
-    const payload = {
-      propertyId,
-      propertySlug,
-      checkIn: checkInEl.value,
-      checkOut: checkOutEl.value,
-      guests: parseInt(guestsEl.value, 10),
-      nights,
-      pricePerNight,
-      cleaningFee,
-      serviceFee: service,
-      total,
-      guest: {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        country: document.getElementById('country').value,
-        specialRequests: document.getElementById('specialRequests').value,
-      },
-      locale,
-    };
-
-    const resetUi = (msg) => {
-      clearTimeout(showOverlayTimer);
-      if (overlay) {
-        overlay.classList.remove('is-visible');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('payment-pending');
-      }
-      submitBtn.classList.remove('is-loading');
-      submitBtn.removeAttribute('aria-busy');
-      submitBtn.textContent = msg || submitBtn.dataset.originalText || submitBtn.textContent;
-    };
-
-    try {
-      const res = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.redsysUrl) {
-          sessionStorage.setItem('gm_last_booking', JSON.stringify({ ...payload, orderId: data.orderId }));
-          window.location.href = data.redsysUrl;
-          return;
-        }
-      }
-
-      throw new Error(`HTTP ${res.status}`);
-    } catch (err) {
-      console.warn('[booking] payment endpoint unreachable, dev fallback:', err);
-
-      const orderId = 'DEV' + Date.now().toString().slice(-8);
-      sessionStorage.setItem('gm_last_booking', JSON.stringify({ ...payload, orderId }));
-      window.location.href = `/${locale}/book/success?ref=${orderId}&prop=${propertySlug}&dev=1`;
-    }
-  });
-</script>

@@ -20,3 +20,6 @@ pnpm-debug.log*
 
 # Astro
 .astro/
+
+# Nivora catalog cache (regenerated each build)
+.nivora-cache/
