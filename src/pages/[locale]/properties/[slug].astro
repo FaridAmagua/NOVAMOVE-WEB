@@ -50,6 +50,10 @@ const detailedLocation = property.location[locale]?.trim();
 const showDetailedLocation = Boolean(
   detailedLocation && detailedLocation.localeCompare(destLabel, undefined, { sensitivity: 'base' }) !== 0
 );
+const mapLocation = detailedLocation || destLabel;
+const mapSrc = property.lat != null && property.lng != null
+  ? `https://maps.google.com/maps?q=${property.lat},${property.lng}&z=14&output=embed`
+  : `https://maps.google.com/maps?q=${encodeURIComponent(mapLocation)}&z=14&output=embed`;
 const processSteps = locale === 'es'
   ? [
       ['Solicita información', 'Cuéntanos qué necesitas y resolveremos tus dudas sobre la vivienda.'],
@@ -82,6 +86,23 @@ const amenityIcons: Record<string, string> = {
   concierge:   '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/>',
   elevator:    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v4M9 11l3-3 3 3M9 16l3 3 3-3M8 6h8"/>',
 };
+
+const genericFeatureIcon = '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>';
+const featureIconAliases: Array<[string[], string]> = [
+  [['piscina', 'pool'], 'pool'], [['wifi', 'wi-fi'], 'wifi'],
+  [['aire acondicionado', 'air conditioning'], 'ac'], [['garaje', 'parking', 'aparcamiento'], 'parking'],
+  [['cocina', 'kitchen'], 'kitchen'], [['vista al mar', 'vistas al mar', 'sea view'], 'sea-view'],
+  [['vista a la ciudad', 'vistas a la ciudad', 'city view'], 'city-view'], [['jardin', 'garden'], 'garden'],
+  [['terraza', 'terrace'], 'terrace'], [['jacuzzi'], 'jacuzzi'], [['gimnasio', 'gym'], 'gym'],
+  [['cine', 'cinema'], 'cinema'], [['barbacoa', 'bbq'], 'bbq'], [['chimenea', 'fireplace'], 'fireplace'],
+  [['playa', 'beach access'], 'beach-access'], [['portero', 'conserje', 'concierge'], 'concierge'],
+  [['ascensor', 'elevator'], 'elevator'],
+];
+function featureIcon(feature: string) {
+  const normalized = feature.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const alias = featureIconAliases.find(([terms]) => terms.some((term) => normalized.includes(term)));
+  return alias ? amenityIcons[alias[1]] : genericFeatureIcon;
+}
 ---
 
 <BaseLayout
@@ -236,21 +257,21 @@ const amenityIcons: Record<string, string> = {
               {features.map(a => (
                 <div class="amenity-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" set:html={amenityIcons[a] ?? ''} />
+                       stroke-linecap="round" stroke-linejoin="round" set:html={featureIcon(a)} />
                   <span>{a}</span>
                 </div>
               ))}
             </div>
           </section>}
 
-          <!-- Map placeholder -->
-          {property.lat != null && property.lng != null && <section class="prop-section reveal">
+          <!-- Public-area map: coordinates when available, otherwise the configured public zone. -->
+          {mapLocation && <section class="prop-section reveal">
             <header class="prop-section__header">
               <h2 class="h3">{t(locale, 'properties.neighborhood')}</h2>
             </header>
             <div class="prop-map">
               <iframe
-                src={`https://maps.google.com/maps?q=${property.lat},${property.lng}&z=14&output=embed`}
+                src={mapSrc}
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
                 title={`${property.name[locale]} - ${property.location[locale]}`}
@@ -261,7 +282,7 @@ const amenityIcons: Record<string, string> = {
                   <circle cx="12" cy="9" r="3"/>
                 </svg>
                 <div>
-                  <strong>{property.location[locale]}</strong>
+                  <strong>{mapLocation}</strong>
                   <span>{locale === 'es'
                     ? `Zona de ${destLabel}, con servicios a pocos minutos.`
                     : `${destLabel} area, with local services just minutes away.`}</span>
