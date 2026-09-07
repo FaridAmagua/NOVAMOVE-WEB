@@ -1,5 +1,5 @@
 ---
-import { languages, type Locale, swapLocaleInPath, localizedPath } from '../utils/i18n';
+import { languages, type Locale, swapLocaleInPath } from '../utils/i18n';
 
 interface Props {
   locale: Locale;
@@ -8,20 +8,22 @@ interface Props {
 }
 
 const { locale, currentPath, variant = 'light' } = Astro.props;
-const targetLocale: Locale = locale === 'es' ? 'en' : 'es';
-const targetPath = swapLocaleInPath(currentPath, targetLocale);
+const localeOptions: Locale[] = ['es', 'en'];
 ---
 
-<a
-  href={targetPath}
-  hreflang={targetLocale}
-  class={`lang-switcher lang-switcher--${variant}`}
-  aria-label={`Switch language to ${languages[targetLocale]}`}
->
-  <span class="lang-switcher__current">{locale.toUpperCase()}</span>
-  <span class="lang-switcher__sep" aria-hidden="true">/</span>
-  <span class="lang-switcher__alt">{targetLocale.toUpperCase()}</span>
-</a>
+<nav class={`lang-switcher lang-switcher--${variant}`} aria-label={locale === 'es' ? 'Seleccionar idioma' : 'Choose language'}>
+  {localeOptions.map((option, index) => <>
+    {index > 0 && <span class="lang-switcher__sep" aria-hidden="true">/</span>}
+    <a
+      href={option === locale ? currentPath : swapLocaleInPath(currentPath, option)}
+      hreflang={option}
+      lang={option}
+      class:list={['lang-switcher__option', { 'is-active': option === locale }]}
+      aria-current={option === locale ? 'page' : undefined}
+      aria-label={`${languages[option]}${option === locale ? ' (actual)' : ''}`}
+    >{option.toUpperCase()}</a>
+  </>)}
+</nav>
 
 <style>
   .lang-switcher {
@@ -31,7 +33,7 @@ const targetPath = swapLocaleInPath(currentPath, targetLocale);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.12em;
-    padding: 0.45rem 0.9rem;
+    padding: 0.28rem;
     border: 1px solid currentColor;
     border-radius: 999px;
     transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
@@ -41,19 +43,18 @@ const targetPath = swapLocaleInPath(currentPath, targetLocale);
     border-color: rgba(255, 255, 255, 0.4);
   }
   .lang-switcher--light:hover {
-    background: var(--color-white);
-    color: var(--color-navy);
+    border-color: rgba(255,255,255,.72);
   }
   .lang-switcher--dark {
     color: var(--color-navy);
     border-color: rgba(10, 29, 63, 0.25);
   }
   .lang-switcher--dark:hover {
-    background: var(--color-navy);
-    color: var(--color-white);
     border-color: var(--color-navy);
   }
-  .lang-switcher__current { opacity: 0.55; }
-  .lang-switcher__sep { opacity: 0.4; }
-  .lang-switcher__alt { opacity: 1; }
+  .lang-switcher__option { min-width: 34px; min-height: 30px; padding: 0 .45rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; opacity: .68; transition: 160ms ease; }
+  .lang-switcher__option:hover { opacity: 1; }
+  .lang-switcher--light .lang-switcher__option.is-active { color: var(--color-navy); background: var(--color-white); opacity: 1; }
+  .lang-switcher--dark .lang-switcher__option.is-active { color: var(--color-white); background: var(--color-navy); opacity: 1; }
+  .lang-switcher__sep { opacity: 0.38; }
 </style>

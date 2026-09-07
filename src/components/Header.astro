@@ -56,7 +56,7 @@ const isActive = (href: string) => {
     </nav>
 
     <div class="site-header__actions">
-      <LanguageSwitcher locale={locale} currentPath={currentPath} variant={transparent ? 'light' : 'dark'} />
+      <LanguageSwitcher locale={locale} currentPath={currentPath} variant="light" />
       <a href={localizedPath(locale, '/contact')} class="btn btn--primary site-header__cta">
         {t(locale, 'nav.cta')}
       </a>
@@ -182,7 +182,7 @@ const isActive = (href: string) => {
     width: 44px;
     height: 44px;
     padding: 0;
-    z-index: 110;
+    z-index: 310;
     border-radius: 4px;
     position: relative;
   }
@@ -242,6 +242,9 @@ const isActive = (href: string) => {
   @media (max-width: 960px) {
     .site-nav, .site-header__actions { display: none; }
     .site-header__toggle { display: flex; }
+    .site-header__inner { position: relative; z-index: 300; height: 72px; }
+    .site-header { min-height: 72px; background: rgba(10,29,63,.97); color: var(--color-white); }
+    .site-drawer { padding-top: 92px; }
   }
 </style>
 
@@ -257,31 +260,31 @@ const isActive = (href: string) => {
     document.body.style.overflow = '';
   };
 
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const toggle = target.closest('[data-menu-toggle]');
-    const drawer = target.closest('.site-drawer');
+  const headerWindow = window as Window & { __globalMoveHeaderBound?: boolean };
+  if (!headerWindow.__globalMoveHeaderBound) {
+    headerWindow.__globalMoveHeaderBound = true;
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const toggle = target.closest('[data-menu-toggle]');
+      const drawer = target.closest('.site-drawer');
 
-    if (toggle) {
-      const willBeOpen = toggle.getAttribute('aria-expanded') !== 'true';
-      toggle.setAttribute('aria-expanded', String(willBeOpen));
-      toggle.classList.toggle('is-open', willBeOpen);
-      const drawerEl = document.querySelector('.site-drawer');
-      drawerEl?.classList.toggle('is-open', willBeOpen);
-      drawerEl?.setAttribute('aria-hidden', String(!willBeOpen));
-      document.body.style.overflow = willBeOpen ? 'hidden' : '';
-      return;
-    }
+      if (toggle) {
+        const willBeOpen = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(willBeOpen));
+        toggle.classList.toggle('is-open', willBeOpen);
+        const drawerEl = document.querySelector('.site-drawer');
+        drawerEl?.classList.toggle('is-open', willBeOpen);
+        drawerEl?.setAttribute('aria-hidden', String(!willBeOpen));
+        document.body.style.overflow = willBeOpen ? 'hidden' : '';
+        return;
+      }
 
-    // Click on a link inside the open drawer → navigate + close drawer
-    if (drawer && target.closest('a')) {
-      closeDrawer();
-      return;
-    }
-  });
+      if (drawer && target.closest('a')) closeDrawer();
+    });
 
-  // ESC closes the drawer
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDrawer();
-  });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+    document.addEventListener('astro:before-swap', closeDrawer);
+  }
 </script>
