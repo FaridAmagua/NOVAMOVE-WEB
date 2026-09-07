@@ -74,7 +74,7 @@ const inquirySubject = encodeURIComponent(
         <aside class="lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
           <div class="reveal bg-white border border-navy/5 rounded-lg overflow-hidden shadow-md">
             <div class="aspect-[16/10] overflow-hidden">
-              <img src={property.images[0]} alt={property.name[locale]} class="w-full h-full object-cover" />
+              <img src={property.images[0]} alt={property.name[locale]} class="w-full h-full object-cover" style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
             </div>
             <div class="p-7">
               <span class="text-[0.72rem] text-gold font-semibold tracking-[0.12em] uppercase">

@@ -122,6 +122,20 @@ export function orderImages(images: PublicProperty['images']): string[] {
   return sorted.map((i) => i.url);
 }
 
+function orderImageRecords(images: PublicProperty['images']) {
+  return [...(images ?? [])].sort((a, b) => {
+    if (a.isCover && !b.isCover) return -1;
+    if (!a.isCover && b.isCover) return 1;
+    return a.position - b.position;
+  });
+}
+
+function imagePosition(image: PublicProperty['images'][number]): string {
+  const x = Number.isFinite(image.focalPoint?.x) ? image.focalPoint!.x : 50;
+  const y = Number.isFinite(image.focalPoint?.y) ? image.focalPoint!.y : 50;
+  return `${Math.min(100, Math.max(0, x))}% ${Math.min(100, Math.max(0, y))}%`;
+}
+
 // ── Mapper Nivora → Property (modelo UI) ────────────────────────────
 
 export function fromNivora(np: PublicProperty): Property {
@@ -145,7 +159,9 @@ export function fromNivora(np: PublicProperty): Property {
   };
 
   // Imágenes: isCover primero, luego position ascendente.
-  const images = orderImages(np.images);
+  const orderedImages = orderImageRecords(np.images);
+  const images = orderedImages.map((image) => image.url);
+  const imagePositions = orderedImages.map(imagePosition);
 
   return {
     id: np.id,
@@ -177,6 +193,8 @@ export function fromNivora(np: PublicProperty): Property {
     bathrooms: np.specs.bathrooms,
     sizeM2: np.specs.builtAreaSqm,
     images,
+    imagePositions,
+    imagePosition: imagePositions[0],
     featured: np.featured,
   };
 }

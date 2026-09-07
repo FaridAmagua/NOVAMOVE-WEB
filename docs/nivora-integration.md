@@ -86,17 +86,17 @@ NIVORA_CATALOG_TOKEN replace-with-real-token
 | `features.es` (array) | `amenidades` |
 | `features.en` (fallback a es) | — |
 | `images` ordenadas con `isCover` primero | `images` (URLs) |
-| `images[0].focalPoint` → `center {y}% center {x}%` | `imageFocal` |
+| `images[].focalPoint` → `{x}% {y}%` | `imagePositions[]` y `imagePosition` para portada |
 | `featured` | `featured` |
 | `operation` | `transaction` (rent | sale) |
 | `type` (mapped a los 4 tipos que soporta la UI) | `type` |
 | `content.es.publicLocation` | `destination` (zone libre) |
 
-**No leemos** de Nivora: `publishedAt`, `updatedAt`, `reference`, `usableAreaSqm`, `plotAreaSqm`, `id` (slug), `id` (id), `width`, `height`, `alt`, `focalPoint` (excepto para la primera imagen). `maxGuests` se eliminó (no se infiere).
+**No leemos** de Nivora: `publishedAt`, `updatedAt`, `usableAreaSqm`, `plotAreaSqm`, `width`, `height` y `alt`. `maxGuests` se eliminó (no se infiere).
 
 **Catálogo vacío** es válido: `properties: []` no rompe el build.
 **Status** no se expone todavía en la UI (se guarda vía `featured` como proxy temporal).
-**focalPoint** se convierte a CSS `object-position` (`"center {y}% center {x}%"`).
+**focalPoint** se convierte a CSS `object-position` (`"{x}% {y}%"`) para cada imagen; si falta, se usa `50% 50%`.
 
 ## Comportamientos garantizados
 
