@@ -73,6 +73,12 @@ export type PublicProperty = {
     en?: string[];
   };
 
+  map?: {
+    query: string;
+    precision: 'street' | 'neighborhood' | 'area';
+    radiusKm: number;
+  };
+
   images: Array<{
     id: string;
     url: string;
@@ -221,6 +227,11 @@ function validateResponse(raw: unknown): PublicCatalogResponse {
     }
     if (!Array.isArray(p.images)) {
       throw new NivoraError(`Propiedad ${p.id} sin images[]`);
+    }
+    if (p.map && (!['street', 'neighborhood', 'area'].includes(p.map.precision) ||
+      typeof p.map.query !== 'string' || typeof p.map.radiusKm !== 'number' ||
+      p.map.radiusKm < 0.5 || p.map.radiusKm > 30)) {
+      throw new NivoraError(`Propiedad ${p.id} con configuración de mapa inválida`);
     }
   }
 

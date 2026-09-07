@@ -195,6 +195,7 @@ export function fromNivora(np: PublicProperty): Property {
     images,
     imagePositions,
     imagePosition: imagePositions[0],
+    map: np.map,
     featured: np.featured,
   };
 }
