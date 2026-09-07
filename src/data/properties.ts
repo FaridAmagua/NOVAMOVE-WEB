@@ -53,6 +53,7 @@ export interface Property {
   featured?: boolean;
   lat?: number;
   lng?: number;
+  map?: { query: string; precision: 'street' | 'neighborhood' | 'area'; radiusKm: number };
   reviews?: Review[];
 }
 
