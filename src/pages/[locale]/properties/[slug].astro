@@ -31,7 +31,11 @@ const locale = Astro.params.locale as Locale;
 // Versión de precio: €/mes (Nivora envía amountCents/mes).
 const priceUnit = `/${locale === 'es' ? 'mes' : 'month'}`;
 const ctaLabel = t(locale, 'properties.requestInfo');
-const ctaHref = '#inquiry';
+const whatsappNumber = '34601518207';
+const whatsappMessage = locale === 'es'
+  ? `Hola, me interesa la propiedad ${property.name.es} (${property.reference}). ¿Podéis darme más información?`
+  : `Hello, I am interested in ${property.name.en} (${property.reference}). Could you send me more information?`;
+const ctaHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
 const visitHref = `/${locale}/book/${property.slug}`;
 
@@ -135,7 +139,7 @@ function featureIcon(feature: string) {
           aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
         >
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
-               style={`object-position: ${property.imagePosition ?? 'center 62%'};`} />
+               style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
           <span class={`prop-gallery__badge prop-gallery__badge--${property.status === 'available' ? 'rent' : 'sale'}`}>
             {statusLabel(property.status, locale)}
           </span>
@@ -147,9 +151,9 @@ function featureIcon(feature: string) {
           </span>
         </div>
         <div class="prop-gallery__thumbs">
-          {property.images.slice(1, 4).map(img => (
+          {property.images.slice(1, 4).map((img, index) => (
             <div class="prop-gallery__thumb" data-lightbox-trigger="property" data-lightbox-group="property" role="button" tabindex="0" aria-label="Ver foto">
-              <img src={img} alt="" loading="lazy" />
+              <img src={img} alt="" loading="lazy" style={`object-position: ${property.imagePositions?.[index + 1] ?? '50% 50%'};`} />
             </div>
           ))}
           {property.images.length < 4 && Array.from({ length: 4 - property.images.length }).map(() => (
@@ -291,45 +295,17 @@ function featureIcon(feature: string) {
             </div>
           </section>}
 
-          <!-- Inquiry form (Solicitar información) -->
+          <!-- Direct WhatsApp inquiry -->
           <section id="inquiry" class="prop-section prop-inquiry reveal">
             <h2 class="h3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
-            <p class="lead">{t(locale, 'salesInquiry.subtitle')}</p>
-
-            <form class="inquiry-form" id="inquiry-form" name="property-inquiry" method="POST" action={`/${locale}/contact/`} data-netlify="true" novalidate data-loading-on-submit>
-              <input type="hidden" name="form-name" value="property-inquiry" />
-              <input type="hidden" name="property" value={property.name[locale]} />
-              <input type="hidden" name="reference" value={property.reference} />
-              <input type="hidden" name="locale" value={locale} />
-              <div class="field-row">
-                <div class="field">
-                  <label for="inquiry-name">{t(locale, 'salesInquiry.fullName')}</label>
-                  <input type="text" id="inquiry-name" name="name" class="input" required autocomplete="name" />
-                </div>
-                <div class="field">
-                  <label for="inquiry-email">{t(locale, 'salesInquiry.email')}</label>
-                  <input type="email" id="inquiry-email" name="email" class="input" required autocomplete="email" />
-                </div>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="inquiry-phone">{t(locale, 'salesInquiry.phone')}</label>
-                  <input type="tel" id="inquiry-phone" name="phone" class="input" required autocomplete="tel" />
-                </div>
-                <div class="field">
-                  <label for="inquiry-country">{locale === 'es' ? 'País' : 'Country'}</label>
-                  <input type="text" id="inquiry-country" name="country" class="input" autocomplete="country-name" />
-                </div>
-              </div>
-              <div class="field">
-                <label for="inquiry-message">{t(locale, 'salesInquiry.message')}</label>
-                <textarea id="inquiry-message" name="message" class="textarea" rows="4"></textarea>
-              </div>
-              <p class="inquiry-form__privacy">{t(locale, 'salesInquiry.privacy')}</p>
-              <button type="submit" class="btn btn--primary inquiry-form__submit" data-magnetic="0.25">
-                <span data-magnetic-inner>{t(locale, 'salesInquiry.submit')}</span>
-              </button>
-            </form>
+            <p class="lead">{locale === 'es' ? 'Habla directamente con nuestro equipo y recibe respuesta sobre esta vivienda.' : 'Chat directly with our team and get answers about this property.'}</p>
+            <div class="prop-whatsapp-card">
+              <span class="prop-whatsapp-card__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.3L3 20.5l1.7-4.9A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.3 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.7 1.7c.1.3.1.5-.1.7l-.6.7c-.2.2-.1.4 0 .6.7 1.2 1.7 2.2 3 2.8.3.1.5.1.7-.1l.8-1c.2-.2.4-.3.7-.2l1.7.8c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.5.6-1.4.9-2.3.8-1.1-.1-2.6-.6-4.4-2.2-2-1.8-3.3-4-3.4-5.5 0-.7.2-1.2.5-1.6.4-.5.8-.8 1.2-1Z"/></svg>
+              </span>
+              <div><strong>{locale === 'es' ? 'Consulta por WhatsApp' : 'Ask via WhatsApp'}</strong><p>{locale === 'es' ? 'El mensaje incluye automáticamente el nombre y la referencia del inmueble.' : 'The message automatically includes the property name and reference.'}</p></div>
+              <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary">{locale === 'es' ? 'Abrir WhatsApp' : 'Open WhatsApp'}</a>
+            </div>
           </section>
 
           <section class="prop-section reveal">
@@ -369,7 +345,7 @@ function featureIcon(feature: string) {
                 </p>
               )}
               <div class="booking-card__cta-group">
-                <a href={ctaHref} class="btn btn--primary w-full text-base">
+                <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary w-full text-base">
                   {ctaLabel}
                 </a>
                 <a href={visitHref} class="btn btn--secondary booking-card__visit-cta w-full text-base">
@@ -401,7 +377,7 @@ function featureIcon(feature: string) {
             <a href={`/${locale}/properties/${p.slug}`} class="related-card reveal reveal--fade" data-tilt="3">
               <div class="related-card__media">
                 <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
-                     style={`object-position: ${p.imagePosition ?? 'center 62%'};`} />
+                     style={`object-position: ${p.imagePositions?.[0] ?? p.imagePosition ?? '50% 50%'};`} />
                 <span class={`related-card__chip related-card__chip--${p.transaction === 'sale' ? 'sale' : 'rent'}`}>
                   {p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge')}
                 </span>
@@ -428,7 +404,7 @@ function featureIcon(feature: string) {
     <span class="prop-mobile-cta__amount">{formatPrice(property.price, locale)}</span>
     <span class="prop-mobile-cta__unit">{priceUnit}</span>
   </div>
-  <a href={ctaHref} class="btn btn--primary prop-mobile-cta__btn" data-magnetic="0.25">
+  <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary prop-mobile-cta__btn" data-magnetic="0.25">
     <span data-magnetic-inner>{ctaLabel}</span>
   </a>
 </div>
@@ -455,7 +431,7 @@ function featureIcon(feature: string) {
 <style is:global>
   /* ============ GALLERY SECTION (breadcrumb + images) ============ */
   .prop-gallery-wrap {
-    padding-top: 2.5rem;
+    padding-top: calc(var(--header-height) + clamp(2rem, 4vw, 3.75rem));
     padding-bottom: 1.5rem;
   }
 
@@ -497,8 +473,7 @@ function featureIcon(feature: string) {
   .prop-gallery__main img {
     width: 100%; height: 100%;
     object-fit: cover;
-    /* Focus ~60% from top — keeps the property centred and crops out sky */
-    object-position: center 62%;
+    object-position: 50% 50%;
   }
   .prop-gallery__badge {
     position: absolute;
@@ -769,13 +744,12 @@ function featureIcon(feature: string) {
     line-height: 1.4;
   }
 
-  /* ============ INQUIRY (SALE) ============ */
-  .prop-inquiry .inquiry-form {
-    margin-top: 1.5rem;
-    background: var(--color-light);
-    padding: 2rem;
-    border-radius: var(--radius-md);
-  }
+  /* ============ DIRECT WHATSAPP INQUIRY ============ */
+  .prop-whatsapp-card { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid rgba(10,29,63,.08); border-radius: var(--radius-md); display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 1rem; background: var(--color-light); }
+  .prop-whatsapp-card__icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: white; background: #1f9d62; }
+  .prop-whatsapp-card strong { display: block; color: var(--color-navy); font-size: 1rem; }
+  .prop-whatsapp-card p { margin: .3rem 0 0; color: var(--text-secondary); font-size: .88rem; line-height: 1.5; }
+  .prop-whatsapp-card .btn { white-space: nowrap; }
 
   /* ============ PROCESS TIMELINE ============ */
   .prop-process {
@@ -1252,6 +1226,7 @@ function featureIcon(feature: string) {
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 960px) {
+    .prop-gallery-wrap { padding-top: calc(var(--header-height) + 1.5rem); }
     .prop-gallery { grid-template-columns: 1fr; height: auto; }
     .prop-gallery__main { aspect-ratio: 16/10; }
     .prop-gallery__thumbs {
@@ -1273,6 +1248,10 @@ function featureIcon(feature: string) {
   }
 
   @media (max-width: 540px) {
+    .prop-gallery-wrap { padding-top: calc(var(--header-height) + 1rem); }
+    .prop-breadcrumb { margin-bottom: 1rem; }
+    .prop-whatsapp-card { grid-template-columns: auto minmax(0,1fr); padding: 1.2rem; }
+    .prop-whatsapp-card .btn { grid-column: 1/-1; width: 100%; }
     .prop-section { margin-bottom: 2.5rem; padding-top: 2rem; }
     .prop-quick-specs { padding: 1rem; gap: 0.4rem; }
     .prop-quick-spec { padding: 0.45rem 0.7rem; font-size: 0.85rem; }

@@ -81,6 +81,7 @@ export type PublicProperty = {
     height: number;
     isCover: boolean;
     position: number;
+    focalPoint?: { x: number; y: number };
   }>;
 
   publishedAt: string;

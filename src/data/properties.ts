@@ -46,6 +46,8 @@ export interface Property {
   bathrooms: number | null;
   sizeM2: number | null;
   images: string[];
+  /** CSS object-position for every image, in the same order as images. */
+  imagePositions?: string[];
   /** CSS object-position. */
   imagePosition?: string;
   featured?: boolean;

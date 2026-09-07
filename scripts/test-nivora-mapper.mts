@@ -153,7 +153,7 @@ try {
   failed++;
 }
 
-console.log('\n=== Test 8: sin recorte específico → imagePosition undefined ===\n');
+console.log('\n=== Test 8: encuadre por imagen con fallback centrado ===\n');
 try {
   const fixture = {
     ...fullFixture,
@@ -162,7 +162,12 @@ try {
     ],
   };
   const p = fromNivora(fixture as any);
-  test('imagePosition es undefined sin focalPoint', p.imagePosition === undefined);
+  test('imagePosition queda centrado sin focalPoint', p.imagePosition === '50% 50%');
+  const focused = fromNivora({
+    ...fixture,
+    images: [{ ...fixture.images[0], focalPoint: { x: 35, y: 72 } }],
+  } as any);
+  test('focalPoint se convierte en object-position', focused.imagePosition === '35% 72%');
 } catch (e: any) {
   console.error('  ERROR Test 9:', e.message);
   failed++;
