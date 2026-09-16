@@ -173,6 +173,13 @@ function featureIcon(feature: string) {
           ))}
         </div>
       </div>
+      {property.images.length > 4 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'Más fotografías de la propiedad' : 'More property photos'}>
+        {property.images.slice(4).map((img, index) => (
+          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" aria-label={locale === 'es' ? `Ver fotografía ${index + 5}` : `View photo ${index + 5}`}>
+            <img src={img} alt={`${property.name[locale]} · ${index + 5}`} loading="lazy" style={`object-position: ${property.imagePositions?.[index + 4] ?? '50% 50%'};`} />
+          </button>
+        ))}
+      </div>}
     </div>
   </section>
 
@@ -547,6 +554,27 @@ function featureIcon(feature: string) {
     color: var(--color-gray-cool);
     opacity: 0.4;
   }
+  .prop-gallery-extra {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .prop-gallery-extra__item {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    border-radius: 0.35rem;
+    background: var(--color-light);
+    cursor: zoom-in;
+  }
+  .prop-gallery-extra__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .prop-gallery-extra__item:focus-visible { outline: 3px solid var(--color-gold); outline-offset: 2px; }
 
   /* ============ TITLE BLOCK ============ */
   .prop-title-block {
