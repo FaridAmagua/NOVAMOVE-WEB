@@ -104,6 +104,11 @@ const isActive = (href: string) => {
                 transform var(--dur-base) var(--ease);
   }
 
+  .site-header.is-menu-open {
+    z-index: 2147483000;
+    pointer-events: auto;
+  }
+
   .site-header--transparent {
     color: var(--color-white);
     background: transparent;
@@ -270,13 +275,13 @@ const isActive = (href: string) => {
     position: fixed;
     inset: 0;
     background:
-      linear-gradient(180deg, rgba(10, 29, 63, 0.96) 0%, rgba(6, 17, 41, 0.98) 100%);
+      linear-gradient(180deg, rgba(10, 29, 63, 0.995) 0%, rgba(6, 17, 41, 0.998) 100%);
     color: var(--color-white);
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
     padding: 1.5rem 1.5rem 2rem;
     /* Above header so links are clickable when open. */
-    z-index: 400;
+    z-index: 2147483001;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -301,6 +306,8 @@ const isActive = (href: string) => {
     color: var(--color-white);
     position: relative;
     flex: 0 0 auto;
+    z-index: 2;
+    pointer-events: auto;
   }
 
   .site-drawer__close span {
@@ -380,10 +387,11 @@ const isActive = (href: string) => {
   };
 
   const headerWindow = window as Window & { __globalMoveHeaderBoundVersion?: string };
-  if (headerWindow.__globalMoveHeaderBoundVersion !== 'drawer-close-v2') {
-    headerWindow.__globalMoveHeaderBoundVersion = 'drawer-close-v2';
+  if (headerWindow.__globalMoveHeaderBoundVersion !== 'drawer-close-v4') {
+    headerWindow.__globalMoveHeaderBoundVersion = 'drawer-close-v4';
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target) return;
       const toggle = target.closest('[data-menu-toggle]');
       const close = target.closest('[data-menu-close]');
       const drawer = target.closest('.site-drawer');
@@ -407,7 +415,7 @@ const isActive = (href: string) => {
       }
 
       if (drawer && target.closest('a')) closeDrawer();
-    });
+    }, true);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeDrawer();
