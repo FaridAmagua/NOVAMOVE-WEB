@@ -38,6 +38,16 @@ const whatsappMessage = locale === 'es'
 const ctaHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
 const visitHref = `/${locale}/book/${property.slug}/`;
+const availabilitySource = property as Property & {
+  availableFrom?: string | null;
+  availability?: { availableFrom?: string | null } | null;
+};
+const availableFromRaw = availabilitySource.availableFrom ?? availabilitySource.availability?.availableFrom ?? null;
+const availableFromDate = availableFromRaw ? new Date(availableFromRaw) : null;
+const showAvailableFrom = Boolean(availableFromDate && !Number.isNaN(availableFromDate.getTime()));
+const availableFromLabel = showAvailableFrom && availableFromDate
+  ? new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(availableFromDate)
+  : '';
 
 // Features por idioma: en ES usa features.es; en EN usa features.en con
 // fallback a features.es si está vacío.
@@ -379,11 +389,11 @@ function featureIcon(feature: string) {
                 {statusLabel(property.status, locale)}
               </div>
               <h2 class="booking-card__mobile-title">{locale === 'es' ? 'Solicitar una visita' : 'Request a Tour'}</h2>
-              <div class="booking-card__mobile-days" aria-hidden="true">
-                <span><small>{locale === 'es' ? 'sábado' : 'sat'}</small><strong>19</strong></span>
-                <span><small>{locale === 'es' ? 'domingo' : 'sun'}</small><strong>20</strong></span>
-                <span><small>{locale === 'es' ? 'lunes' : 'mon'}</small><strong>21</strong></span>
-              </div>
+              {showAvailableFrom && (
+                <p class="booking-card__mobile-availability">
+                  {locale === 'es' ? 'Disponible desde' : 'Available from'} <strong>{availableFromLabel}</strong>
+                </p>
+              )}
               <p class="booking-card__mobile-choice">{locale === 'es' ? 'Elige el tipo de visita' : 'Choose a tour type'}</p>
               <div class="booking-card__mobile-tabs" aria-hidden="true">
                 <span>{locale === 'es' ? 'Presencial' : 'In Person'}</span>
@@ -670,7 +680,7 @@ function featureIcon(feature: string) {
 
   .label-mobile,
   .booking-card__mobile-title,
-  .booking-card__mobile-days,
+  .booking-card__mobile-availability,
   .booking-card__mobile-choice,
   .booking-card__mobile-tabs {
     display: none;
@@ -1623,36 +1633,26 @@ function featureIcon(feature: string) {
     }
     .booking-card__mobile-title {
       display: block;
-      margin: 0 0 1rem;
+      margin: 0 0 1.15rem;
       color: var(--color-white);
       text-align: center;
       font-size: 0.9rem;
       line-height: 1.15;
       font-weight: 900;
     }
-    .booking-card__mobile-days {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.45rem;
-      margin-bottom: 0.9rem;
-    }
-    .booking-card__mobile-days span {
-      display: grid;
-      place-items: center;
-      min-height: 74px;
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      border-radius: 4px;
+    .booking-card__mobile-availability {
+      display: block;
+      margin: -0.45rem 0 1rem;
+      text-align: center;
       color: var(--color-white);
+      font-size: 0.72rem;
+      line-height: 1.35;
+      font-weight: 700;
     }
-    .booking-card__mobile-days small {
-      font-size: 0.52rem;
-      line-height: 1;
-      opacity: 0.9;
-      text-transform: lowercase;
-    }
-    .booking-card__mobile-days strong {
-      font-size: 1.28rem;
-      line-height: 1;
+    .booking-card__mobile-availability strong {
+      display: block;
+      margin-top: 0.1rem;
+      font-size: 0.86rem;
       font-weight: 900;
     }
     .booking-card__mobile-choice {
@@ -1686,6 +1686,32 @@ function featureIcon(feature: string) {
     .booking-card__ref,
     .booking-card__note {
       display: none;
+    }
+    .booking-card__price {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      margin: 1.15rem 0 1.25rem;
+      gap: 0.32rem;
+      color: var(--color-white);
+    }
+    .booking-card__from {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+    }
+    .booking-card__amount {
+      color: var(--color-white);
+      font-size: 1.9rem;
+      line-height: 1;
+      font-weight: 900;
+      text-shadow: none;
+    }
+    .booking-card__unit {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.92rem;
+      font-weight: 700;
     }
     .booking-card__chip {
       display: block;
@@ -1789,18 +1815,20 @@ function featureIcon(feature: string) {
   }
 
   /* ============ BOOKING CARD price: belt-and-suspenders for iOS Safari ============ */
-  .booking-card__price {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: baseline;
-    gap: 0.35rem;
-    margin-bottom: 1.5rem;
-    text-align: left;
-    width: 100%;
-  }
-  .booking-card__from { white-space: nowrap; }
-  .booking-card__amount {
-    font-size: 1.75rem; /* smaller mobile so 3 elements fit */
+  @media (min-width: 541px) {
+    .booking-card__price {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: baseline;
+      gap: 0.35rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      width: 100%;
+    }
+    .booking-card__from { white-space: nowrap; }
+    .booking-card__amount {
+      font-size: 1.75rem; /* smaller tablet so 3 elements fit */
+    }
   }
 </style>
