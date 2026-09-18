@@ -151,6 +151,11 @@ const isActive = (href: string) => {
                 backdrop-filter var(--dur-base) var(--ease);
   }
 
+  .site-header.is-menu-open .site-header__inner {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .site-header.is-scrolled .site-header__inner,
   .site-header:not(.site-header--transparent) .site-header__inner {
     background: rgba(10, 29, 63, 0.94);
@@ -269,9 +274,9 @@ const isActive = (href: string) => {
     color: var(--color-white);
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
-    padding: calc(72px + 2rem) 1.5rem 2rem;
+    padding: 1.5rem 1.5rem 2rem;
     /* Above header so links are clickable when open. */
-    z-index: 200;
+    z-index: 400;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -354,7 +359,7 @@ const isActive = (href: string) => {
     }
 
     .site-drawer {
-      padding-top: calc(10px + 62px + 1.35rem);
+      padding-top: 1.25rem;
     }
   }
 </style>
@@ -363,6 +368,9 @@ const isActive = (href: string) => {
   // Mobile drawer toggle. Uses event delegation so it survives Astro View
   // Transitions (which replace the drawer element on each navigation).
   const closeDrawer = () => {
+    document.querySelectorAll('.site-header.is-menu-open').forEach((el) => {
+      el.classList.remove('is-menu-open');
+    });
     document.querySelectorAll('.site-header__toggle.is-open, .site-drawer.is-open').forEach((el) => {
       el.classList.remove('is-open');
       if (el.classList.contains('site-header__toggle')) el.setAttribute('aria-expanded', 'false');
@@ -387,8 +395,10 @@ const isActive = (href: string) => {
 
       if (toggle) {
         const willBeOpen = toggle.getAttribute('aria-expanded') !== 'true';
+        const headerEl = document.querySelector('.site-header');
         toggle.setAttribute('aria-expanded', String(willBeOpen));
         toggle.classList.toggle('is-open', willBeOpen);
+        headerEl?.classList.toggle('is-menu-open', willBeOpen);
         const drawerEl = document.querySelector('.site-drawer');
         drawerEl?.classList.toggle('is-open', willBeOpen);
         drawerEl?.setAttribute('aria-hidden', String(!willBeOpen));
