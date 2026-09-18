@@ -256,6 +256,11 @@ const isActive = (href: string) => {
   .site-header__toggle.is-open span:nth-child(2) { opacity: 0; }
   .site-header__toggle.is-open span:nth-child(3) { transform: translate(-12px, -50%) rotate(-45deg); }
 
+  .site-header__toggle.is-open {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .site-drawer {
     position: fixed;
     inset: 0;
@@ -330,8 +335,7 @@ const isActive = (href: string) => {
     .site-nav, .site-header__actions { display: none; }
     .site-header__toggle { display: flex; }
     .site-header__inner { position: relative; z-index: 300; height: 72px; }
-    .site-header { min-height: 72px; background: rgba(10,29,63,.97); color: var(--color-white); }
-    .site-drawer { padding-top: 92px; }
+    .site-header { color: var(--color-white); }
   }
 
   @media (max-width: 720px) {
