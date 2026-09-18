@@ -324,9 +324,50 @@ function initButtonLoading(): void {
   });
 }
 
+/* ---------- 11. Local-only Netlify form shim ---------- */
+/* Astro's dev server does not handle Netlify POST forms. In local dev, prevent
+ * those submissions so browser history does not keep a POST entry that becomes
+ * a 405 when the user goes back. Production still submits normally. */
+function initLocalNetlifyForms(): void {
+  const isLocal =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
+
+  if (!isLocal) return;
+
+  document.querySelectorAll<HTMLFormElement>('form[data-netlify="true"]').forEach((form) => {
+    if (form.dataset.localNetlifyBound === 'true') return;
+    form.dataset.localNetlifyBound = 'true';
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const btn = form.querySelector<HTMLButtonElement>('[data-magnetic], button[type="submit"], .btn--primary');
+      let banner = form.querySelector<HTMLElement>('.form-banner');
+
+      if (!banner) {
+        banner = document.createElement('div');
+        form.prepend(banner);
+      }
+
+      banner.className = 'form-banner form-banner--success';
+      banner.textContent = document.documentElement.lang === 'es'
+        ? 'Mensaje simulado en local. En producción se enviará con Netlify.'
+        : 'Local test message. In production this will submit through Netlify.';
+      banner.setAttribute('role', 'status');
+
+      setTimeout(() => {
+        btn?.classList.remove('is-loading');
+        btn?.removeAttribute('aria-busy');
+        form.reset();
+      }, 900);
+    });
+  });
+}
+
 /* ---------- Init ---------- */
 
-/* ---------- 11. Header scroll behavior (transparent → solid) ---------- */
+/* ---------- 12. Header scroll behavior (transparent → solid) ---------- */
 /* Single global scroll listener that re-queries the current header on
  * every scroll, so it survives Astro View Transitions (which replace
  * the header element on each navigation). */
@@ -362,6 +403,7 @@ function initAll(): void {
   initParallax();
   animateCounters();
   initImageFade();
+  initLocalNetlifyForms();
   initButtonLoading();
   initHeaderScroll();
 }
@@ -374,6 +416,8 @@ if (!reduceMotion) {
 } else {
   // Just mark reveals visible immediately
   document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible'));
+  initLocalNetlifyForms();
+  initButtonLoading();
 }
 
 // Re-init after view transition navigation

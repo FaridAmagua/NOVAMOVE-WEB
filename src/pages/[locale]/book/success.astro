@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 import { getPropertyBySlug } from '../../../data/property-source';
 
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 
 const locale = Astro.params.locale as Locale;
@@ -43,7 +43,7 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
             <span class="text-xs text-gold tracking-[0.16em] uppercase font-semibold">
               {t(locale, 'bookingSuccess.reference')}
             </span>
-            <span class="font-serif text-2xl text-navy tracking-[0.1em]">{orderRef}</span>
+            <span class="font-sans text-2xl text-navy tracking-[0.1em]">{orderRef}</span>
             {isDev && <span class="text-xs text-red-700 font-semibold tracking-[0.18em] uppercase">DEV MODE</span>}
           </div>
         )}
@@ -51,7 +51,7 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
         <div class="flex flex-wrap justify-center gap-6 mt-8">
           <a href={`/${locale}/`} class="btn btn--secondary">{t(locale, 'bookingSuccess.backHome')}</a>
           {property && (
-            <a href={`/${locale}/properties/${property.slug}`} class="btn btn--link">
+            <a href={`/${locale}/properties/${property.slug}/`} class="btn btn--link">
               {t(locale, 'bookingSuccess.viewProperty')} →
             </a>
           )}
@@ -64,11 +64,11 @@ const stepDescs = ['step1Desc', 'step2Desc', 'step3Desc'] as const;
         <ol class="flex flex-col gap-6">
           {steps.map((step, i) => (
             <li class="flex gap-6 p-8 bg-white rounded-lg border-l-4 border-gold">
-              <span class="font-serif text-3xl text-gold font-medium leading-none flex-shrink-0">
+              <span class="font-sans text-3xl text-gold font-medium leading-none flex-shrink-0">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <div>
-                <h3 class="font-serif text-xl text-navy font-semibold mb-2">{t(locale, `bookingSuccess.${step}`)}</h3>
+                <h3 class="font-sans text-xl text-navy font-semibold mb-2">{t(locale, `bookingSuccess.${step}`)}</h3>
                 <p class="text-text-secondary leading-relaxed m-0">{t(locale, `bookingSuccess.${stepDescs[i]}`)}</p>
               </div>
             </li>

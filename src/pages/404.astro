@@ -52,19 +52,19 @@ const escapeRoutes = [
         </p>
 
         <h1
-          class="reveal font-serif font-normal text-gold-soft leading-[0.85] tracking-tight mt-0 mb-4"
+          class="reveal font-sans font-normal text-gold-soft leading-[0.85] tracking-tight mt-0 mb-4"
           style="font-size: clamp(8rem, 22vw, 18rem); text-shadow: 0 8px 60px rgba(200,167,106,0.25);"
           aria-hidden="true"
         >404</h1>
 
         <h2
-          class="reveal font-serif font-medium text-white text-[clamp(1.5rem,3vw,2.25rem)] leading-tight mb-5"
+          class="reveal font-sans font-medium text-white text-[clamp(1.5rem,3vw,2.25rem)] leading-tight mb-5"
           style="--reveal-delay: 200ms;"
         >
           {locale === 'es' ? (
-            <>Esta dirección <span class="italic-serif">se ha mudado</span><br/>o nunca existió.</>
+            <>Esta dirección <span class="">se ha mudado</span><br/>o nunca existió.</>
           ) : (
-            <>This address <span class="italic-serif">has moved</span><br/>or never existed.</>
+            <>This address <span class="">has moved</span><br/>or never existed.</>
           )}
         </h2>
 
@@ -104,7 +104,7 @@ const escapeRoutes = [
                 class="escape-card group grid grid-cols-[1fr_auto] grid-rows-[auto_auto] gap-x-4 gap-y-1 items-center p-4 md:px-5 bg-white/[0.06] border border-white/10 rounded-lg text-white no-underline transition-all duration-300 hover:bg-white/[0.12] hover:border-gold hover:-translate-y-0.5"
                 style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"
               >
-                <span class="font-serif text-[1.05rem] text-white">{r.label}</span>
+                <span class="font-sans text-[1.05rem] text-white">{r.label}</span>
                 <span class="text-gold transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
                 <span class="col-span-2 text-xs text-white/60">{r.desc}</span>
               </a>

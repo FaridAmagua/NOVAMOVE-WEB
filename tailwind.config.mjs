@@ -15,7 +15,7 @@ export default {
       colors: {
         navy:    { DEFAULT: '#0A1D3F', 700: '#11295A', 900: '#061129' },
         charcoal:'#1C1F24',
-        gold:    { DEFAULT: '#C8A76A', soft: '#E4D2A8', hover: '#B89554' },
+        gold:    { DEFAULT: '#071B68', soft: '#FFFFFF', hover: '#000000' },
         cream:   '#F5F6F8',
         'gray-cool': '#6E7480',
         'gray-soft': '#B5BAC2',

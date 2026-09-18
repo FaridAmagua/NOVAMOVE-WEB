@@ -2,45 +2,28 @@
 import { localizedPath, type Locale } from '../utils/i18n';
 
 interface Props {
-  /**
-   * Visual variant of the logo.
-   * - 'light' → dark mark, for white backgrounds (default)
-   * - 'white' → white mark, for dark backgrounds
-   */
   variant?: 'light' | 'white';
-  /** Height of the mark in pixels. Width auto-scales preserving aspect ratio. */
   size?: number;
-  /** Show the wordmark + tagline next to the icon. */
   withWordmark?: boolean;
+  mark?: boolean;
   locale: Locale;
 }
 
-const { variant = 'light', size = 44, withWordmark = false, locale } = Astro.props;
-
-// Pick the right asset per variant. The mark-only PNGs are used in the header
-// and footer because they cleanly scale; the larger logo-light.png is reserved
-// for contexts that need the full lockup (marketing surfaces).
-const markSrc = variant === 'white' ? '/brand/logo-white.png' : '/brand/logo-dark.png';
-
-const wordmarkColor = variant === 'white' ? '#FFFFFF' : '#0A1D3F';
-const taglineColor = variant === 'white' ? 'rgba(255,255,255,0.7)' : 'rgba(10,29,63,0.7)';
+const { size = 44, mark = true, locale } = Astro.props;
 ---
 
-<a href={localizedPath(locale, '/')} class="logo" aria-label="Global Move — Inicio">
-  <img
-    src={markSrc}
-    alt=""
-    width={size}
-    height={size}
-    class="logo__mark"
-    loading="eager"
-    decoding="async"
-  />
-  {withWordmark && (
-    <span class="logo__wordmark">
-      <span class="logo__name" style={`color:${wordmarkColor}`}>GLOBAL MOVE</span>
-      <span class="logo__tag" style={`color:${taglineColor}`}>RELOCATION &amp; RENTALS</span>
-    </span>
+<a href={localizedPath(locale, '/')} class="logo" aria-label="Global Move - Inicio">
+  {mark && (
+    <img
+      src="/brand/wordmark-light.png"
+      alt="GLOBAL.MOVE"
+      width="320"
+      height="50"
+      class="logo__mark"
+      style={`height:${Math.max(size, 38)}px`}
+      loading="eager"
+      decoding="async"
+    />
   )}
 </a>
 
@@ -48,32 +31,23 @@ const taglineColor = variant === 'white' ? 'rgba(255,255,255,0.7)' : 'rgba(10,29
   .logo {
     display: inline-flex;
     align-items: center;
-    gap: 0.85rem;
     text-decoration: none;
   }
+
   .logo__mark {
     display: block;
+    width: auto;
     flex-shrink: 0;
-    height: auto;
     transition: opacity var(--dur-base) var(--ease);
   }
-  .logo:hover .logo__mark { opacity: 0.85; }
-  .logo__wordmark { display: flex; flex-direction: column; line-height: 1; gap: 5px; }
-  .logo__name {
-    font-family: var(--font-serif);
-    font-size: 1.25rem;
-    letter-spacing: 0.18em;
-    font-weight: 500;
+
+  .logo:hover .logo__mark {
+    opacity: 0.85;
   }
-  .logo__tag {
-    font-family: var(--font-sans);
-    font-size: 0.55rem;
-    letter-spacing: 0.3em;
-    font-weight: 500;
-  }
+
   @media (max-width: 540px) {
-    /* Hide the small tagline on mobile to save header space */
-    .logo__tag { display: none; }
-    .logo__wordmark { gap: 0; }
+    .logo__mark {
+      max-height: 38px;
+    }
   }
 </style>

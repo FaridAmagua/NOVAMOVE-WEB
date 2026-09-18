@@ -1,5 +1,4 @@
 ---
-import Logo from './Logo.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { t, localizedPath, type Locale } from '../utils/i18n';
 
@@ -37,8 +36,12 @@ const isActive = (href: string) => {
   data-transparent={transparent ? 'true' : 'false'}
 >
   <div class="container site-header__inner">
-    <!-- Logo always white: navbar is either transparent (over hero) or navy glass (scrolled / non-transparent pages) — never on a white background -->
-    <Logo locale={locale} variant="white" withWordmark={true} />
+    <!-- Wordmark image (GLOBAL.MOVE): navbar is either transparent (over hero)
+         or navy glass (scrolled / non-transparent pages). The image is white-ish,
+         designed for dark backgrounds. -->
+    <a href={localizedPath(locale, '/')} class="site-header__wordmark" aria-label="Global Move — Inicio">
+      <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="320" height="50" />
+    </a>
 
     <nav class="site-nav" aria-label="Principal">
       <ul class="site-nav__list">
@@ -56,10 +59,7 @@ const isActive = (href: string) => {
     </nav>
 
     <div class="site-header__actions">
-      <LanguageSwitcher locale={locale} currentPath={currentPath} variant="light" />
-      <a href={localizedPath(locale, '/contact')} class="btn btn--primary site-header__cta">
-        {t(locale, 'nav.cta')}
-      </a>
+      <LanguageSwitcher locale={locale} currentPath={currentPath} variant={transparent ? 'light' : 'dark'} />
     </div>
 
     <button class="site-header__toggle" aria-label="Abrir menú" aria-expanded="false" data-menu-toggle>
@@ -70,6 +70,15 @@ const isActive = (href: string) => {
   <!-- Mobile drawer -->
   <div class="site-drawer" data-menu-drawer aria-hidden="true">
     <nav class="site-drawer__nav" aria-label="Móvil">
+      <div class="site-drawer__top">
+        <div class="site-drawer__lang">
+          <LanguageSwitcher locale={locale} currentPath={currentPath} variant="light" />
+        </div>
+        <button class="site-drawer__close" type="button" aria-label="Cerrar menú" data-menu-close>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
       <ul>
         {navItems.map(item => (
           <li>
@@ -77,12 +86,6 @@ const isActive = (href: string) => {
           </li>
         ))}
       </ul>
-      <a href={localizedPath(locale, '/contact')} class="btn btn--primary site-drawer__cta">
-        {t(locale, 'nav.cta')}
-      </a>
-      <div class="site-drawer__lang">
-        <LanguageSwitcher locale={locale} currentPath={currentPath} variant="light" />
-      </div>
     </nav>
   </div>
 </header>
@@ -90,15 +93,15 @@ const isActive = (href: string) => {
 <style>
   .site-header {
     position: fixed;
-    top: 0;
+    top: 16px;
     left: 0;
     right: 0;
     z-index: 100;
-    transition: background var(--dur-base) var(--ease),
-                box-shadow var(--dur-base) var(--ease),
+    padding-inline: clamp(0.75rem, 2vw, 1.5rem);
+    pointer-events: none;
+    transition: top var(--dur-base) var(--ease),
                 color var(--dur-base) var(--ease),
-                border-color var(--dur-base) var(--ease);
-    border-bottom: 1px solid transparent;
+                transform var(--dur-base) var(--ease);
   }
 
   .site-header--transparent {
@@ -108,43 +111,88 @@ const isActive = (href: string) => {
 
   .site-header.is-scrolled,
   .site-header:not(.site-header--transparent) {
-    background: rgba(10, 29, 63, 0.92);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    box-shadow: 0 4px 22px rgba(0, 0, 0, 0.18);
     color: var(--color-white);
-    border-bottom-color: rgba(200, 167, 106, 0.18);
   }
 
-  /* When scrolled on dark navy, the active link underline stays gold
+  /* When scrolled on dark navy, the active link underline stays white
      and the link opacity lifts to 1 for legibility */
   .site-header.is-scrolled .site-nav__link,
   .site-header:not(.site-header--transparent) .site-nav__link {
     opacity: 1;
   }
 
+  .site-header.is-scrolled :global(.lang-switcher),
+  .site-header:not(.site-header--transparent) :global(.lang-switcher) {
+    color: var(--color-white);
+    border-color: rgba(255, 255, 255, 0.38);
+  }
+
+  .site-header.is-scrolled :global(.lang-switcher:hover),
+  .site-header:not(.site-header--transparent) :global(.lang-switcher:hover) {
+    background: var(--color-white);
+    color: var(--color-navy);
+    border-color: var(--color-white);
+  }
+
   .site-header__inner {
-    height: var(--header-height);
+    height: 72px;
+    max-width: min(100%, 1520px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-8);
+    gap: clamp(1rem, 2.5vw, var(--space-8));
+    padding-inline: clamp(1.25rem, 2.6vw, 2.5rem);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    pointer-events: auto;
+    transition: background var(--dur-base) var(--ease),
+                box-shadow var(--dur-base) var(--ease),
+                border-color var(--dur-base) var(--ease),
+                backdrop-filter var(--dur-base) var(--ease);
+  }
+
+  .site-header.is-scrolled .site-header__inner,
+  .site-header:not(.site-header--transparent) .site-header__inner {
+    background: rgba(10, 29, 63, 0.94);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 45px rgba(10, 29, 63, 0.22);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .site-header__wordmark {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+  .site-header__wordmark img {
+    display: block;
+    height: 42px;
+    width: auto;
+  }
+  .site-header__wordmark:hover { opacity: 0.85; }
+
+  @media (max-width: 720px) {
+    .site-header__wordmark img {
+      height: 48px;
+    }
   }
 
   .site-nav__list {
     display: flex;
-    gap: var(--space-8);
+    gap: clamp(1.1rem, 2vw, var(--space-8));
     align-items: center;
   }
 
   .site-nav__link {
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0;
     padding: 0.4rem 0;
     position: relative;
-    opacity: 0.9;
+    opacity: 0.94;
     transition: opacity var(--dur-base) var(--ease);
   }
 
@@ -155,7 +203,7 @@ const isActive = (href: string) => {
     left: 0;
     width: 0;
     height: 1px;
-    background: var(--color-gold);
+    background: currentColor;
     transition: width var(--dur-base) var(--ease);
   }
 
@@ -172,7 +220,7 @@ const isActive = (href: string) => {
   .site-header__actions {
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-3);
   }
 
   .site-header__cta { padding: 0.85rem 1.25rem; font-size: 0.72rem; min-height: 44px; }
@@ -211,11 +259,12 @@ const isActive = (href: string) => {
   .site-drawer {
     position: fixed;
     inset: 0;
-    background: var(--color-navy);
+    background:
+      linear-gradient(180deg, rgba(10, 29, 63, 0.96) 0%, rgba(6, 17, 41, 0.98) 100%);
     color: var(--color-white);
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
-    padding: calc(var(--header-height) + 0.5rem) 1.5rem 2rem;
+    padding: 1.25rem 1.5rem 2rem;
     /* Above header so links are clickable when open. */
     z-index: 200;
     overflow-y: auto;
@@ -223,21 +272,59 @@ const isActive = (href: string) => {
   }
   .site-drawer.is-open { transform: translateX(0); }
 
+  .site-drawer__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: clamp(2.75rem, 12vh, 5rem);
+  }
+
+  .site-drawer__close {
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 50%;
+    color: var(--color-white);
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .site-drawer__close span {
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 999px;
+  }
+
+  .site-drawer__close span:first-child { transform: rotate(45deg); }
+  .site-drawer__close span:last-child { transform: rotate(-45deg); }
+
   .site-drawer__nav ul {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.35rem;
     margin-bottom: 2.5rem;
   }
   .site-drawer__link {
-    font-family: var(--font-serif);
-    font-size: 1.8rem;
-    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    padding: 0.7rem 0;
+    font-family: var(--font-sans);
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: 0;
     color: var(--color-white);
   }
-  .site-drawer__cta { width: 100%; margin-bottom: 2rem; }
-
-  .site-drawer__lang { padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.12); }
+  .site-drawer__lang {
+    display: inline-flex;
+  }
 
   @media (max-width: 960px) {
     .site-nav, .site-header__actions { display: none; }
@@ -245,6 +332,22 @@ const isActive = (href: string) => {
     .site-header__inner { position: relative; z-index: 300; height: 72px; }
     .site-header { min-height: 72px; background: rgba(10,29,63,.97); color: var(--color-white); }
     .site-drawer { padding-top: 92px; }
+  }
+
+  @media (max-width: 720px) {
+    .site-header {
+      top: 10px;
+      padding-inline: 0.75rem;
+    }
+
+    .site-header__inner {
+      height: 62px;
+      padding-inline: 1rem 0.75rem;
+    }
+
+    .site-header__wordmark img {
+      height: 34px;
+    }
   }
 </style>
 
@@ -266,7 +369,13 @@ const isActive = (href: string) => {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const toggle = target.closest('[data-menu-toggle]');
+      const close = target.closest('[data-menu-close]');
       const drawer = target.closest('.site-drawer');
+
+      if (close) {
+        closeDrawer();
+        return;
+      }
 
       if (toggle) {
         const willBeOpen = toggle.getAttribute('aria-expanded') !== 'true';

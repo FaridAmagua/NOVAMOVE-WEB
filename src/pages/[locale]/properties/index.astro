@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHero from '../../../components/PageHero.astro';
-import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 import {
   propertyTypeLabel,
   formatPrice,
@@ -9,7 +9,7 @@ import {
 import { getProperties, getUniqueZones, zoneLabel } from '../../../data/property-source';
 
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 
 const locale = Astro.params.locale as Locale;
@@ -44,7 +44,7 @@ if (sort === 'price-asc') {
 >
   <PageHero
     eyebrow={t(locale, 'properties.title')}
-    title={locale === 'es' ? 'Propiedades<br/><span class="italic-serif">seleccionadas.</span>' : 'Handpicked<br/><span class="italic-serif">properties.</span>'}
+    title={locale === 'es' ? 'Propiedades<br/><span class="">seleccionadas.</span>' : 'Handpicked<br/><span class="">properties.</span>'}
     subtitle={t(locale, 'properties.subtitle')}
     image="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=2000&q=80"
   />
@@ -81,7 +81,7 @@ if (sort === 'price-asc') {
         </div>
 
         {destinationFilter && (
-          <a href={`/${locale}/properties`}
+          <a href={`/${locale}/properties/`}
             class="self-end text-[0.78rem] font-semibold tracking-[0.1em] uppercase text-gold py-2.5 hover:opacity-80">
             × {t(locale, 'properties.filterReset')}
           </a>
@@ -95,7 +95,7 @@ if (sort === 'price-asc') {
           {filtered.map((p) => {
             // Nivora = solo alquiler larga duración
             const ctaLabel = locale === 'es' ? 'Ver propiedad' : 'View property';
-            const targetPath = `/${locale}/properties/${p.slug}`;
+            const targetPath = `/${locale}/properties/${p.slug}/`;
             const zone = zoneLabel(p.destination, locale);
             const location = p.location[locale]?.trim();
             const showLocation = Boolean(location && location.localeCompare(zone, undefined, { sensitivity: 'base' }) !== 0);
@@ -134,7 +134,7 @@ if (sort === 'price-asc') {
                       {showLocation && <span>·</span>}
                       {showLocation && <span>{location}</span>}
                     </div>
-                    <h3 class="font-serif text-[1.45rem] leading-tight text-navy mb-2">{p.name[locale]}</h3>
+                    <h3 class="font-sans text-[1.45rem] leading-tight text-navy mb-2">{p.name[locale]}</h3>
                     <p class="text-[0.9rem] text-text-secondary leading-relaxed mb-4 min-h-[2.7em]">{p.tagline[locale]}</p>
                     {(p.bedrooms || p.bathrooms || p.sizeM2) && (
                       <div class="flex gap-2 text-[0.82rem] text-text-secondary pb-4 border-b border-navy/5 mb-4">
@@ -147,7 +147,7 @@ if (sort === 'price-asc') {
                     )}
                     <div class="flex items-baseline gap-2 flex-wrap">
                       <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
-                      <span class="font-serif text-2xl text-gold font-medium">{formatPrice(p.price, locale)}</span>
+                      <span class="font-sans text-2xl text-gold font-medium">{formatPrice(p.price, locale)}</span>
                       <span class="text-[0.82rem] text-text-secondary">/{locale === 'es' ? 'mes' : 'month'}</span>
                     </div>
                     <span class="block mt-4 text-gold text-[0.78rem] font-semibold tracking-[0.12em] uppercase transition-all duration-300 group-hover:tracking-[0.16em]">

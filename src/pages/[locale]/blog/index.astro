@@ -2,7 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHero from '../../../components/PageHero.astro';
 import { getCollection } from 'astro:content';
-import { t, localeParams, type Locale } from '../../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 
 const locale = Astro.params.locale as Locale;
 const allPosts = await getCollection('blog');
@@ -19,7 +19,7 @@ const formatDate = (d: Date, loc: Locale) =>
 
 const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${cat}`);
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 ---
 
@@ -30,7 +30,7 @@ export async function getStaticPaths() {
 >
   <PageHero
     eyebrow={t(locale, 'blog.title')}
-    title={locale === 'es' ? 'Blog &<br/><span class="italic-serif">News.</span>' : 'Blog &<br/><span class="italic-serif">News.</span>'}
+    title={locale === 'es' ? 'Blog &<br/><span class="">News.</span>' : 'Blog &<br/><span class="">News.</span>'}
     subtitle={t(locale, 'blog.subtitle')}
     image="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=80"
     align="center"
@@ -50,7 +50,7 @@ export async function getStaticPaths() {
               style={`transition-delay:${i * 60}ms`}
             >
               <a
-                href={`/${locale}/blog/${post.slug.replace(/\.(es|en)$/, '')}`}
+                href={`/${locale}/blog/${post.slug.replace(/\.(es|en)$/, '')}/`}
                 class="block text-text-primary no-underline"
               >
                 {post.data.cover && (
@@ -67,7 +67,7 @@ export async function getStaticPaths() {
                   <span class="inline-block text-xs font-semibold tracking-[0.18em] uppercase text-gold mb-3.5">
                     {categoryLabel(post.data.category, locale)}
                   </span>
-                  <h2 class="font-serif text-2xl leading-tight text-navy mb-3.5 transition-colors duration-300 group-hover:text-gold">
+                  <h2 class="font-sans text-2xl leading-tight text-navy mb-3.5 transition-colors duration-300 group-hover:text-gold">
                     {post.data.title}
                   </h2>
                   <p class="text-[0.92rem] leading-relaxed text-text-secondary mb-5 line-clamp-3">

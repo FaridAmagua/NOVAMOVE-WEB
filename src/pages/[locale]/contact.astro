@@ -1,11 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
-import { t, localeParams, type Locale } from '../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../utils/i18n';
 
 const locale = Astro.params.locale as Locale;
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 ---
 

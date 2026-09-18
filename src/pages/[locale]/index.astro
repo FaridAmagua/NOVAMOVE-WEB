@@ -1,194 +1,179 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { t, localeParams, type Locale } from '../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../utils/i18n';
+import { getProperties, zoneLabel } from '../../data/property-source';
+import { formatPrice, statusLabel } from '../../data/properties';
 
 const locale = Astro.params.locale as Locale;
 
-const services = [
-  { key: 'relocation', icon: 'home',   href: '/services#relocation' },
-  { key: 'rentals',    icon: 'key',    href: '/services#rentals' },
-  { key: 'sales',      icon: 'globe',  href: '/services#sales' },
-  { key: 'concierge',  icon: 'bell',   href: '/services#concierge' },
-];
+const { properties } = await getProperties();
+const featuredProperties = properties.filter((property) => property.featured).slice(0, 3);
+const homeProperties = featuredProperties.length > 0 ? featuredProperties : properties.slice(0, 3);
 
-const destinations = [
-  { key: 'madrid',     img: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=900&q=80' },
-  { key: 'barcelona',  img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=900&q=80' },
-  { key: 'marbella',   img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=900&q=80' },
-  { key: 'mallorca',   img: 'https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=900&q=80' },
-  { key: 'ibiza',      img: 'https://images.unsplash.com/photo-1559656914-a30970c1affd?w=900&q=80' },
-  { key: 'canarias',   img: 'https://images.unsplash.com/photo-1505939435612-a18ea96b80b3?w=900&q=80' },
+const regions = [
+  'madrid',
+  'barcelona',
+  'marbella',
+  'mallorca',
+  'ibiza',
+  'canarias',
+  'valencia',
+  'sevilla',
+  'malaga',
+  'sitges',
+  'palma',
+  'alicante',
+  'bilbao',
+  'tenerife',
 ];
-
-const process = ['discovery', 'planning', 'execution', 'settling'] as const;
-const testimonials = ['one', 'two', 'three'] as const;
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 ---
 
 <BaseLayout transparentHeader={true}>
   <!-- ============ HERO ============ -->
-  <section class="relative min-h-[100svh] flex items-center text-white overflow-hidden">
+  <section class="home-hero relative min-h-[100svh] flex items-center justify-center text-white overflow-hidden">
     <div class="absolute inset-0 -z-0" aria-hidden="true">
       <img
-        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=2000&q=80"
+        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=75"
         alt=""
         loading="eager"
         fetchpriority="high"
         data-ken-burns
-        data-parallax="0.15"
         class="w-full h-full object-cover"
         style="transition: none;"
       />
       <div class="absolute inset-0"
         style="background:
-          linear-gradient(135deg, rgba(10,29,63,0.85) 0%, rgba(10,29,63,0.55) 60%, rgba(10,29,63,0.4) 100%),
-          linear-gradient(180deg, rgba(10,29,63,0.4) 0%, rgba(10,29,63,0.6) 100%);"
+          linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.30) 42%, rgba(0,0,0,0.82) 100%),
+          linear-gradient(90deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.10) 48%, rgba(0,0,0,0.35) 100%);"
       ></div>
     </div>
 
-    <div class="container max-w-[880px] pt-[calc(var(--header-height)+4rem)] pb-24">
-      <p class="eyebrow eyebrow--light reveal reveal--blur">{t(locale, 'hero.eyebrow')}</p>
-      <h1 class="reveal text-white font-medium leading-[1.02] mb-7"
-          style="font-size: clamp(3rem, 7.5vw, 6.5rem); letter-spacing: -0.02em; --reveal-delay: 120ms;">
+    <div class="container home-hero__content pt-[calc(var(--header-height)+5rem)] pb-24">
+      <h1 class="home-hero__title reveal text-white"
+          style="--reveal-delay: 120ms;">
         {locale === 'es' ? (
-          <>Te movemos,<br/><span class="italic-serif">vives mejor.</span></>
+          <>Te movemos,<br/><span class="">vives mejor.</span></>
         ) : (
-          <>We move you,<br/><span class="italic-serif">you live better.</span></>
+          <>We move you,<br/><span class="">you live better.</span></>
         )}
       </h1>
-      <p class="reveal max-w-[56ch] mb-10"
-         style="font-size: clamp(1.05rem, 1.4vw, 1.25rem); line-height: 1.6; color: rgba(255,255,255,0.85); --reveal-delay: 280ms;">
+      <p class="home-hero__subtitle reveal"
+         style="--reveal-delay: 280ms;">
         {t(locale, 'hero.subheadline')}
       </p>
-      <div class="flex flex-wrap gap-4 reveal" style="--reveal-delay: 420ms;">
-        <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.3">
-          <span data-magnetic-inner>{t(locale, 'hero.primaryCta')}</span>
-        </a>
-        <a href={`/${locale}/destinations`} class="btn btn--ghost" data-magnetic="0.3">
-          <span data-magnetic-inner>{t(locale, 'hero.secondaryCta')}</span>
-        </a>
-      </div>
+
+      <form class="home-hero__search reveal" action={`/${locale}/properties/`} method="get" role="search" style="--reveal-delay: 420ms;">
+        <label class="sr-only" for="home-search">
+          {locale === 'es' ? 'Buscar propiedades' : 'Search properties'}
+        </label>
+        <span class="home-hero__search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+        </span>
+        <input
+          id="home-search"
+          name="dest"
+          type="search"
+          autocomplete="off"
+          placeholder={locale === 'es'
+            ? 'Busca propiedades, ubicaciones...'
+            : 'Search properties, locations...'}
+        />
+        <button type="submit" aria-label={locale === 'es' ? 'Buscar' : 'Search'}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+        </button>
+      </form>
     </div>
 
     <!-- Scroll indicator -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-6 h-10 border-[1.5px] border-white/50 rounded-xl flex justify-center pt-2" aria-hidden="true">
-      <span class="block w-0.5 h2 bg-gold rounded-sm" style="animation: scrollHint 1.6s ease-in-out infinite;"></span>
+      <span class="block w-0.5 h2 bg-white rounded-sm" style="animation: scrollHint 1.6s ease-in-out infinite;"></span>
     </div>
   </section>
 
-  <!-- ============ SERVICES ============ -->
-  <section class="section" aria-labelledby="services-heading">
+  <section class="home-regions" aria-labelledby="regions-heading">
     <div class="container">
-      <div class="max-w-3xl mb-16">
-        <p class="eyebrow">{t(locale, 'services.eyebrow')}</p>
-        <h2 id="services-heading" class="h2 mt-4 mb-4">{t(locale, 'services.headline')}</h2>
-        <p class="lead mt-0">{t(locale, 'services.subheadline')}</p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-stagger data-stagger-step="100">
-        {services.map(({ key, icon, href }) => (
-          <a href={`/${locale}${href}`}
-             class="reveal reveal--fade group flex flex-col p-9 bg-white border border-navy/5 rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-gold text-text-primary no-underline"
-             data-tilt="4">
-            <span class="inline-flex items-center justify-center w-14 h-14 rounded-lg text-gold mb-6"
-                  style="background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-700) 100%);" aria-hidden="true">
-              {icon === 'home' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>}
-              {icon === 'key' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9 2 2-2 2 2 2-3 3-2-2-3 3"/></svg>}
-              {icon === 'globe' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>}
-              {icon === 'bell' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg>}
-            </span>
-            <h3 class="font-serif text-2xl font-medium text-navy mb-3">{t(locale, `services.items.${key}.title`)}</h3>
-            <p class="text-[0.95rem] leading-relaxed text-text-secondary flex-1 mb-6">{t(locale, `services.items.${key}.description`)}</p>
-            <span class="text-xl text-gold transition-transform duration-300 group-hover:translate-x-1.5" aria-hidden="true">→</span>
+      <h2 id="regions-heading" class="home-section-title reveal">
+        {locale === 'es' ? 'Nuestras regiones' : 'Our Regions'}
+      </h2>
+      <div class="home-regions__grid reveal reveal--fade">
+        {regions.map((region) => (
+          <a class="home-region-pill" href={`/${locale}/properties/?dest=${region}`}>
+            <span>{zoneLabel(region, locale)}</span>
+            {['barcelona', 'marbella', 'ibiza', 'madrid'].includes(region) && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
+            )}
           </a>
         ))}
       </div>
-
-      <div class="reveal reveal--fade mt-12 text-left">
-        <a href={`/${locale}/services`} class="btn btn--link">{t(locale, 'services.cta')}</a>
-      </div>
     </div>
   </section>
 
-  <!-- ============ DESTINATIONS ============ -->
-  <section class="section section--dark" aria-labelledby="destinations-heading">
+  <section class="home-featured" aria-labelledby="featured-heading">
     <div class="container">
-      <header class="reveal max-w-3xl mx-auto mb-16 text-center">
-        <p class="eyebrow eyebrow--light">{t(locale, 'destinations.eyebrow')}</p>
-        <h2 id="destinations-heading" class="h2">{t(locale, 'destinations.headline')}</h2>
-        <p class="lead">{t(locale, 'destinations.subheadline')}</p>
+      <header class="home-featured__header reveal">
+        <h2 id="featured-heading" class="home-section-title">
+          {locale === 'es' ? 'Propiedades destacadas' : 'Featured Properties'}
+        </h2>
+        <p>
+          {locale === 'es'
+            ? 'Explora algunas de nuestras casas, apartamentos y villas mas exclusivas.'
+            : 'Check out some of our most exclusive houses, apartments, villas, and more.'}
+        </p>
       </header>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-stagger data-stagger-step="80">
-        {destinations.map(({ key, img }) => (
-          <a href={`/${locale}/destinations#${key}`}
-             class="reveal reveal--scale group relative block overflow-hidden rounded-lg aspect-[4/5] text-white no-underline"
-             data-tilt="3">
-            <div class="absolute inset-0">
-              <img src={img} alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            </div>
-            <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 30%, rgba(10,29,63,0.85) 100%);"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-7 z-10">
-              <h3 class="font-serif text-[1.6rem] text-white mb-1">{t(locale, `destinations.items.${key}.name`)}</h3>
-              <p class="text-[0.85rem] text-white/80 leading-snug">{t(locale, `destinations.items.${key}.tag`)}</p>
+      <div class="home-properties-grid">
+        {homeProperties.map((property) => (
+          <a class="home-property-card reveal reveal--fade" href={`/${locale}/properties/${property.slug}/`}>
+            <figure class="home-property-card__media">
+              <img
+                src={property.images[0]}
+                alt={property.name[locale]}
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 720px) 100vw, 33vw"
+                style={`object-position: ${property.imagePosition ?? 'center 62%'};`}
+              />
+              <span class="home-property-card__status">
+                {statusLabel(property.status, locale)}
+              </span>
+              <figcaption>{property.name[locale]}</figcaption>
+            </figure>
+            <div class="home-property-card__body">
+              <strong>{formatPrice(property.price, locale)}</strong>
+              <p>{property.location[locale]}</p>
+              <dl>
+                {property.bedrooms && (
+                  <div>
+                    <dt>{locale === 'es' ? 'Dorm.' : 'Beds'}</dt>
+                    <dd>{property.bedrooms}</dd>
+                  </div>
+                )}
+                {property.bathrooms && (
+                  <div>
+                    <dt>{locale === 'es' ? 'Banos' : 'Baths'}</dt>
+                    <dd>{property.bathrooms}</dd>
+                  </div>
+                )}
+                {property.sizeM2 && (
+                  <div>
+                    <dt>m2</dt>
+                    <dd>{property.sizeM2}</dd>
+                  </div>
+                )}
+              </dl>
             </div>
           </a>
-        ))}
-      </div>
-
-      <div class="reveal mt-12 text-center">
-        <a href={`/${locale}/destinations`} class="btn btn--link btn--link-light">{t(locale, 'destinations.cta')}</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PROCESS ============ -->
-  <section class="section" aria-labelledby="process-heading">
-    <div class="container">
-      <header class="reveal max-w-3xl mx-auto mb-16 text-center">
-        <p class="eyebrow">{t(locale, 'process.eyebrow')}</p>
-        <h2 id="process-heading" class="h2">{t(locale, 'process.headline')}</h2>
-        <p class="lead">{t(locale, 'process.subheadline')}</p>
-      </header>
-
-      <ol class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" data-stagger data-stagger-step="120">
-        {process.map((step, i) => (
-          <li class="reveal reveal--left relative pt-6">
-            <span class="absolute top-0 left-0 w-full h-px"
-              style="background: linear-gradient(90deg, var(--color-gold) 0%, transparent 80%);"></span>
-            <span class="block font-serif text-4xl text-gold leading-none font-semibold mb-5 tracking-tight">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <h3 class="font-serif text-xl text-navy mb-3 font-semibold">{t(locale, `process.steps.${step}.title`)}</h3>
-            <p class="text-[0.95rem] leading-relaxed text-text-secondary">{t(locale, `process.steps.${step}.description`)}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- ============ TESTIMONIALS ============ -->
-  <section class="section section--subtle" aria-labelledby="testimonials-heading">
-    <div class="container">
-      <header class="reveal max-w-3xl mx-auto mb-16 text-center">
-        <p class="eyebrow">{t(locale, 'testimonials.eyebrow')}</p>
-        <h2 id="testimonials-heading" class="h2">{t(locale, 'testimonials.headline')}</h2>
-      </header>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" data-stagger data-stagger-step="120">
-        {testimonials.map((id) => (
-          <figure class="reveal reveal--fade relative bg-white p-10 md:p-8 rounded-lg shadow-sm">
-            <span class="absolute -top-2.5 left-6 font-serif text-8xl text-gold leading-none" aria-hidden="true">"</span>
-            <blockquote class="m-0 mb-6">
-              <p class="font-serif text-lg leading-snug text-navy italic">{t(locale, `testimonials.items.${id}.quote`)}</p>
-            </blockquote>
-            <figcaption class="flex flex-col gap-1 pt-5 border-t border-navy/5">
-              <span class="font-semibold text-navy text-[0.92rem]">{t(locale, `testimonials.items.${id}.author`)}</span>
-              <span class="text-[0.82rem] text-gold tracking-[0.06em]">{t(locale, `testimonials.items.${id}.origin`)}</span>
-            </figcaption>
-          </figure>
         ))}
       </div>
     </div>
@@ -216,7 +201,7 @@ export async function getStaticPaths() {
              style="font-size: clamp(1.1rem, 1.5vw, 1.3rem);">
             {t(locale, 'cta.subheadline')}
           </p>
-          <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.35">
+          <a href={`/${locale}/contact/`} class="btn btn--primary" data-magnetic="0.35">
             <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
           </a>
         </div>
@@ -226,6 +211,344 @@ export async function getStaticPaths() {
 </BaseLayout>
 
 <style is:global>
+  .home-hero {
+    isolation: isolate;
+  }
+
+  .home-hero__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 1160px;
+  }
+
+  .home-hero__title {
+    max-width: 1040px;
+    margin: 0 0 1.25rem;
+    font-size: clamp(3.5rem, 8vw, 7.4rem);
+    line-height: 0.98;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-wrap: balance;
+    text-shadow: 0 8px 34px rgba(0, 0, 0, 0.28);
+  }
+
+  .home-hero__subtitle {
+    max-width: 780px;
+    margin: 0 0 2.4rem;
+    color: rgba(255, 255, 255, 0.94);
+    font-size: clamp(1rem, 1.25vw, 1.18rem);
+    line-height: 1.45;
+    font-weight: 800;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  }
+
+  .home-hero__search {
+    width: min(100%, 900px);
+    min-height: 86px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem 0.85rem 2rem;
+    background: var(--color-white);
+    color: var(--color-navy);
+    border-radius: 999px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  }
+
+  .home-hero__search-icon {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    color: rgba(10, 29, 63, 0.36);
+  }
+
+  .home-hero__search-icon svg,
+  .home-hero__search button svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .home-hero__search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-navy);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .home-hero__search input::placeholder {
+    color: rgba(10, 29, 63, 0.24);
+    opacity: 1;
+  }
+
+  .home-hero__search button {
+    width: 62px;
+    height: 62px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    background: #0b42df;
+    border-radius: 999px;
+    transition: transform var(--dur-base) var(--ease), background var(--dur-base) var(--ease);
+  }
+
+  .home-regions {
+    padding-block: clamp(4rem, 7vw, 6.5rem);
+    background: #f4f4f4;
+  }
+
+  .home-section-title {
+    color: #071b68;
+    font-size: clamp(2.6rem, 5.6vw, 4.8rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  .home-regions__grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.7rem 0.85rem;
+    margin-top: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .home-region-pill {
+    min-height: 58px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    background: var(--color-white);
+    color: #071b68;
+    border: 1px solid rgba(7, 27, 104, 0.04);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.035);
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-align: center;
+    transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+  }
+
+  .home-region-pill:hover {
+    background: #071b68;
+    color: var(--color-white);
+    transform: translateY(-1px);
+  }
+
+  .home-region-pill svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .home-featured {
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+    background: var(--color-white);
+  }
+
+  .home-featured__header {
+    max-width: 720px;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .home-featured__header p {
+    margin-top: 1.2rem;
+    color: #4a4f58;
+    font-size: clamp(1rem, 1.35vw, 1.3rem);
+    line-height: 1.42;
+    font-weight: 500;
+  }
+
+  .home-properties-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 3vw, 2.6rem);
+  }
+
+  .home-property-card {
+    color: #000;
+  }
+
+  .home-property-card__media {
+    position: relative;
+    aspect-ratio: 1.48 / 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #e7e7e7;
+    margin: 0 0 1.05rem;
+  }
+
+  .home-property-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms var(--ease-out);
+  }
+
+  .home-property-card:hover .home-property-card__media img {
+    transform: scale(1.035);
+  }
+
+  .home-property-card__status {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.42rem 0.8rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: #071b68;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .home-property-card__media figcaption {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    max-width: 82%;
+    padding: 0.7rem 1rem 0.72rem;
+    background: #000;
+    color: #fff;
+    border-top-right-radius: 999px;
+    font-size: clamp(0.98rem, 1.2vw, 1.18rem);
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .home-property-card__body strong {
+    display: block;
+    color: #000;
+    font-size: clamp(1.05rem, 1.3vw, 1.25rem);
+    line-height: 1.2;
+    font-weight: 900;
+    margin-bottom: 0.45rem;
+  }
+
+  .home-property-card__body p {
+    color: #000;
+    font-size: clamp(0.98rem, 1.2vw, 1.12rem);
+    line-height: 1.35;
+    font-weight: 600;
+    margin-bottom: 1.05rem;
+  }
+
+  .home-property-card__body dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.8rem;
+    color: #000;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .home-property-card__body div {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28rem;
+  }
+
+  .home-property-card__body div + div::before {
+    content: ".";
+    margin-right: 0.35rem;
+  }
+
+  .home-property-card__body dt,
+  .home-property-card__body dd {
+    margin: 0;
+  }
+
+  .home-hero__search button:hover {
+    background: #0733ad;
+    transform: translateY(-1px);
+  }
+
+  .home-hero__search button svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  @media (max-width: 720px) {
+    .home-hero__content {
+      padding-top: calc(var(--header-height) + 4rem);
+      padding-bottom: 6rem;
+    }
+
+    .home-hero__title {
+      font-size: clamp(3rem, 15vw, 4.6rem);
+      margin-bottom: 1rem;
+    }
+
+    .home-hero__subtitle {
+      margin-bottom: 1.7rem;
+      font-size: 0.98rem;
+    }
+
+    .home-hero__search {
+      min-height: 68px;
+      gap: 0.7rem;
+      padding: 0.65rem 0.7rem 0.65rem 1.25rem;
+    }
+
+    .home-hero__search-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .home-hero__search input {
+      font-size: 0.92rem;
+    }
+
+    .home-hero__search button {
+      width: 50px;
+      height: 50px;
+    }
+
+    .home-hero__search button svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .home-regions,
+    .home-featured {
+      padding-block: 3.25rem;
+    }
+
+    .home-regions__grid,
+    .home-properties-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-section-title {
+      font-size: clamp(2.5rem, 13vw, 3.5rem);
+    }
+
+    .home-region-pill {
+      min-height: 54px;
+      justify-content: space-between;
+      padding-inline: 1.1rem;
+      text-align: left;
+    }
+
+    .home-property-card__media {
+      aspect-ratio: 1.34 / 1;
+    }
+  }
+
   /* Hero scroll-indicator animation */
   @keyframes scrollHint {
     0% { transform: translateY(0); opacity: 1; }

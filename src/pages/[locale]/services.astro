@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
-import { t, localeParams, type Locale } from '../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../utils/i18n';
 
 const locale = Astro.params.locale as Locale;
 
@@ -96,7 +96,7 @@ const services = [
   },
 ];
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 ---
 
@@ -133,7 +133,7 @@ export async function getStaticPaths() {
                   </li>
                 ))}
               </ul>
-              <a href={`/${locale}/contact`} class="btn btn--secondary">
+              <a href={`/${locale}/contact/`} class="btn btn--secondary">
                 {t(locale, 'common.scheduleConsultation')}
               </a>
             </div>
@@ -148,7 +148,7 @@ export async function getStaticPaths() {
       <div class="reveal text-center max-w-2xl mx-auto">
         <h2 id="services-cta" class="h2">{t(locale, 'cta.headline')}</h2>
         <p class="lead mx-auto my-5">{t(locale, 'cta.subheadline')}</p>
-        <a href={`/${locale}/contact`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
+        <a href={`/${locale}/contact/`} class="btn btn--primary">{t(locale, 'cta.button')}</a>
       </div>
     </div>
   </section>

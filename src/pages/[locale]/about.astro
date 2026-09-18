@@ -1,12 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
-import { t, localeParams, type Locale } from '../../utils/i18n';
+import { t, supportedLocales, type Locale } from '../../utils/i18n';
 
 const locale = Astro.params.locale as Locale;
 const values = ['excellence', 'trust', 'humanity', 'global'] as const;
 export async function getStaticPaths() {
-  return localeParams;
+  return supportedLocales.map(locale => ({ params: { locale } }));
 }
 ---
 
@@ -25,7 +25,7 @@ export async function getStaticPaths() {
     <div class="container">
       <div class="reveal max-w-[880px] mx-auto text-center">
         <p class="eyebrow">{t(locale, 'about.mission.title')}</p>
-        <p class="font-serif text-navy italic leading-snug max-w-3xl mx-auto"
+        <p class="font-sans text-navy  leading-snug max-w-3xl mx-auto"
            style="font-size: clamp(1.5rem, 3vw, 2.25rem);">
           {t(locale, 'about.mission.body')}
         </p>
@@ -44,10 +44,10 @@ export async function getStaticPaths() {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-stagger data-stagger-step="120">
         {values.map((v, i) => (
           <div class="reveal reveal--fade bg-white p-10 rounded-lg border-t-4 border-gold shadow-sm" data-tilt="3">
-            <span class="block font-serif text-lg text-gold font-medium tracking-[0.1em] mb-4">
+            <span class="block font-sans text-lg text-gold font-medium tracking-[0.1em] mb-4">
               0{i + 1}
             </span>
-            <h3 class="font-serif text-[1.35rem] text-navy mb-3">{t(locale, `about.values.items.${v}.title`)}</h3>
+            <h3 class="font-sans text-[1.35rem] text-navy mb-3">{t(locale, `about.values.items.${v}.title`)}</h3>
             <p class="text-text-secondary text-[0.95rem] leading-relaxed">{t(locale, `about.values.items.${v}.description`)}</p>
           </div>
         ))}
@@ -68,19 +68,19 @@ export async function getStaticPaths() {
           <p class="lead">{t(locale, 'about.team.body')}</p>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-8 border-t border-navy/10">
             <div class="flex flex-col gap-1.5">
-              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="12" data-counter-duration="1400">12</span>
+              <span class="font-sans text-4xl text-gold leading-none font-medium" data-counter="12" data-counter-duration="1400">12</span>
               <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'nacionalidades' : 'nationalities'}</span>
             </div>
             <div class="flex flex-col gap-1.5">
-              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="20" data-counter-suffix="+" data-counter-duration="1600">20+</span>
+              <span class="font-sans text-4xl text-gold leading-none font-medium" data-counter="20" data-counter-suffix="+" data-counter-duration="1600">20+</span>
               <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'destinos' : 'destinations'}</span>
             </div>
             <div class="flex flex-col gap-1.5">
-              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="15" data-counter-suffix="y" data-counter-duration="1400">15y</span>
+              <span class="font-sans text-4xl text-gold leading-none font-medium" data-counter="15" data-counter-suffix="y" data-counter-duration="1400">15y</span>
               <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'de experiencia' : 'experience'}</span>
             </div>
             <div class="flex flex-col gap-1.5">
-              <span class="font-serif text-4xl text-gold leading-none font-medium" data-counter="500" data-counter-suffix="+" data-counter-duration="2200">500+</span>
+              <span class="font-sans text-4xl text-gold leading-none font-medium" data-counter="500" data-counter-suffix="+" data-counter-duration="2200">500+</span>
               <span class="text-[0.78rem] tracking-[0.1em] uppercase text-text-secondary font-medium">{locale === 'es' ? 'mudanzas guiadas' : 'moves delivered'}</span>
             </div>
           </div>
@@ -94,7 +94,7 @@ export async function getStaticPaths() {
       <div class="reveal reveal--scale text-center max-w-2xl mx-auto">
         <h2 class="h2">{t(locale, 'cta.headline')}</h2>
         <p class="lead mx-auto my-5">{t(locale, 'cta.subheadline')}</p>
-        <a href={`/${locale}/contact`} class="btn btn--primary" data-magnetic="0.35">
+        <a href={`/${locale}/contact/`} class="btn btn--primary" data-magnetic="0.35">
           <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
         </a>
       </div>

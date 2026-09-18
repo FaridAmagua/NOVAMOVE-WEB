@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 
 const { property } = Astro.props as { property: Property };
 const locale = Astro.params.locale as Locale;
-const propertyUrl = `/${locale}/properties/${property.slug}`;
+const propertyUrl = `/${locale}/properties/${property.slug}/`;
 const inquirySubject = encodeURIComponent(
   locale === 'es'
     ? `Solicitud de información: ${property.name.es}`
@@ -52,14 +52,14 @@ const inquirySubject = encodeURIComponent(
       <div class="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 lg:gap-12 items-start">
         <div class="reveal bg-white border border-navy/10 rounded-lg p-6 md:p-8">
           <a
-            href={`/${locale}/contact?subject=${inquirySubject}&property=${property.slug}`}
+            href={`/${locale}/contact/?subject=${inquirySubject}&property=${property.slug}`}
             class="btn btn--primary w-full text-base"
             data-magnetic="0.25"
           >
             <span data-magnetic-inner>{t(locale, 'properties.requestInfo')}</span>
           </a>
           <a
-            href={`/${locale}/contact?subject=${inquirySubject}&visit=1&property=${property.slug}`}
+            href={`/${locale}/contact/?subject=${inquirySubject}&visit=1&property=${property.slug}`}
             class="mt-3 block text-center text-[0.85rem] tracking-[0.14em] uppercase text-gold border border-gold/40 rounded px-4 py-3 hover:bg-gold hover:text-navy transition-colors"
           >
             {locale === 'es' ? 'Concertar visita' : 'Schedule a viewing'}
@@ -80,7 +80,7 @@ const inquirySubject = encodeURIComponent(
               <span class="text-[0.72rem] text-gold font-semibold tracking-[0.12em] uppercase">
                 {propertyTypeLabel(property.type, locale)} · {zoneLabel(property.destination, locale)}
               </span>
-              <h3 class="font-serif text-[1.35rem] text-navy mt-1.5 mb-0">{property.name[locale]}</h3>
+              <h3 class="font-sans text-[1.35rem] text-navy mt-1.5 mb-0">{property.name[locale]}</h3>
 
               {(property.bedrooms || property.bathrooms || property.sizeM2) && (
                 <>
@@ -98,7 +98,7 @@ const inquirySubject = encodeURIComponent(
 
               <div class="flex items-baseline gap-2 flex-wrap">
                 <span class="text-[0.75rem] text-text-secondary uppercase tracking-[0.1em]">{t(locale, 'common.from')}</span>
-                <span class="font-serif text-2xl text-gold font-medium">{formatPrice(property.price, locale)}</span>
+                <span class="font-sans text-2xl text-gold font-medium">{formatPrice(property.price, locale)}</span>
                 <span class="text-[0.82rem] text-text-secondary">/{locale === 'es' ? 'mes' : 'month'}</span>
               </div>
               <p class="text-[0.75rem] text-text-secondary mt-2">

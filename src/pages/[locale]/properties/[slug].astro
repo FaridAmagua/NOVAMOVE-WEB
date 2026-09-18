@@ -37,7 +37,7 @@ const whatsappMessage = locale === 'es'
   : `Hello, I am interested in ${property.name.en} (${property.reference}). Could you send me more information?`;
 const ctaHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
-const visitHref = `/${locale}/book/${property.slug}`;
+const visitHref = `/${locale}/book/${property.slug}/`;
 
 // Features por idioma: en ES usa features.es; en EN usa features.en con
 // fallback a features.es si está vacío.
@@ -129,7 +129,7 @@ function featureIcon(feature: string) {
       <nav class="prop-breadcrumb reveal" aria-label="Breadcrumb">
         <a href={`/${locale}/`}>{t(locale, 'properties.breadcrumbHome')}</a>
         <span aria-hidden="true">›</span>
-        <a href={`/${locale}/properties`}>{t(locale, 'properties.breadcrumbProperties')}</a>
+        <a href={`/${locale}/properties/`}>{t(locale, 'properties.breadcrumbProperties')}</a>
         <span aria-hidden="true">›</span>
         <span aria-current="page">{property.name[locale]}</span>
       </nav>
@@ -197,7 +197,7 @@ function featureIcon(feature: string) {
             <div class="prop-title-block__meta">
               <span class="prop-title-block__type">{propertyTypeLabel(property.type, locale)}</span>
               <span class="prop-title-block__dot">·</span>
-              <a href={`/${locale}/properties?dest=${property.destination}`} class="prop-title-block__city">{destLabel}</a>
+              <a href={`/${locale}/properties/?dest=${property.destination}`} class="prop-title-block__city">{destLabel}</a>
               {showDetailedLocation && <span class="prop-title-block__dot">·</span>}
               {showDetailedLocation && <span>{detailedLocation}</span>}
               {property.reference && (
@@ -388,7 +388,7 @@ function featureIcon(feature: string) {
         </header>
         <div class="related-grid" data-stagger data-stagger-step="80">
           {otherProps.map((p) => (
-            <a href={`/${locale}/properties/${p.slug}`} class="related-card reveal reveal--fade" data-tilt="3">
+            <a href={`/${locale}/properties/${p.slug}/`} class="related-card reveal reveal--fade" data-tilt="3">
               <div class="related-card__media">
                 <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
                      style={`object-position: ${p.imagePositions?.[0] ?? p.imagePosition ?? '50% 50%'};`} />
