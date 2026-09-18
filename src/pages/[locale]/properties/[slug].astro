@@ -275,7 +275,10 @@ function featureIcon(feature: string) {
 
           <!-- Description with collapse -->
           <section class="prop-section reveal">
-            <h2 class="h3 prop-section__title">{t(locale, 'properties.highlights')}</h2>
+            <h2 class="h3 prop-section__title">
+              <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
+              <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
+            </h2>
             <div class="prop-description" data-collapse>
               <p class="prop-description__text">{property.description[locale]}</p>
               <p class="prop-description__extra" hidden>
@@ -375,6 +378,17 @@ function featureIcon(feature: string) {
               <div class={`booking-card__chip booking-card__chip--${property.status === 'available' ? 'rent' : 'sale'}`}>
                 {statusLabel(property.status, locale)}
               </div>
+              <h2 class="booking-card__mobile-title">{locale === 'es' ? 'Solicitar una visita' : 'Request a Tour'}</h2>
+              <div class="booking-card__mobile-days" aria-hidden="true">
+                <span><small>{locale === 'es' ? 'sábado' : 'sat'}</small><strong>19</strong></span>
+                <span><small>{locale === 'es' ? 'domingo' : 'sun'}</small><strong>20</strong></span>
+                <span><small>{locale === 'es' ? 'lunes' : 'mon'}</small><strong>21</strong></span>
+              </div>
+              <p class="booking-card__mobile-choice">{locale === 'es' ? 'Elige el tipo de visita' : 'Choose a tour type'}</p>
+              <div class="booking-card__mobile-tabs" aria-hidden="true">
+                <span>{locale === 'es' ? 'Presencial' : 'In Person'}</span>
+                <span>{locale === 'es' ? 'Videollamada' : 'Via Video Chat'}</span>
+              </div>
               <div class="booking-card__price">
                 <span class="booking-card__from">{t(locale, 'common.from')}</span>
                 <span class="booking-card__amount">{formatPrice(property.price, locale)}</span>
@@ -388,10 +402,12 @@ function featureIcon(feature: string) {
               )}
               <div class="booking-card__cta-group">
                 <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary w-full text-base">
-                  {ctaLabel}
+                  <span class="label-desktop">{ctaLabel}</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Contactar agentes' : 'Contact Agents'}</span>
                 </a>
                 <a href={visitHref} class="btn btn--secondary booking-card__visit-cta w-full text-base">
-                  {visitLabel}
+                  <span class="label-desktop">{visitLabel}</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Siguiente' : 'Next'}</span>
                 </a>
               </div>
               <p class="booking-card__note booking-card__note--trust">
@@ -649,6 +665,14 @@ function featureIcon(feature: string) {
   }
 
   .prop-mobile-summary {
+    display: none;
+  }
+
+  .label-mobile,
+  .booking-card__mobile-title,
+  .booking-card__mobile-days,
+  .booking-card__mobile-choice,
+  .booking-card__mobile-tabs {
     display: none;
   }
 
@@ -1502,6 +1526,12 @@ function featureIcon(feature: string) {
     .prop-section__count {
       display: none;
     }
+    .label-desktop {
+      display: none;
+    }
+    .label-mobile {
+      display: inline;
+    }
     .prop-description {
       line-height: 1.42;
     }
@@ -1591,6 +1621,67 @@ function featureIcon(feature: string) {
     .booking-card__top {
       padding: 1.2rem;
     }
+    .booking-card__mobile-title {
+      display: block;
+      margin: 0 0 1rem;
+      color: var(--color-white);
+      text-align: center;
+      font-size: 0.9rem;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+    .booking-card__mobile-days {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+    .booking-card__mobile-days span {
+      display: grid;
+      place-items: center;
+      min-height: 74px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 4px;
+      color: var(--color-white);
+    }
+    .booking-card__mobile-days small {
+      font-size: 0.52rem;
+      line-height: 1;
+      opacity: 0.9;
+      text-transform: lowercase;
+    }
+    .booking-card__mobile-days strong {
+      font-size: 1.28rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+    .booking-card__mobile-choice {
+      display: block;
+      margin: 0 0 0.45rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.58rem;
+      font-weight: 800;
+    }
+    .booking-card__mobile-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+    .booking-card__mobile-tabs span {
+      display: grid;
+      place-items: center;
+      min-height: 34px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      color: var(--color-white);
+      font-size: 0.62rem;
+      font-weight: 800;
+    }
+    .booking-card__mobile-tabs span:first-child {
+      background: var(--color-white);
+      color: var(--color-navy);
+    }
     .booking-card__price,
     .booking-card__ref,
     .booking-card__note {
@@ -1613,8 +1704,17 @@ function featureIcon(feature: string) {
     }
     .booking-card .btn {
       border-radius: 5px;
-      min-height: 46px;
-      font-size: 0.82rem;
+      min-height: 42px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: none;
+      padding: 0.7rem 1rem;
+    }
+    .booking-card .btn--primary {
+      background: var(--color-white);
+      color: var(--color-navy);
+      border-color: var(--color-white);
     }
     .booking-card__visit-cta {
       background: transparent;
