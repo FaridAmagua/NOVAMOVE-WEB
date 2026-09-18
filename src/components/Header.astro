@@ -379,9 +379,9 @@ const isActive = (href: string) => {
     document.body.style.overflow = '';
   };
 
-  const headerWindow = window as Window & { __globalMoveHeaderBound?: boolean };
-  if (!headerWindow.__globalMoveHeaderBound) {
-    headerWindow.__globalMoveHeaderBound = true;
+  const headerWindow = window as Window & { __globalMoveHeaderBoundVersion?: string };
+  if (headerWindow.__globalMoveHeaderBoundVersion !== 'drawer-close-v2') {
+    headerWindow.__globalMoveHeaderBoundVersion = 'drawer-close-v2';
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const toggle = target.closest('[data-menu-toggle]');
