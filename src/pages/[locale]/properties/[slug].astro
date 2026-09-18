@@ -338,7 +338,7 @@ function featureIcon(feature: string) {
           </section>}
 
           <!-- Direct WhatsApp inquiry -->
-          <section id="inquiry" class="prop-section prop-inquiry reveal">
+          <section id="inquiry" class="prop-section prop-inquiry prop-desktop-extra reveal">
             <h2 class="h3 prop-section__title">{t(locale, 'salesInquiry.title')}</h2>
             <p class="lead">{locale === 'es' ? 'Habla directamente con nuestro equipo y recibe respuesta sobre esta vivienda.' : 'Chat directly with our team and get answers about this property.'}</p>
             <div class="prop-whatsapp-card">
@@ -350,7 +350,7 @@ function featureIcon(feature: string) {
             </div>
           </section>
 
-          <section class="prop-section reveal">
+          <section class="prop-section prop-desktop-extra reveal">
             <header class="prop-section__header prop-section__header--center">
               <p class="eyebrow">{locale === 'es' ? 'Alquiler de larga duración' : 'Long-term rental'}</p>
               <h2 class="h2">{locale === 'es' ? 'Tu próxima vivienda, paso a paso' : 'Your next home, step by step'}</h2>
@@ -1348,21 +1348,31 @@ function featureIcon(feature: string) {
   }
 
   @media (max-width: 540px) {
+    body:has(.prop-gallery-wrap) .site-header {
+      display: none;
+    }
     .prop-gallery-wrap {
-      padding-top: calc(var(--header-height) + 0.85rem);
-      padding-bottom: 0.85rem;
+      padding-top: 0.75rem;
+      padding-bottom: 0;
+      background: #fff;
     }
     .prop-gallery-wrap .container,
     .prop-body .container {
-      padding-inline: 0.75rem;
+      padding-inline: 0.85rem;
     }
     .prop-breadcrumb {
-      margin-bottom: 0.75rem;
-      font-size: 0.72rem;
-      gap: 0.35rem;
+      margin-bottom: 0.62rem;
+      font-size: 0.66rem;
+      gap: 0.3rem;
+      color: #071b68;
+      font-weight: 900;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .prop-breadcrumb a,
+    .prop-breadcrumb [aria-current="page"] {
+      color: #071b68;
     }
     .prop-breadcrumb [aria-current="page"] {
       min-width: 0;
@@ -1370,20 +1380,24 @@ function featureIcon(feature: string) {
       text-overflow: ellipsis;
     }
     .prop-gallery {
-      gap: 0.45rem;
-      border-radius: 6px;
+      display: block;
+      border-radius: 5px;
+      overflow: visible;
     }
     .prop-gallery__main {
-      aspect-ratio: 1.42 / 1;
-      border-radius: 6px;
+      aspect-ratio: 1.5 / 1;
+      border-radius: 5px;
+    }
+    .prop-gallery__main img {
+      border-radius: 5px;
     }
     .prop-gallery__badge {
-      top: 0.7rem;
-      right: 0.7rem;
+      top: 0.55rem;
+      right: 0.55rem;
       left: auto;
-      padding: 0.34rem 0.55rem;
+      padding: 0.28rem 0.48rem;
       border-radius: 3px;
-      font-size: 0.58rem;
+      font-size: 0.52rem;
       letter-spacing: 0.08em;
       background: rgba(255, 255, 255, 0.92);
       color: var(--color-navy);
@@ -1392,51 +1406,57 @@ function featureIcon(feature: string) {
       display: none;
     }
     .prop-gallery__thumbs {
+      display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.42rem;
+      gap: 0.38rem;
+      margin-top: 0.45rem;
     }
     .prop-gallery__thumb {
       min-height: 0;
       aspect-ratio: 1.18 / 1;
-      border-radius: 5px;
+      border-radius: 4px;
     }
     .prop-gallery-extra {
       display: none;
     }
     .prop-body {
-      padding-top: 0.65rem;
-      padding-bottom: 2.75rem;
+      padding-top: 0.7rem;
+      padding-bottom: 2rem;
+      background: #fff;
     }
     .prop-layout {
-      gap: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
     .prop-title-block {
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.45rem;
     }
     .prop-title-block__meta {
       display: none;
     }
     .prop-title-block__title {
-      font-size: 1.45rem;
-      line-height: 1.12;
-      margin-bottom: 0.45rem;
+      font-size: 1.18rem;
+      line-height: 1.05;
+      margin-bottom: 0.25rem;
       letter-spacing: 0;
+      color: #071b68;
+      font-weight: 900;
     }
     .prop-title-block__tagline {
-      font-size: 0.92rem;
-      line-height: 1.45;
+      display: none;
     }
     .prop-mobile-summary {
       display: block;
-      margin-bottom: 1rem;
+      margin-bottom: 0.55rem;
     }
     .prop-mobile-summary strong {
       display: block;
-      color: var(--color-navy);
-      font-size: 1.22rem;
+      color: #000;
+      font-size: 1.05rem;
       line-height: 1.15;
       font-weight: 900;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.22rem;
     }
     .prop-mobile-summary strong span {
       margin-left: 0.18rem;
@@ -1448,29 +1468,33 @@ function featureIcon(feature: string) {
     .prop-mobile-summary > span {
       display: block;
       color: var(--text-primary);
-      font-size: 0.9rem;
-      line-height: 1.35;
-      font-weight: 700;
+      font-size: 0.8rem;
+      line-height: 1.25;
+      font-weight: 800;
     }
     .prop-mobile-summary > span {
-      margin-top: 0.15rem;
+      margin-top: 0.1rem;
       color: var(--text-secondary);
-      font-size: 0.82rem;
+      font-size: 0.72rem;
       font-weight: 600;
+    }
+    .prop-desktop-extra {
+      display: none;
     }
     .prop-whatsapp-card { grid-template-columns: auto minmax(0,1fr); padding: 1.2rem; }
     .prop-whatsapp-card .btn { grid-column: 1/-1; width: 100%; }
     .prop-section {
-      margin-bottom: 1.8rem;
-      padding-top: 1.25rem;
+      margin-bottom: 1.35rem;
+      padding-top: 1rem;
       border-top-color: rgba(10, 29, 63, 0.1);
     }
     .prop-section__title,
     .prop-section__header h2 {
-      font-size: 1.32rem;
+      font-size: 1.1rem;
       line-height: 1.16;
       font-weight: 900;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
+      color: #071b68;
     }
     .prop-section__header {
       margin-bottom: 1rem;
@@ -1479,13 +1503,14 @@ function featureIcon(feature: string) {
       display: none;
     }
     .prop-description {
-      line-height: 1.55;
+      line-height: 1.42;
     }
     .prop-description__text,
     .prop-description__extra {
-      font-size: 0.95rem;
-      line-height: 1.55;
-      margin-bottom: 0.75rem;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      margin-bottom: 0.65rem;
+      color: #1c1f24;
     }
     .prop-description__toggle {
       border-bottom: 0;
@@ -1499,16 +1524,16 @@ function featureIcon(feature: string) {
       display: flex;
       justify-content: flex-start;
       padding: 0;
-      gap: 0.65rem 1rem;
+      gap: 0.42rem 0.72rem;
       background: transparent;
       border-radius: 0;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
     }
     .prop-quick-spec {
       padding: 0;
       background: transparent;
       border-radius: 0;
-      font-size: 0.72rem;
+      font-size: 0.56rem;
       gap: 0.32rem;
       font-weight: 900;
       text-transform: uppercase;
@@ -1522,23 +1547,26 @@ function featureIcon(feature: string) {
     }
     .prop-overview__list div {
       grid-template-columns: 0.44fr 1fr;
-      padding: 0.85rem 0;
+      padding: 0.72rem 0;
       gap: 0.8rem;
     }
     .prop-overview__list dt {
-      font-size: 0.72rem;
+      font-size: 0.63rem;
+      color: #111;
     }
     .prop-overview__list dd {
-      font-size: 0.8rem;
+      font-size: 0.64rem;
+      color: #111;
     }
     .amenities-grid { grid-template-columns: 1fr; }
     .amenity-item {
-      padding: 0.35rem 0;
+      padding: 0.22rem 0;
       background: transparent;
       border-radius: 0;
       gap: 0.45rem;
-      font-size: 0.86rem;
-      font-weight: 700;
+      font-size: 0.7rem;
+      line-height: 1.25;
+      font-weight: 800;
       align-items: flex-start;
     }
     .amenity-item:hover { background: transparent; }
@@ -1552,19 +1580,32 @@ function featureIcon(feature: string) {
     .inquiry-form { padding: 1.5rem; }
     .inquiry-form .field-row { grid-template-columns: 1fr; }
     .booking-card {
-      border-radius: 6px;
+      margin-top: 0.5rem;
+      border-radius: 5px;
       background: var(--color-navy);
       color: var(--color-white);
       box-shadow: none;
+      border: 0;
+      order: 5;
     }
     .booking-card__top {
-      padding: 1.25rem;
+      padding: 1.2rem;
     }
-    .booking-card__chip,
     .booking-card__price,
     .booking-card__ref,
     .booking-card__note {
       display: none;
+    }
+    .booking-card__chip {
+      display: block;
+      width: fit-content;
+      margin: 0 auto 1rem;
+      background: transparent;
+      color: var(--color-white);
+      padding: 0;
+      font-size: 0.8rem;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .booking-card__cta-group {
       display: grid;
@@ -1590,7 +1631,7 @@ function featureIcon(feature: string) {
 
   /* ============ MOBILE STICKY CTA BAR (rental properties only) ============ */
   .prop-mobile-cta {
-    display: none;
+    display: none !important;
     position: fixed;
     bottom: 0;
     left: 0;
