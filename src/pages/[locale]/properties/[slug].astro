@@ -211,6 +211,12 @@ function featureIcon(feature: string) {
             <p class="prop-title-block__tagline">{property.tagline[locale]}</p>
           </header>
 
+          <section class="prop-mobile-summary reveal" aria-label={locale === 'es' ? 'Resumen de la propiedad' : 'Property overview'}>
+            <strong>{formatPrice(property.price, locale)}<span>{priceUnit}</span></strong>
+            <p>{property.name[locale]}</p>
+            <span>{mapLocation}</span>
+          </section>
+
           <!-- Quick specs horizontal bar -->
           {(property.bedrooms || property.bathrooms || property.sizeM2) && <div class="prop-quick-specs reveal">
             {property.bedrooms && <div class="prop-quick-spec">
@@ -244,6 +250,28 @@ function featureIcon(feature: string) {
               </span>
             </div>
           </div>}
+
+          <section class="prop-overview prop-section reveal">
+            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Overview' : 'Overview'}</h2>
+            <dl class="prop-overview__list">
+              <div>
+                <dt>{locale === 'es' ? 'Tipo de propiedad' : 'Property Type'}</dt>
+                <dd>{propertyTypeLabel(property.type, locale)}</dd>
+              </div>
+              <div>
+                <dt>{locale === 'es' ? 'Ubicación' : 'Location'}</dt>
+                <dd>{mapLocation}</dd>
+              </div>
+              {property.reference && <div>
+                <dt>{locale === 'es' ? 'Referencia' : 'Reference'}</dt>
+                <dd>{property.reference}</dd>
+              </div>}
+              <div>
+                <dt>{locale === 'es' ? 'Estado' : 'Status'}</dt>
+                <dd>{statusLabel(property.status, locale)}</dd>
+              </div>
+            </dl>
+          </section>
 
           <!-- Description with collapse -->
           <section class="prop-section reveal">
@@ -618,6 +646,41 @@ function featureIcon(feature: string) {
     color: var(--text-secondary);
     line-height: 1.5;
     margin: 0;
+  }
+
+  .prop-mobile-summary {
+    display: none;
+  }
+
+  .prop-overview__list {
+    display: grid;
+    border-top: 1px solid rgba(10, 29, 63, 0.1);
+  }
+
+  .prop-overview__list div {
+    display: grid;
+    grid-template-columns: minmax(130px, 0.42fr) 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(10, 29, 63, 0.1);
+  }
+
+  .prop-overview__list dt,
+  .prop-overview__list dd {
+    margin: 0;
+  }
+
+  .prop-overview__list dt {
+    color: var(--color-navy);
+    font-size: 0.86rem;
+    font-weight: 900;
+  }
+
+  .prop-overview__list dd {
+    color: var(--text-primary);
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.45;
   }
 
   /* ============ QUICK SPECS BAR ============ */
@@ -1285,16 +1348,239 @@ function featureIcon(feature: string) {
   }
 
   @media (max-width: 540px) {
-    .prop-gallery-wrap { padding-top: calc(var(--header-height) + 1rem); }
-    .prop-breadcrumb { margin-bottom: 1rem; }
+    .prop-gallery-wrap {
+      padding-top: calc(var(--header-height) + 0.85rem);
+      padding-bottom: 0.85rem;
+    }
+    .prop-gallery-wrap .container,
+    .prop-body .container {
+      padding-inline: 0.75rem;
+    }
+    .prop-breadcrumb {
+      margin-bottom: 0.75rem;
+      font-size: 0.72rem;
+      gap: 0.35rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .prop-breadcrumb [aria-current="page"] {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .prop-gallery {
+      gap: 0.45rem;
+      border-radius: 6px;
+    }
+    .prop-gallery__main {
+      aspect-ratio: 1.42 / 1;
+      border-radius: 6px;
+    }
+    .prop-gallery__badge {
+      top: 0.7rem;
+      right: 0.7rem;
+      left: auto;
+      padding: 0.34rem 0.55rem;
+      border-radius: 3px;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--color-navy);
+    }
+    .prop-gallery__zoom {
+      display: none;
+    }
+    .prop-gallery__thumbs {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.42rem;
+    }
+    .prop-gallery__thumb {
+      min-height: 0;
+      aspect-ratio: 1.18 / 1;
+      border-radius: 5px;
+    }
+    .prop-gallery-extra {
+      display: none;
+    }
+    .prop-body {
+      padding-top: 0.65rem;
+      padding-bottom: 2.75rem;
+    }
+    .prop-layout {
+      gap: 1.5rem;
+    }
+    .prop-title-block {
+      margin-bottom: 0.9rem;
+    }
+    .prop-title-block__meta {
+      display: none;
+    }
+    .prop-title-block__title {
+      font-size: 1.45rem;
+      line-height: 1.12;
+      margin-bottom: 0.45rem;
+      letter-spacing: 0;
+    }
+    .prop-title-block__tagline {
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+    .prop-mobile-summary {
+      display: block;
+      margin-bottom: 1rem;
+    }
+    .prop-mobile-summary strong {
+      display: block;
+      color: var(--color-navy);
+      font-size: 1.22rem;
+      line-height: 1.15;
+      font-weight: 900;
+      margin-bottom: 0.35rem;
+    }
+    .prop-mobile-summary strong span {
+      margin-left: 0.18rem;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .prop-mobile-summary p,
+    .prop-mobile-summary > span {
+      display: block;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+    .prop-mobile-summary > span {
+      margin-top: 0.15rem;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
     .prop-whatsapp-card { grid-template-columns: auto minmax(0,1fr); padding: 1.2rem; }
     .prop-whatsapp-card .btn { grid-column: 1/-1; width: 100%; }
-    .prop-section { margin-bottom: 2.5rem; padding-top: 2rem; }
-    .prop-quick-specs { padding: 1rem; gap: 0.4rem; }
-    .prop-quick-spec { padding: 0.45rem 0.7rem; font-size: 0.85rem; }
+    .prop-section {
+      margin-bottom: 1.8rem;
+      padding-top: 1.25rem;
+      border-top-color: rgba(10, 29, 63, 0.1);
+    }
+    .prop-section__title,
+    .prop-section__header h2 {
+      font-size: 1.32rem;
+      line-height: 1.16;
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+    .prop-section__header {
+      margin-bottom: 1rem;
+    }
+    .prop-section__count {
+      display: none;
+    }
+    .prop-description {
+      line-height: 1.55;
+    }
+    .prop-description__text,
+    .prop-description__extra {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin-bottom: 0.75rem;
+    }
+    .prop-description__toggle {
+      border-bottom: 0;
+      font-size: 0.78rem;
+      letter-spacing: 0;
+      text-transform: none;
+      padding: 0.15rem 0;
+      font-weight: 900;
+    }
+    .prop-quick-specs {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0;
+      gap: 0.65rem 1rem;
+      background: transparent;
+      border-radius: 0;
+      margin-bottom: 1rem;
+    }
+    .prop-quick-spec {
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      font-size: 0.72rem;
+      gap: 0.32rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .prop-quick-spec svg {
+      display: none;
+    }
+    .prop-quick-spec strong {
+      color: #000;
+    }
+    .prop-overview__list div {
+      grid-template-columns: 0.44fr 1fr;
+      padding: 0.85rem 0;
+      gap: 0.8rem;
+    }
+    .prop-overview__list dt {
+      font-size: 0.72rem;
+    }
+    .prop-overview__list dd {
+      font-size: 0.8rem;
+    }
     .amenities-grid { grid-template-columns: 1fr; }
+    .amenity-item {
+      padding: 0.35rem 0;
+      background: transparent;
+      border-radius: 0;
+      gap: 0.45rem;
+      font-size: 0.86rem;
+      font-weight: 700;
+      align-items: flex-start;
+    }
+    .amenity-item:hover { background: transparent; }
+    .amenity-item svg {
+      width: 10px;
+      height: 10px;
+      margin-top: 0.42rem;
+      color: var(--color-navy);
+      fill: var(--color-navy);
+    }
     .inquiry-form { padding: 1.5rem; }
     .inquiry-form .field-row { grid-template-columns: 1fr; }
+    .booking-card {
+      border-radius: 6px;
+      background: var(--color-navy);
+      color: var(--color-white);
+      box-shadow: none;
+    }
+    .booking-card__top {
+      padding: 1.25rem;
+    }
+    .booking-card__chip,
+    .booking-card__price,
+    .booking-card__ref,
+    .booking-card__note {
+      display: none;
+    }
+    .booking-card__cta-group {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .booking-card .btn {
+      border-radius: 5px;
+      min-height: 46px;
+      font-size: 0.82rem;
+    }
+    .booking-card__visit-cta {
+      background: transparent;
+      color: var(--color-white);
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow: none;
+    }
     .prop-map__overlay {
       bottom: 1rem; left: 1rem; right: 1rem;
       max-width: none;
@@ -1320,8 +1606,6 @@ function featureIcon(feature: string) {
   }
   @media (max-width: 720px) {
     .prop-mobile-cta { display: flex; flex-direction: column; gap: 0.65rem; }
-    /* Reserve bottom space so footer isn't covered */
-    body:has(.prop-mobile-cta) { padding-bottom: 128px; }
   }
   .prop-mobile-cta__price {
     display: flex;
