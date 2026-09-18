@@ -269,7 +269,7 @@ const isActive = (href: string) => {
     color: var(--color-white);
     transform: translateX(100%);
     transition: transform var(--dur-slow) var(--ease);
-    padding: 1.25rem 1.5rem 2rem;
+    padding: calc(72px + 2rem) 1.5rem 2rem;
     /* Above header so links are clickable when open. */
     z-index: 200;
     overflow-y: auto;
@@ -282,7 +282,7 @@ const isActive = (href: string) => {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: clamp(2.75rem, 12vh, 5rem);
+    margin-bottom: clamp(2rem, 7vh, 3.5rem);
   }
 
   .site-drawer__close {
@@ -351,6 +351,10 @@ const isActive = (href: string) => {
 
     .site-header__wordmark img {
       height: 34px;
+    }
+
+    .site-drawer {
+      padding-top: calc(10px + 62px + 1.35rem);
     }
   }
 </style>
