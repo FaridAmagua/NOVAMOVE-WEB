@@ -21,8 +21,23 @@ export default {
         'gray-soft': '#B5BAC2',
       },
       fontFamily: {
-        sans: ['Montserrat', 'system-ui', 'sans-serif'],
-        serif: ['Montserrat', 'system-ui', 'sans-serif'],
+        sans: ['Montserrat', 'sans-serif'],
+        serif: ['Montserrat', 'sans-serif'],
+      },
+      fontWeight: {
+        medium: '500',
+        bold: '700',
+        extrabold: '800',
+      },
+      fontSize: {
+        h1: ['68px', { lineHeight: '1.1', fontWeight: '800' }],
+        h2: ['48px', { lineHeight: '1.15', fontWeight: '800' }],
+        h3: ['32px', { lineHeight: '1.2', fontWeight: '800' }],
+        h4: ['24px', { lineHeight: '1.25', fontWeight: '800' }],
+        h5: ['20px', { lineHeight: '1.3', fontWeight: '800' }],
+        h6: ['16px', { lineHeight: '1.4', fontWeight: '700' }],
+        pretitle: ['14px', { lineHeight: '17px', letterSpacing: '0.02em', fontWeight: '700' }],
+        btn: ['14px', { lineHeight: '1.43', letterSpacing: '0.56px', fontWeight: '700' }],
       },
       maxWidth: {
         container: '1280px',

@@ -285,22 +285,27 @@ function featureIcon(feature: string) {
 
           <!-- Description with collapse -->
           <section class="prop-section reveal">
-            <h2 class="h3 prop-section__title">
-              <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
-              <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
-            </h2>
-            <div class="prop-description" data-collapse>
-              <p class="prop-description__text">{property.description[locale]}</p>
-              <p class="prop-description__extra" hidden>
-                {locale === 'es'
-                  ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
-                  : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
-              </p>
-              <button type="button" class="prop-description__toggle" data-collapse-toggle hidden>
-                <span data-collapse-label-more>{t(locale, 'properties.viewMore')}</span>
-                <span data-collapse-label-less hidden>{t(locale, 'properties.viewLess')}</span>
-              </button>
-            </div>
+            <details class="prop-mobile-accordion" open>
+              <summary>
+                <span>
+                  <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
+                </span>
+                <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
+              </summary>
+              <div class="prop-description" data-collapse>
+                <p class="prop-description__text">{property.description[locale]}</p>
+                <p class="prop-description__extra" hidden>
+                  {locale === 'es'
+                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
+                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
+                </p>
+                <button type="button" class="prop-description__toggle" data-collapse-toggle hidden>
+                  <span data-collapse-label-more>{t(locale, 'properties.viewMore')}</span>
+                  <span data-collapse-label-less hidden>{t(locale, 'properties.viewLess')}</span>
+                </button>
+              </div>
+            </details>
           </section>
 
           <!-- Features (amenities) — ES/EN con fallback -->
@@ -1427,7 +1432,7 @@ function featureIcon(feature: string) {
     }
     .prop-gallery-wrap .container,
     .prop-body .container {
-      padding-inline: 0.85rem;
+      padding-inline: 0.75rem;
       max-width: none;
     }
     .prop-breadcrumb {
@@ -1557,6 +1562,10 @@ function featureIcon(feature: string) {
       margin-bottom: 1.35rem;
       padding-top: 1rem;
       border-top-color: rgba(10, 29, 63, 0.1);
+    }
+    .prop-section:has(.prop-map),
+    .prop-sidebar {
+      margin-inline: -0.25rem;
     }
     .prop-section__title,
     .prop-section__header h2 {
@@ -1699,7 +1708,7 @@ function featureIcon(feature: string) {
       order: 5;
     }
     .booking-card__top {
-      padding: 1.4rem;
+      padding: 1.55rem clamp(1rem, 5vw, 1.45rem);
     }
     .booking-card__mobile-title {
       display: block;
@@ -1734,8 +1743,8 @@ function featureIcon(feature: string) {
     }
     .booking-card__mobile-tabs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.45rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.55rem;
       margin-bottom: 0.9rem;
     }
     .booking-card__mobile-tabs span {
@@ -1747,6 +1756,8 @@ function featureIcon(feature: string) {
       color: var(--color-white);
       font-size: 0.86rem;
       font-weight: 800;
+      min-width: 0;
+      white-space: nowrap;
     }
     .booking-card__mobile-tabs span:first-child {
       background: var(--color-white);
@@ -1765,6 +1776,8 @@ function featureIcon(feature: string) {
       margin: 1.2rem 0 1.35rem;
       gap: 0.42rem;
       color: var(--color-white);
+      flex-wrap: nowrap;
+      min-width: 0;
     }
     .booking-card__from {
       color: rgba(255, 255, 255, 0.78);
@@ -1774,10 +1787,11 @@ function featureIcon(feature: string) {
     }
     .booking-card__amount {
       color: var(--color-white);
-      font-size: clamp(2.2rem, 12vw, 3rem);
+      font-size: clamp(2.1rem, 11vw, 2.75rem);
       line-height: 1;
       font-weight: 900;
       text-shadow: none;
+      white-space: nowrap;
     }
     .booking-card__unit {
       color: rgba(255, 255, 255, 0.82);
@@ -1807,6 +1821,7 @@ function featureIcon(feature: string) {
       letter-spacing: 0;
       text-transform: none;
       padding: 0.7rem 1rem;
+      width: 100%;
     }
     .booking-card .btn--primary {
       background: var(--color-white);
