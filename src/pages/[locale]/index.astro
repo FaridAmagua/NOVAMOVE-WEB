@@ -529,20 +529,34 @@ export async function getStaticPaths() {
       padding-block: 3.25rem;
     }
 
-    .home-regions__grid,
+    .home-regions__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 2.4rem;
+    }
+
     .home-properties-grid {
       grid-template-columns: 1fr;
     }
 
     .home-section-title {
-      font-size: clamp(2.5rem, 13vw, 3.5rem);
+      font-size: clamp(2.6rem, 12.5vw, 3.4rem);
     }
 
     .home-region-pill {
-      min-height: 54px;
-      justify-content: space-between;
-      padding-inline: 1.1rem;
-      text-align: left;
+      min-height: 76px;
+      justify-content: center;
+      padding-inline: 0.75rem;
+      text-align: center;
+      font-size: clamp(1.08rem, 4.8vw, 1.55rem);
+      line-height: 1.05;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
+    }
+
+    .home-region-pill svg {
+      width: 20px;
+      height: 20px;
     }
 
     .home-property-card__media {

@@ -30,7 +30,6 @@ const isActive = (href: string) => {
   return cleanCurrent === cleanHref;
 };
 
-const whatsappHref = 'https://wa.me/34601518207';
 ---
 
 <header
@@ -69,12 +68,6 @@ const whatsappHref = 'https://wa.me/34601518207';
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
           <circle cx="11" cy="11" r="7"></circle>
           <path d="m20 20-3.5-3.5"></path>
-        </svg>
-      </a>
-      <a class="site-header__icon-btn" href={whatsappHref} target="_blank" rel="noopener noreferrer" aria-label={locale === 'es' ? 'Contactar por WhatsApp' : 'Contact via WhatsApp'}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20.5 11.7a8.4 8.4 0 0 1-12.1 7.6L3.5 20.6l1.4-4.7A8.4 8.4 0 1 1 20.5 11.7Z"></path>
-          <path d="M8.4 7.9c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.6 1.5c.1.3.1.5-.1.7l-.5.6c-.2.2-.1.4 0 .6.6 1.1 1.6 2 2.7 2.6.3.1.5.1.7-.1l.7-.8c.2-.2.4-.3.7-.2l1.5.7c.3.1.5.3.5.5 0 .3-.1 1.2-.6 1.8-.5.5-1.3.8-2.1.7-1-.1-2.4-.6-4-2-1.8-1.6-3-3.7-3.1-5 0-.7.2-1.1.5-1.5.3-.4.7-.7 1.1-.9Z"></path>
         </svg>
       </a>
       <button class="site-header__toggle" aria-label="Abrir menú" aria-expanded="false" data-menu-toggle>
@@ -260,7 +253,7 @@ const whatsappHref = 'https://wa.me/34601518207';
   .site-header__mobile-actions {
     display: none;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.8rem;
     flex-shrink: 0;
   }
 
@@ -405,15 +398,15 @@ const whatsappHref = 'https://wa.me/34601518207';
 
   @media (max-width: 720px) {
     .site-header {
-      top: 12px;
-      padding-inline: 1rem;
+      top: 16px;
+      padding-inline: clamp(1.05rem, 4vw, 1.6rem);
     }
 
     .site-header__inner {
-      width: min(100%, 408px);
-      height: 92px;
+      width: min(100%, 440px);
+      height: 96px;
       margin-inline: auto;
-      padding-inline: 22px;
+      padding-inline: clamp(1.8rem, 6vw, 2.3rem);
       border-radius: 999px;
       background: transparent;
       border-color: transparent;
@@ -430,20 +423,25 @@ const whatsappHref = 'https://wa.me/34601518207';
     }
 
     .site-header__wordmark img {
-      width: 148px;
+      width: clamp(190px, 48vw, 240px);
       height: auto;
-      max-height: 36px;
+      max-height: 48px;
       object-fit: contain;
     }
 
     .site-header__icon-btn {
-      width: 48px;
-      height: 48px;
+      width: 58px;
+      height: 58px;
+    }
+
+    .site-header__icon-btn svg {
+      width: 26px;
+      height: 26px;
     }
 
     .site-header__toggle {
-      width: 48px;
-      height: 48px;
+      width: 58px;
+      height: 58px;
       border: 1px solid rgba(255, 255, 255, 0.24);
       border-radius: 50%;
     }
