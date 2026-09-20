@@ -54,15 +54,11 @@ export async function getStaticPaths() {
     <div class="container home-hero__content pt-[calc(var(--header-height)+5rem)] pb-24">
       <h1 class="home-hero__title reveal text-white"
           style="--reveal-delay: 120ms;">
-        {locale === 'es' ? (
-          <>Te movemos,<br/><span class="">vives mejor.</span></>
-        ) : (
-          <>We move you,<br/><span class="">you live better.</span></>
-        )}
+        <>Make a Move For Your<br/><span>Future</span></>
       </h1>
       <p class="home-hero__subtitle reveal"
          style="--reveal-delay: 280ms;">
-        {t(locale, 'hero.subheadline')}
+        Earth's Most Followed and Subscribed to Real Estate Brand
       </p>
 
       <form class="home-hero__search reveal" action={`/${locale}/properties/`} method="get" role="search" style="--reveal-delay: 420ms;">
@@ -489,13 +485,18 @@ export async function getStaticPaths() {
     }
 
     .home-hero__title {
-      font-size: clamp(3rem, 15vw, 4.6rem);
-      margin-bottom: 1rem;
+      max-width: 560px;
+      font-size: clamp(2.75rem, 11.2vw, 3.25rem);
+      line-height: 1.04;
+      margin-bottom: 1.15rem;
     }
 
     .home-hero__subtitle {
+      max-width: 390px;
       margin-bottom: 1.7rem;
-      font-size: 0.98rem;
+      font-size: clamp(1.05rem, 4.6vw, 1.25rem);
+      line-height: 1.35;
+      font-weight: 800;
     }
 
     .home-hero__search {
