@@ -40,7 +40,7 @@ const isActive = (href: string) => {
          or navy glass (scrolled / non-transparent pages). The image is white-ish,
          designed for dark backgrounds. -->
     <a href={localizedPath(locale, '/')} class="site-header__wordmark" aria-label="Global Move — Inicio">
-      <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="320" height="50" />
+      <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="894" height="100" />
     </a>
 
     <nav class="site-nav" aria-label="Principal">
@@ -179,14 +179,20 @@ const isActive = (href: string) => {
   }
   .site-header__wordmark img {
     display: block;
-    height: 42px;
+    height: 50px;
     width: auto;
   }
   .site-header__wordmark:hover { opacity: 0.85; }
 
+  @media (max-width: 960px) {
+    .site-header__wordmark img {
+      height: 28px;
+    }
+  }
+
   @media (max-width: 720px) {
     .site-header__wordmark img {
-      height: 48px;
+      height: 18px;
     }
   }
 
@@ -352,17 +358,41 @@ const isActive = (href: string) => {
 
   @media (max-width: 720px) {
     .site-header {
-      top: 10px;
-      padding-inline: 0.75rem;
+      top: 12px;
+      padding-inline: 1rem;
     }
 
     .site-header__inner {
-      height: 62px;
-      padding-inline: 1rem 0.75rem;
+      width: min(100%, 408px);
+      height: 92px;
+      margin-inline: auto;
+      padding-inline: 30px;
+      border-radius: 999px;
+      background: rgba(10, 29, 63, 0.22);
+      border-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px) saturate(125%);
+      -webkit-backdrop-filter: blur(10px) saturate(125%);
+    }
+
+    .site-header.is-scrolled .site-header__inner,
+    .site-header:not(.site-header--transparent) .site-header__inner {
+      background: rgba(10, 29, 63, 0.94);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 16px 42px rgba(10, 29, 63, 0.24);
     }
 
     .site-header__wordmark img {
-      height: 34px;
+      width: 158px;
+      height: auto;
+      max-height: 36px;
+      object-fit: contain;
+    }
+
+    .site-header__toggle {
+      width: 52px;
+      height: 52px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 50%;
     }
 
     .site-drawer {
