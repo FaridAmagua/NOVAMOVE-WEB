@@ -23,6 +23,10 @@
   --color-gold: #071B68;
   --color-gold-hover: #000000;
   --color-gold-soft: #FFFFFF;
+  --custom-blue-color: #001A72;
+  --custom-dark-color: #000000;
+  --custom-light-color: #FFFFFF;
+  --custom-muted-color: #787878;
 
   /* Semantic */
   --bg-default: var(--color-white);
@@ -297,12 +301,13 @@ nav a {
 
 .eyebrow {
   display: inline-block;
-  font-family: var(--font-sans);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-family: var(--global-primary-font-family);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 17px;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--custom-muted-color);
   margin-bottom: var(--space-5);
 }
 
@@ -328,10 +333,11 @@ nav a {
   gap: var(--space-2);
   padding: 0.95rem 1.75rem;
   border-radius: var(--radius-sm);
-  font-family: var(--font-sans);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-family: var(--global-primary-font-family);
+  font-size: clamp(0.875rem, 0.546875vw, 1.75rem);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.56px;
+  line-height: 1.43;
   text-transform: uppercase;
   transition: all var(--dur-base) var(--ease);
   white-space: nowrap;
@@ -398,37 +404,38 @@ nav a {
    ============================================ */
 
 .h-display {
-  font-size: clamp(2.5rem, 6.5vw, 5.25rem);
-  line-height: 1.04;
-  font-weight: 600;
-  letter-spacing: -0.025em;
+  font-size: clamp(4.25rem, 4.296875vw, 13.75rem);
+  line-height: 1.1;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0;
 }
 
 .h1 {
-  font-size: clamp(2.25rem, 5vw, 4rem);
-  line-height: 1.08;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: clamp(4.25rem, 4.296875vw, 13.75rem);
+  line-height: 1.1;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0;
 }
 
 .h2 {
-  font-size: clamp(1.875rem, 3.6vw, 2.75rem);
-  line-height: 1.12;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: clamp(3rem, 1.875vw, 6rem);
+  line-height: 1.15;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0;
 }
 
 .h3 {
-  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-size: clamp(2rem, 1.25vw, 4rem);
   line-height: 1.2;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0;
 }
 
 .h4 {
-  font-size: var(--fs-xl);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.5rem, 0.9375vw, 3rem);
+  line-height: 1.25;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 0;
 }
 .lead {
   font-size: clamp(1.05rem, 1.4vw, 1.2rem);
