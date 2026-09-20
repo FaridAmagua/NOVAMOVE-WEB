@@ -123,7 +123,7 @@ export async function getStaticPaths() {
         </h2>
         <p>
           {locale === 'es'
-            ? 'Explora algunas de nuestras casas, apartamentos y villas mas exclusivas.'
+            ? 'Explora algunas de nuestras casas, apartamentos y villas más exclusivas.'
             : 'Check out some of our most exclusive houses, apartments, villas, and more.'}
         </p>
       </header>
@@ -352,15 +352,20 @@ export async function getStaticPaths() {
   }
 
   .home-featured__header {
-    max-width: 720px;
-    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    max-width: 680px;
+    margin-bottom: clamp(3.1rem, 5.8vw, 5.4rem);
+  }
+
+  .home-featured .home-section-title {
+    font-size: clamp(2.65rem, 5.1vw, 4.4rem);
+    line-height: 0.98;
   }
 
   .home-featured__header p {
-    margin-top: 1.2rem;
+    margin-top: 1.35rem;
     color: #4a4f58;
-    font-size: clamp(1rem, 1.35vw, 1.3rem);
-    line-height: 1.42;
+    font-size: clamp(1.12rem, 1.35vw, 1.42rem);
+    line-height: 1.36;
     font-weight: 500;
   }
 
@@ -376,11 +381,11 @@ export async function getStaticPaths() {
 
   .home-property-card__media {
     position: relative;
-    aspect-ratio: 1.48 / 1;
+    aspect-ratio: 1.5 / 1;
     overflow: hidden;
     border-radius: 8px;
     background: #e7e7e7;
-    margin: 0 0 1.05rem;
+    margin: 0 0 1.18rem;
   }
 
   .home-property-card__media img {
@@ -398,11 +403,11 @@ export async function getStaticPaths() {
     position: absolute;
     top: 1rem;
     left: 1rem;
-    padding: 0.42rem 0.8rem;
+    padding: 0.5rem 0.92rem;
     background: rgba(255, 255, 255, 0.92);
     color: #071b68;
     border-radius: 4px;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     line-height: 1;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -418,7 +423,7 @@ export async function getStaticPaths() {
     background: #000;
     color: #fff;
     border-top-right-radius: 999px;
-    font-size: clamp(0.98rem, 1.2vw, 1.18rem);
+    font-size: clamp(1.08rem, 1.32vw, 1.34rem);
     font-weight: 800;
     line-height: 1.15;
   }
@@ -426,7 +431,7 @@ export async function getStaticPaths() {
   .home-property-card__body strong {
     display: block;
     color: #000;
-    font-size: clamp(1.05rem, 1.3vw, 1.25rem);
+    font-size: clamp(1.18rem, 1.45vw, 1.42rem);
     line-height: 1.2;
     font-weight: 900;
     margin-bottom: 0.45rem;
@@ -434,18 +439,18 @@ export async function getStaticPaths() {
 
   .home-property-card__body p {
     color: #000;
-    font-size: clamp(0.98rem, 1.2vw, 1.12rem);
+    font-size: clamp(1.05rem, 1.32vw, 1.28rem);
     line-height: 1.35;
     font-weight: 600;
-    margin-bottom: 1.05rem;
+    margin-bottom: 1.15rem;
   }
 
   .home-property-card__body dl {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem 0.8rem;
+    gap: 0.52rem 0.86rem;
     color: #000;
-    font-size: 0.8rem;
+    font-size: clamp(0.82rem, 0.9vw, 0.96rem);
     line-height: 1.2;
     font-weight: 900;
     letter-spacing: 0.04em;
@@ -537,10 +542,27 @@ export async function getStaticPaths() {
 
     .home-properties-grid {
       grid-template-columns: 1fr;
+      gap: 2.65rem;
     }
 
     .home-section-title {
       font-size: clamp(2.6rem, 12.5vw, 3.4rem);
+    }
+
+    .home-featured__header {
+      margin-bottom: 3.45rem;
+    }
+
+    .home-featured .home-section-title {
+      font-size: clamp(2.6rem, 11vw, 3.25rem);
+      line-height: 1.02;
+    }
+
+    .home-featured__header p {
+      max-width: 21rem;
+      margin-top: 1.3rem;
+      font-size: clamp(1.16rem, 4.8vw, 1.38rem);
+      line-height: 1.34;
     }
 
     .home-region-pill {
@@ -560,7 +582,44 @@ export async function getStaticPaths() {
     }
 
     .home-property-card__media {
-      aspect-ratio: 1.34 / 1;
+      aspect-ratio: 1.42 / 1;
+      margin-bottom: 1.25rem;
+    }
+
+    .home-property-card__status {
+      top: 1rem;
+      left: 1rem;
+      padding: 0.56rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .home-property-card__media figcaption {
+      max-width: 86%;
+      padding: 0.82rem 1.12rem 0.9rem;
+      font-size: clamp(1.24rem, 5.4vw, 1.62rem);
+      line-height: 1.12;
+    }
+
+    .home-property-card__body strong {
+      font-size: clamp(1.42rem, 6vw, 1.72rem);
+      margin-bottom: 0.55rem;
+    }
+
+    .home-property-card__body p {
+      font-size: clamp(1.22rem, 5.2vw, 1.48rem);
+      line-height: 1.28;
+      margin-bottom: 1.3rem;
+    }
+
+    .home-property-card__body dl {
+      gap: 0.62rem 0.95rem;
+      font-size: clamp(0.94rem, 4vw, 1.12rem);
+      line-height: 1.18;
+      letter-spacing: 0.035em;
+    }
+
+    .home-property-card__body div + div::before {
+      margin-right: 0.42rem;
     }
   }
 
