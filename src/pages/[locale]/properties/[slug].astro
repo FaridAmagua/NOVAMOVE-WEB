@@ -586,18 +586,24 @@ function featureIcon(feature: string) {
                 </p>
               )}
               <p class="booking-card__mobile-choice">{locale === 'es' ? 'Elige el tipo de visita' : 'Choose a tour type'}</p>
-              <div class="booking-card__mobile-tabs" aria-hidden="true">
-                <span>{locale === 'es' ? 'Presencial' : 'In Person'}</span>
-                <span>{locale === 'es' ? 'Videollamada' : 'Via Video Chat'}</span>
+              <div class="booking-card__mobile-tabs" data-tour-type-group>
+                <button type="button" data-tour-type="person" aria-pressed="true">{locale === 'es' ? 'Presencial' : 'In Person'}</button>
+                <button type="button" data-tour-type="video" aria-pressed="false">{locale === 'es' ? 'Videollamada' : 'Via Video Chat'}</button>
               </div>
-              <div class="booking-card__tour-days" aria-hidden="true">
-                <span><small>{locale === 'es' ? 'jueves' : 'thursday'}</small><strong>21</strong><em>sept</em></span>
-                <span><small>{locale === 'es' ? 'viernes' : 'friday'}</small><strong>22</strong><em>sept</em></span>
-                <span><small>{locale === 'es' ? 'sábado' : 'saturday'}</small><strong>23</strong><em>sept</em></span>
+              <div class="booking-card__tour-days" data-tour-days aria-label={locale === 'es' ? 'Elige un día' : 'Choose a day'}>
+                <button type="button" data-tour-day>
+                  <small></small><strong></strong><em></em>
+                </button>
+                <button type="button" data-tour-day>
+                  <small></small><strong></strong><em></em>
+                </button>
+                <button type="button" data-tour-day>
+                  <small></small><strong></strong><em></em>
+                </button>
               </div>
-              <div class="booking-card__tour-nav" aria-hidden="true">
-                <span>‹</span>
-                <span>›</span>
+              <div class="booking-card__tour-nav">
+                <button type="button" data-tour-prev aria-label={locale === 'es' ? 'Días anteriores' : 'Previous days'}>‹</button>
+                <button type="button" data-tour-next aria-label={locale === 'es' ? 'Días siguientes' : 'Next days'}>›</button>
               </div>
               <div class="booking-card__price">
                 <span class="booking-card__from">{t(locale, 'common.from')}</span>
@@ -606,16 +612,17 @@ function featureIcon(feature: string) {
               </div>
               <label class="booking-card__time">
                 <span>{locale === 'es' ? 'Elige una hora' : 'Choose a time'}</span>
-                <select aria-label={locale === 'es' ? 'Elige una hora' : 'Choose a time'}>
-                  <option>9:00 AM</option>
-                  <option>10:00 AM</option>
-                  <option>11:00 AM</option>
-                  <option>12:00 PM</option>
-                  <option>1:00 PM</option>
-                  <option>2:00 PM</option>
-                  <option>3:00 PM</option>
-                  <option>4:00 PM</option>
-                  <option>5:00 PM</option>
+                <select data-tour-time aria-label={locale === 'es' ? 'Elige una hora' : 'Choose a time'}>
+                  <option value="">{locale === 'es' ? 'Seleccionar' : 'Select'}</option>
+                  <option value="9:00 AM">9:00 AM</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="11:00 AM">11:00 AM</option>
+                  <option value="12:00 PM">12:00 PM</option>
+                  <option value="1:00 PM">1:00 PM</option>
+                  <option value="2:00 PM">2:00 PM</option>
+                  <option value="3:00 PM">3:00 PM</option>
+                  <option value="4:00 PM">4:00 PM</option>
+                  <option value="5:00 PM">5:00 PM</option>
                 </select>
               </label>
               {property.reference && (
@@ -629,7 +636,7 @@ function featureIcon(feature: string) {
                   <span class="label-desktop">{ctaLabel}</span>
                   <span class="label-mobile">{locale === 'es' ? 'Contactar agentes' : 'Contact Agents'}</span>
                 </a>
-                <a href={visitHref} class="btn btn--secondary booking-card__visit-cta w-full text-base">
+                <a href={visitHref} class="btn btn--secondary booking-card__visit-cta w-full text-base" data-tour-submit aria-disabled="true">
                   <span class="label-desktop">{visitLabel}</span>
                   <span class="label-mobile">{locale === 'es' ? 'Siguiente' : 'Next'}</span>
                 </a>
@@ -855,6 +862,104 @@ function featureIcon(feature: string) {
     window.addEventListener('scroll', update, { passive: true });
   };
   setupPropertyDetailNav();
+
+  const setupTourScheduler = () => {
+    const root = document.querySelector<HTMLElement>('.booking-card');
+    if (!root) return;
+
+    const locale = document.documentElement.lang?.startsWith('es') ? 'es-ES' : 'en-US';
+    const dayButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-day]'));
+    const typeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-type]'));
+    const timeSelect = root.querySelector<HTMLSelectElement>('[data-tour-time]');
+    const submit = root.querySelector<HTMLAnchorElement>('[data-tour-submit]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-tour-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-tour-next]');
+    if (!dayButtons.length || !timeSelect || !submit) return;
+
+    let offset = 0;
+    let selectedDate = '';
+    let selectedType = typeButtons.find((button) => button.getAttribute('aria-pressed') === 'true')?.dataset.tourType ?? 'person';
+
+    const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'short' });
+    const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'long' });
+    const isoDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const updateSubmit = () => {
+      const hasSelection = Boolean(selectedDate && timeSelect.value);
+      submit.setAttribute('aria-disabled', String(!hasSelection));
+      submit.classList.toggle('is-disabled', !hasSelection);
+      submit.dataset.tourDate = selectedDate;
+      submit.dataset.tourTime = timeSelect.value;
+      submit.dataset.tourType = selectedType;
+    };
+
+    const renderDays = () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      dayButtons.forEach((button, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() + offset + index);
+        const value = isoDate(date);
+        button.dataset.tourDate = value;
+        button.querySelector('small')!.textContent = weekdayFormatter.format(date);
+        button.querySelector('strong')!.textContent = String(date.getDate());
+        button.querySelector('em')!.textContent = monthFormatter.format(date).replace('.', '');
+        const isSelected = selectedDate === value;
+        button.classList.toggle('is-selected', isSelected);
+        button.setAttribute('aria-pressed', String(isSelected));
+      });
+
+      updateSubmit();
+    };
+
+    dayButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedDate = button.dataset.tourDate ?? '';
+        renderDays();
+      });
+    });
+
+    typeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedType = button.dataset.tourType ?? 'person';
+        typeButtons.forEach((item) => {
+          const isSelected = item === button;
+          item.classList.toggle('is-selected', isSelected);
+          item.setAttribute('aria-pressed', String(isSelected));
+        });
+        updateSubmit();
+      });
+    });
+
+    prev?.addEventListener('click', () => {
+      offset = Math.max(0, offset - 3);
+      renderDays();
+    });
+
+    next?.addEventListener('click', () => {
+      offset += 3;
+      renderDays();
+    });
+
+    timeSelect.addEventListener('change', updateSubmit);
+
+    submit.addEventListener('click', (event) => {
+      if (submit.getAttribute('aria-disabled') === 'true') {
+        event.preventDefault();
+        timeSelect.focus();
+      }
+    });
+
+    typeButtons[0]?.classList.add('is-selected');
+    renderDays();
+  };
+  setupTourScheduler();
 </script>
 
 <style is:global>
@@ -4625,6 +4730,109 @@ function featureIcon(feature: string) {
   @media (max-width: 960px) {
     .property-zone-section--sidebar {
       margin-bottom: 1.4rem;
+    }
+  }
+
+  .booking-card__tour-days button,
+  .booking-card__tour-nav button,
+  .booking-card__mobile-tabs button {
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    cursor: pointer;
+  }
+
+  .booking-card__tour-days button {
+    min-height: 160px !important;
+    display: grid !important;
+    place-items: center !important;
+    align-content: center !important;
+    gap: 0.44rem !important;
+    padding: 28px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.75) !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #fff !important;
+    text-align: center !important;
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .booking-card__tour-days button.is-selected {
+    background: #fff !important;
+    color: #001a72 !important;
+    border-color: #fff !important;
+  }
+
+  .booking-card__tour-days small,
+  .booking-card__tour-days em {
+    display: block !important;
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.1 !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    color: currentColor !important;
+    opacity: 1 !important;
+    text-transform: lowercase;
+  }
+
+  .booking-card__tour-days strong {
+    display: block !important;
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: clamp(2.8rem, 9vw, 3.55rem) !important;
+    line-height: 0.92 !important;
+    font-weight: 900 !important;
+    color: currentColor !important;
+  }
+
+  .booking-card__time span {
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+  }
+
+  .booking-card__time select {
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+  }
+
+  .booking-card__mobile-tabs button {
+    min-height: 48px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.1;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .booking-card__mobile-tabs button.is-selected {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  .booking-card__visit-cta.is-disabled,
+  .booking-card__visit-cta[aria-disabled="true"] {
+    opacity: 0.58;
+    cursor: not-allowed;
+    pointer-events: auto;
+  }
+
+  @media (max-width: 540px) {
+    .booking-card__tour-days button {
+      min-height: 128px !important;
+      padding: 20px 10px !important;
+    }
+
+    .booking-card__tour-days small,
+    .booking-card__tour-days em {
+      font-size: 13px !important;
     }
   }
 </style>
