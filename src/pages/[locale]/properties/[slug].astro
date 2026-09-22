@@ -612,18 +612,36 @@ function featureIcon(feature: string) {
               </div>
               <label class="booking-card__time">
                 <span>{locale === 'es' ? 'Elige una hora' : 'Choose a time'}</span>
-                <select data-tour-time aria-label={locale === 'es' ? 'Elige una hora' : 'Choose a time'}>
-                  <option value="">{locale === 'es' ? 'Seleccionar' : 'Select'}</option>
-                  <option value="9:00 AM">9:00 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                  <option value="1:00 PM">1:00 PM</option>
-                  <option value="2:00 PM">2:00 PM</option>
-                  <option value="3:00 PM">3:00 PM</option>
-                  <option value="4:00 PM">4:00 PM</option>
-                  <option value="5:00 PM">5:00 PM</option>
-                </select>
+                <div class="booking-card__time-control" data-tour-time-control>
+                  <button type="button" class="booking-card__time-toggle" data-tour-time-toggle aria-expanded="false">
+                    <span data-tour-time-label>{locale === 'es' ? 'Seleccionar' : 'Select'}</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <div class="booking-card__time-options" data-tour-time-options hidden>
+                    {['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map((time) => (
+                      <button type="button" data-tour-time-option value={time}>
+                        <span>{time}</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="m5 12.5 4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                  <select data-tour-time aria-label={locale === 'es' ? 'Elige una hora' : 'Choose a time'} hidden>
+                    <option value="">{locale === 'es' ? 'Seleccionar' : 'Select'}</option>
+                    <option value="9:00 AM">9:00 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
+                    <option value="5:00 PM">5:00 PM</option>
+                  </select>
+                </div>
               </label>
               {property.reference && (
                 <p class="booking-card__ref">
@@ -654,6 +672,34 @@ function featureIcon(feature: string) {
                   ? 'Tus datos solo se usan para esta consulta · Sin compromiso'
                   : 'Your data is only used for this inquiry · No commitment'}
               </p>
+              <div class="booking-card__form-view" data-tour-form hidden>
+                <form class="booking-card__request-form" data-tour-request-form>
+                  <h2>Schedule a Tour</h2>
+                  <label>
+                    <span>Full Name</span>
+                    <input type="text" name="fullName" autocomplete="name" />
+                  </label>
+                  <label>
+                    <span>Phone</span>
+                    <input type="tel" name="phone" autocomplete="tel" />
+                  </label>
+                  <label>
+                    <span>Email Address</span>
+                    <input type="email" name="email" autocomplete="email" />
+                  </label>
+                  <label class="booking-card__request-consent">
+                    <input type="checkbox" name="tourConsent" required />
+                    <span>
+                      By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls and text messages exclusively from Serhant Real Estate, Inc. (“SERHANT”), including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I also agree to receive marketing emails from SERHANT and its affiliates. I acknowledge my consent is not required to obtain any good or service and to be connected with sellers that can fit my needs without providing consent I can call 1-877-SERHANT. To opt out from texts, I can reply, ‘stop’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply. I acknowledge that I have read and agree to the <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Terms of Use</a>.
+                    </span>
+                  </label>
+                  <button type="submit">Send Request</button>
+                  <p class="booking-card__request-summary" data-tour-summary></p>
+                  <button type="button" class="booking-card__request-change" data-tour-change>
+                    Change
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </aside>
@@ -871,7 +917,15 @@ function featureIcon(feature: string) {
     const dayButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-day]'));
     const typeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-type]'));
     const timeSelect = root.querySelector<HTMLSelectElement>('[data-tour-time]');
+    const timeToggle = root.querySelector<HTMLButtonElement>('[data-tour-time-toggle]');
+    const timeOptions = root.querySelector<HTMLElement>('[data-tour-time-options]');
+    const timeLabel = root.querySelector<HTMLElement>('[data-tour-time-label]');
+    const timeOptionButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-time-option]'));
     const submit = root.querySelector<HTMLAnchorElement>('[data-tour-submit]');
+    const formView = root.querySelector<HTMLElement>('[data-tour-form]');
+    const requestForm = root.querySelector<HTMLFormElement>('[data-tour-request-form]');
+    const changeButton = root.querySelector<HTMLButtonElement>('[data-tour-change]');
+    const summary = root.querySelector<HTMLElement>('[data-tour-summary]');
     const prev = root.querySelector<HTMLButtonElement>('[data-tour-prev]');
     const next = root.querySelector<HTMLButtonElement>('[data-tour-next]');
     if (!dayButtons.length || !timeSelect || !submit) return;
@@ -882,6 +936,7 @@ function featureIcon(feature: string) {
 
     const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'short' });
     const weekdayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'long' });
+    const summaryFormatter = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const isoDate = (date: Date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -896,6 +951,27 @@ function featureIcon(feature: string) {
       submit.dataset.tourDate = selectedDate;
       submit.dataset.tourTime = timeSelect.value;
       submit.dataset.tourType = selectedType;
+    };
+
+    const setSummary = () => {
+      if (!summary || !selectedDate || !timeSelect.value) return;
+      const date = new Date(`${selectedDate}T12:00:00`);
+      summary.textContent = `${summaryFormatter.format(date)} at ${timeSelect.value}`;
+    };
+
+    const showRequestForm = () => {
+      if (!formView) return;
+      setSummary();
+      formView.hidden = false;
+      root.classList.add('is-form-open');
+      root.querySelector<HTMLInputElement>('[name="fullName"]')?.focus();
+    };
+
+    const showScheduler = () => {
+      if (!formView) return;
+      root.classList.remove('is-form-open');
+      formView.hidden = true;
+      timeToggle?.focus();
     };
 
     const renderDays = () => {
@@ -947,13 +1023,50 @@ function featureIcon(feature: string) {
       renderDays();
     });
 
-    timeSelect.addEventListener('change', updateSubmit);
+    const closeTimeOptions = () => {
+      if (!timeOptions || !timeToggle) return;
+      timeOptions.hidden = true;
+      timeToggle.setAttribute('aria-expanded', 'false');
+      timeToggle.classList.remove('is-open');
+    };
+
+    timeToggle?.addEventListener('click', () => {
+      if (!timeOptions) return;
+      const isOpen = timeOptions.hidden;
+      timeOptions.hidden = !isOpen;
+      timeToggle.setAttribute('aria-expanded', String(isOpen));
+      timeToggle.classList.toggle('is-open', isOpen);
+    });
+
+    timeOptionButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const value = button.value;
+        timeSelect.value = value;
+        if (timeLabel) timeLabel.textContent = value;
+        timeOptionButtons.forEach((item) => item.classList.toggle('is-selected', item === button));
+        closeTimeOptions();
+        updateSubmit();
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target as Node)) closeTimeOptions();
+    });
 
     submit.addEventListener('click', (event) => {
       if (submit.getAttribute('aria-disabled') === 'true') {
         event.preventDefault();
-        timeSelect.focus();
+        timeToggle?.focus();
+        return;
       }
+      event.preventDefault();
+      showRequestForm();
+    });
+
+    changeButton?.addEventListener('click', showScheduler);
+
+    requestForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
     });
 
     typeButtons[0]?.classList.add('is-selected');
@@ -4777,10 +4890,33 @@ function featureIcon(feature: string) {
   .booking-card__tour-days strong {
     display: block !important;
     font-family: "Montserrat", var(--font-sans), sans-serif !important;
-    font-size: clamp(2.8rem, 9vw, 3.55rem) !important;
-    line-height: 0.92 !important;
-    font-weight: 900 !important;
+    font-size: 36px !important;
+    line-height: 45px !important;
+    font-weight: 800 !important;
     color: currentColor !important;
+  }
+
+  .booking-card__tour-nav {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+  }
+
+  .booking-card__tour-nav button {
+    width: 40px !important;
+    height: 40px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 26px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+    cursor: pointer;
   }
 
   .booking-card__time span {
@@ -4814,14 +4950,305 @@ function featureIcon(feature: string) {
   }
 
   .booking-card__mobile-tabs button.is-selected {
-    background: rgba(255, 255, 255, 0.28);
+    background: #001a72;
+    color: #fff;
   }
 
   .booking-card__visit-cta.is-disabled,
   .booking-card__visit-cta[aria-disabled="true"] {
-    opacity: 0.58;
+    background: #d7d7d7 !important;
+    color: #444 !important;
+    border-color: #d7d7d7 !important;
+    border-radius: 999px !important;
+    opacity: 1;
     cursor: not-allowed;
     pointer-events: auto;
+  }
+
+  .booking-card__time {
+    position: relative;
+  }
+
+  .booking-card__time select[hidden] {
+    display: none !important;
+  }
+
+  .booking-card__time-control {
+    position: relative;
+  }
+
+  .booking-card__time-toggle {
+    width: 100%;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 0.72rem 0 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .booking-card__time-toggle svg {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    padding: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 50%;
+    transition: transform 160ms ease;
+  }
+
+  .booking-card__time-toggle.is-open svg {
+    transform: rotate(180deg);
+  }
+
+  .booking-card__time-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    max-height: 210px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: grid;
+    gap: 0;
+    padding: 0.2rem 0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+    opacity: 1;
+    transform: translateY(0);
+    transform-origin: top;
+    transition: opacity 180ms ease, transform 180ms ease;
+    scrollbar-width: auto;
+  }
+
+  .booking-card__time-options[hidden] {
+    display: grid !important;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    visibility: hidden;
+  }
+
+  .booking-card__time-options::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .booking-card__time-options::-webkit-scrollbar-thumb {
+    background: #bfbfbf;
+    border-radius: 999px;
+  }
+
+  .booking-card__time-options::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .booking-card__time-options button {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 1rem;
+    border: 0;
+    background: #fff;
+    color: #001a72 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .booking-card__time-options button span {
+    color: #001a72 !important;
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+  .booking-card__time-options button:hover,
+  .booking-card__time-options button.is-selected {
+    background: rgba(0, 26, 114, 0.07);
+  }
+
+  .booking-card__time-options button svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    opacity: 0;
+  }
+
+  .booking-card__time-options button.is-selected svg {
+    opacity: 1;
+  }
+
+  .booking-card__mobile-tabs {
+    overflow: hidden !important;
+    padding: 5px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.28) !important;
+  }
+
+  .booking-card__visit-cta {
+    width: min(100%, 200px) !important;
+    min-height: 50px !important;
+    border-radius: 999px !important;
+  }
+
+  .booking-card__form-view[hidden] {
+    display: none !important;
+  }
+
+  .booking-card.is-form-open .booking-card__chip,
+  .booking-card.is-form-open .booking-card__mobile-title,
+  .booking-card.is-form-open .booking-card__mobile-availability,
+  .booking-card.is-form-open .booking-card__mobile-choice,
+  .booking-card.is-form-open .booking-card__mobile-tabs,
+  .booking-card.is-form-open .booking-card__tour-days,
+  .booking-card.is-form-open .booking-card__tour-nav,
+  .booking-card.is-form-open .booking-card__price,
+  .booking-card.is-form-open .booking-card__time,
+  .booking-card.is-form-open .booking-card__ref,
+  .booking-card.is-form-open .booking-card__cta-group,
+  .booking-card.is-form-open .booking-card__agent,
+  .booking-card.is-form-open .booking-card__note {
+    display: none !important;
+  }
+
+  .booking-card__request-form {
+    display: grid;
+    gap: 1.35rem;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+  }
+
+  .booking-card__request-form h2 {
+    margin: 0 0 0.6rem;
+    color: #fff;
+    text-align: center;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .booking-card__request-form label:not(.booking-card__request-consent) {
+    display: grid;
+    gap: 0.72rem;
+  }
+
+  .booking-card__request-form label:not(.booking-card__request-consent) > span {
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .booking-card__request-form input:not([type="checkbox"]) {
+    width: 100%;
+    height: 50px;
+    padding: 0 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    outline: none;
+  }
+
+  .booking-card__request-form input:not([type="checkbox"]):focus {
+    border-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .booking-card__request-consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.85rem;
+    margin-top: 0.2rem;
+  }
+
+  .booking-card__request-consent input {
+    width: 14px;
+    height: 14px;
+    margin-top: 0.22rem;
+    accent-color: #fff;
+  }
+
+  .booking-card__request-consent span {
+    color: rgba(255, 255, 255, 0.68);
+    text-align: center;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+
+  .booking-card__request-consent a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .booking-card__request-form button[type="submit"] {
+    justify-self: center;
+    min-width: 180px;
+    min-height: 50px;
+    padding: 0 1.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .booking-card__request-summary {
+    margin: 0.25rem 0 0;
+    color: #fff;
+    text-align: center;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 800;
+  }
+
+  .booking-card__request-change {
+    justify-self: center;
+    min-width: 132px;
+    min-height: 50px;
+    padding: 0 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+    cursor: pointer;
   }
 
   @media (max-width: 540px) {
@@ -4833,6 +5260,14 @@ function featureIcon(feature: string) {
     .booking-card__tour-days small,
     .booking-card__tour-days em {
       font-size: 13px !important;
+    }
+
+    .booking-card__request-form {
+      gap: 1.25rem;
+    }
+
+    .booking-card__request-consent span {
+      font-size: 13px;
     }
   }
 </style>
