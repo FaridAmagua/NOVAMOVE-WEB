@@ -912,6 +912,8 @@ function featureIcon(feature: string) {
   const setupTourScheduler = () => {
     const root = document.querySelector<HTMLElement>('.booking-card');
     if (!root) return;
+    if (root.dataset.tourSchedulerReady === 'true') return;
+    root.dataset.tourSchedulerReady = 'true';
 
     const locale = document.documentElement.lang?.startsWith('es') ? 'es-ES' : 'en-US';
     const dayButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-tour-day]'));
@@ -1073,6 +1075,7 @@ function featureIcon(feature: string) {
     renderDays();
   };
   setupTourScheduler();
+  document.addEventListener('astro:page-load', setupTourScheduler);
 </script>
 
 <style is:global>
@@ -5216,17 +5219,17 @@ function featureIcon(feature: string) {
 
   .booking-card__request-form button[type="submit"] {
     justify-self: center;
-    min-width: 156px;
-    min-height: 46px;
-    padding: 0 1.35rem;
+    min-width: 180px;
+    min-height: 50px;
+    padding: 0 1.6rem;
     border: 0;
     border-radius: 999px;
     background: #fff;
     color: #001a72;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
   }
 
