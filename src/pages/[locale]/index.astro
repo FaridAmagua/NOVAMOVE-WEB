@@ -143,7 +143,7 @@ export async function getStaticPaths() {
               <span class="home-property-card__status">
                 {statusLabel(property.status, locale)}
               </span>
-              <figcaption>{property.name[locale]}</figcaption>
+              <figcaption>GLOBAL.MOVE Signature</figcaption>
             </figure>
             <div class="home-property-card__body">
               <strong>{formatPrice(property.price, locale)}</strong>
@@ -151,20 +151,20 @@ export async function getStaticPaths() {
               <dl>
                 {property.bedrooms && (
                   <div>
-                    <dt>{locale === 'es' ? 'Dorm.' : 'Beds'}</dt>
                     <dd>{property.bedrooms}</dd>
+                    <dt>{locale === 'es' ? 'DORM.' : 'BEDS'}</dt>
                   </div>
                 )}
                 {property.bathrooms && (
                   <div>
-                    <dt>{locale === 'es' ? 'Banos' : 'Baths'}</dt>
                     <dd>{property.bathrooms}</dd>
+                    <dt>{locale === 'es' ? 'BAÑOS' : 'FULL BATHS'}</dt>
                   </div>
                 )}
                 {property.sizeM2 && (
                   <div>
-                    <dt>m2</dt>
                     <dd>{property.sizeM2}</dd>
+                    <dt>{locale === 'es' ? 'M²' : 'SQ.FT.'}</dt>
                   </div>
                 )}
               </dl>
@@ -300,6 +300,11 @@ export async function getStaticPaths() {
     background: #f4f4f4;
   }
 
+  .home-regions .home-section-title {
+    font-size: 24px;
+    line-height: 1.14;
+  }
+
   .home-section-title {
     color: #071b68;
     font-size: clamp(2.6rem, 5.6vw, 4.8rem);
@@ -327,8 +332,8 @@ export async function getStaticPaths() {
     border: 1px solid rgba(7, 27, 104, 0.04);
     border-radius: 8px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.035);
-    font-size: 1rem;
-    font-weight: 900;
+    font-size: 16px;
+    font-weight: 700;
     letter-spacing: 0;
     text-align: center;
     transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
@@ -423,25 +428,28 @@ export async function getStaticPaths() {
     background: #000;
     color: #fff;
     border-top-right-radius: 999px;
-    font-size: clamp(1.08rem, 1.32vw, 1.34rem);
-    font-weight: 800;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    font-weight: 500;
     line-height: 1.15;
   }
 
   .home-property-card__body strong {
     display: block;
     color: #000;
-    font-size: clamp(1.18rem, 1.45vw, 1.42rem);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
     line-height: 1.2;
-    font-weight: 900;
+    font-weight: 700;
     margin-bottom: 0.45rem;
   }
 
   .home-property-card__body p {
     color: #000;
-    font-size: clamp(1.05rem, 1.32vw, 1.28rem);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
     line-height: 1.35;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 1.15rem;
   }
 
@@ -450,10 +458,11 @@ export async function getStaticPaths() {
     flex-wrap: wrap;
     gap: 0.52rem 0.86rem;
     color: #000;
-    font-size: clamp(0.82rem, 0.9vw, 0.96rem);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 12px;
     line-height: 1.2;
-    font-weight: 900;
-    letter-spacing: 0.04em;
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -567,12 +576,12 @@ export async function getStaticPaths() {
     }
 
     .home-region-pill {
-      min-height: 76px;
+      min-height: 58px;
       justify-content: center;
-      padding-inline: 0.75rem;
+      padding: 0.78rem 0.75rem;
       text-align: center;
-      font-size: clamp(1.08rem, 4.8vw, 1.55rem);
-      line-height: 1.05;
+      font-size: 16px;
+      line-height: 1.12;
       border-radius: 8px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
     }

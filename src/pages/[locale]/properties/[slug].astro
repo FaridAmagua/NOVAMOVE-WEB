@@ -86,6 +86,48 @@ const processSteps = locale === 'es'
       ['Prepare the tenancy', 'We guide you through the terms, documents and next steps.'],
     ];
 
+const overviewItems = [
+  ['Property Type', 'Other'],
+  ['Location', '21 & 407 Fairfield Pond Ln, Sagaponack, NY 11962'],
+  ['Year Built', '1998'],
+  ['MLS ID', '924260'],
+  ['Listing Last Updated', '9/15/2026 6:03 PM'],
+];
+
+const interiorFeatures = [
+  ['Total Bedrooms', property.bedrooms ? String(property.bedrooms) : '8'],
+  ['Full Bathrooms', property.bathrooms ? String(property.bathrooms) : '7'],
+  ['Half Bathrooms', '3'],
+  ['Flooring', 'Hardwood, Tile, Stone'],
+  ['Laundry Room', 'Laundry Room'],
+  ['Fireplace', 'Fireplace'],
+  ['Appliances', 'Dishwasher, Dryer, Refrigerator, Microwave, Oven, Stainless Steel Appliance(s), Washer'],
+  ['Other Interior Features', 'Primary Bedroom, En Suite Bathroom, Walk-In Closet(s), Media Room, Study, Exercise Room, Entrance Foyer, Family Room, Living Room, Great Room, Dining Room, Breakfast Area'],
+];
+
+const exteriorFeatures = [
+  ['Stories', '2'],
+  ['Garage Spaces', '3.0'],
+  ['Water Source', 'Private Well'],
+  ['Pool', 'Gunite, Heated, In Ground, Private'],
+  ['Roof', 'Cedar'],
+  ['Lot Features', 'Cul-De-Sac, Fenced, On Golf Course, Sprinklers In Ground'],
+  ['Parking', 'Attached'],
+  ['Heat Type', 'Forced Air, Geothermal'],
+  ['Air Conditioning', 'Central Air'],
+];
+
+const detailFeatures = [
+  ['Neighborhood', 'Sagaponack'],
+  ['Architecture Styles', 'Contemporary'],
+  ['Water Frontage', 'Ocean Front, Waterfront'],
+  ['View Description', 'Ocean, Water'],
+];
+
+const financialFeatures = [
+  ['Price', '$89,000,000'],
+];
+
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
 const amenityIcons: Record<string, string> = {
   pool:        '<path d="M2 18c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1"/><path d="M6 14V9a3 3 0 0 1 6 0v5"/><path d="M12 10c1.5 0 1.5-1 3-1s1.5 1 3 1"/><path d="M12 6c1.5 0 1.5-1 3-1s1.5 1 3 1"/>',
@@ -128,12 +170,28 @@ function featureIcon(feature: string) {
 <BaseLayout
   title={property.name[locale]}
   description={property.tagline[locale]}
-  transparentHeader={false}
+  transparentHeader={true}
 >
   <!-- =======================================================
        Hero: Gallery + Title (top section, full bleed)
        ======================================================= -->
   <section class="prop-gallery-wrap">
+    <div class="prop-detail-nav" aria-label={locale === 'es' ? 'Navegación de propiedad' : 'Property navigation'}>
+      <a href={`/${locale}/`} class="prop-detail-nav__wordmark" aria-label="Global Move - Inicio">GLOBAL.MOVE</a>
+      <div class="prop-detail-nav__actions">
+        <a class="prop-detail-nav__icon" href={`/${locale}/properties/`} aria-label={locale === 'es' ? 'Buscar propiedades' : 'Search properties'}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+        </a>
+        <button class="prop-detail-nav__icon prop-detail-nav__toggle site-header__toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-menu-toggle>
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
     <div class="container">
       <!-- Breadcrumb -->
       <nav class="prop-breadcrumb reveal" aria-label="Breadcrumb">
@@ -154,6 +212,7 @@ function featureIcon(feature: string) {
           tabindex="0"
           aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
         >
+          <span class="prop-gallery__signature">GLOBAL.MOVE Signature</span>
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
                style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
           <span class={`prop-gallery__badge prop-gallery__badge--${property.status === 'available' ? 'rent' : 'sale'}`}>
@@ -167,12 +226,12 @@ function featureIcon(feature: string) {
           </span>
         </div>
         <div class="prop-gallery__thumbs">
-          {property.images.slice(1, 4).map((img, index) => (
+          {property.images.slice(1, 5).map((img, index) => (
             <div class="prop-gallery__thumb" data-lightbox-trigger="property" data-lightbox-group="property" role="button" tabindex="0" aria-label="Ver foto">
               <img src={img} alt="" loading="lazy" style={`object-position: ${property.imagePositions?.[index + 1] ?? '50% 50%'};`} />
             </div>
           ))}
-          {property.images.length < 4 && Array.from({ length: 4 - property.images.length }).map(() => (
+          {property.images.length < 5 && Array.from({ length: 5 - property.images.length }).map(() => (
             <div class="prop-gallery__thumb prop-gallery__thumb--placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -183,10 +242,10 @@ function featureIcon(feature: string) {
           ))}
         </div>
       </div>
-      {property.images.length > 4 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'Más fotografías de la propiedad' : 'More property photos'}>
-        {property.images.slice(4).map((img, index) => (
-          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" aria-label={locale === 'es' ? `Ver fotografía ${index + 5}` : `View photo ${index + 5}`}>
-            <img src={img} alt={`${property.name[locale]} · ${index + 5}`} loading="lazy" style={`object-position: ${property.imagePositions?.[index + 4] ?? '50% 50%'};`} />
+      {property.images.length > 5 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'Más fotografías de la propiedad' : 'More property photos'}>
+        {property.images.slice(5).map((img, index) => (
+          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" aria-label={locale === 'es' ? `Ver fotografía ${index + 6}` : `View photo ${index + 6}`}>
+            <img src={img} alt={`${property.name[locale]} · ${index + 6}`} loading="lazy" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
           </button>
         ))}
       </div>}
@@ -222,9 +281,8 @@ function featureIcon(feature: string) {
           </header>
 
           <section class="prop-mobile-summary reveal" aria-label={locale === 'es' ? 'Resumen de la propiedad' : 'Property overview'}>
+            <p>{mapLocation}</p>
             <strong>{formatPrice(property.price, locale)}<span>{priceUnit}</span></strong>
-            <p>{property.name[locale]}</p>
-            <span>{mapLocation}</span>
           </section>
 
           <!-- Quick specs horizontal bar -->
@@ -235,22 +293,25 @@ function featureIcon(feature: string) {
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
-              <span><strong>{property.bedrooms}</strong> {t(locale, 'common.bedrooms')}</span>
+              <span><strong>{property.bedrooms}</strong> BEDS</span>
             </div>}
             {property.bathrooms && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M9 6L6 18h12l-3-12M9 6V4a3 3 0 0 1 6 0v2M5 21h14"/>
               </svg>
-              <span><strong>{property.bathrooms}</strong> {t(locale, 'common.bathrooms')}</span>
+              <span><strong>{property.bathrooms}</strong> FULL BATHS</span>
             </div>}
+            <div class="prop-quick-spec">
+              <span><strong>3</strong> HALF BATHS</span>
+            </div>
             {property.sizeM2 && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <path d="M3 10h18"/>
               </svg>
-              <span><strong>{property.sizeM2}</strong> m²</span>
+              <span><strong>{property.sizeM2}</strong> SQ.FT.</span>
             </div>}
-            <div class="prop-quick-spec">
+            <div class="prop-quick-spec prop-quick-spec--status">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M9 12l2 2 4-4"/>
@@ -261,9 +322,51 @@ function featureIcon(feature: string) {
             </div>
           </div>}
 
+          <button type="button" class="prop-share-button reveal" data-property-share aria-label={locale === 'es' ? 'Compartir propiedad' : 'Share property'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6.5 17.5 17.5 6.5"/>
+              <path d="M10 6.5h7.5V14"/>
+            </svg>
+            <span>{locale === 'es' ? 'Compartir' : 'Share'}</span>
+          </button>
+
+          <div class="prop-mobile-actions reveal">
+            <a href="#get-in-touch">{locale === 'es' ? 'Get in Touch' : 'Get in Touch'}</a>
+            <a href="#tour-card">{locale === 'es' ? 'Schedule a Tour' : 'Schedule a Tour'}</a>
+          </div>
+
+          <!-- Description with collapse -->
+          <section class="prop-section prop-section--description reveal">
+            <details class="prop-mobile-accordion" open>
+              <summary>
+                <span>
+                  <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
+                  <span class="label-mobile">Property Description</span>
+                </span>
+                <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
+              </summary>
+              <div class="prop-description">
+                <p class="prop-description__text">{property.description[locale]}</p>
+                <p class="prop-description__extra">
+                  {locale === 'es'
+                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
+                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
+                </p>
+                <button type="button" class="prop-description__read-more">Read More</button>
+              </div>
+            </details>
+          </section>
+
           <section class="prop-overview prop-section reveal">
             <h2 class="h3 prop-section__title">{locale === 'es' ? 'Overview' : 'Overview'}</h2>
             <dl class="prop-overview__list">
+              {overviewItems.map(([label, value]) => (
+                <div>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+              <template>
               <div>
                 <dt>{locale === 'es' ? 'Tipo de propiedad' : 'Property Type'}</dt>
                 <dd>{propertyTypeLabel(property.type, locale)}</dd>
@@ -280,11 +383,12 @@ function featureIcon(feature: string) {
                 <dt>{locale === 'es' ? 'Estado' : 'Status'}</dt>
                 <dd>{statusLabel(property.status, locale)}</dd>
               </div>
+              </template>
             </dl>
           </section>
 
           <!-- Description with collapse -->
-          <section class="prop-section reveal">
+          <section class="prop-section prop-section--legacy-description reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
                 <span>
@@ -300,21 +404,42 @@ function featureIcon(feature: string) {
                     ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
                     : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
                 </p>
-                <button type="button" class="prop-description__toggle" data-collapse-toggle hidden>
-                  <span data-collapse-label-more>{t(locale, 'properties.viewMore')}</span>
-                  <span data-collapse-label-less hidden>{t(locale, 'properties.viewLess')}</span>
-                </button>
               </div>
             </details>
           </section>
 
           <!-- Features (amenities) — ES/EN con fallback -->
-          {features.length > 0 && <section class="prop-section reveal">
+          {features.length > 0 && <section class="prop-section prop-features-section reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
-                <span>{t(locale, 'properties.amenitiesTitle')}</span>
+                <span>Property Features & Amenities</span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
+              <div class="property-feature-groups">
+                <section class="property-feature-group">
+                  <h3>Interior</h3>
+                  <ul>
+                    {interiorFeatures.map(([label, value]) => (
+                      <li>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+                <section class="property-feature-group property-feature-group--exterior">
+                  <h3>Exterior</h3>
+                  <ul>
+                    {exteriorFeatures.map(([label, value]) => (
+                      <li>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+              <template>
               <span class="prop-section__count">
                 {locale === 'es' ? `${features.length} servicios incluidos` : `${features.length} services included`}
               </span>
@@ -327,11 +452,39 @@ function featureIcon(feature: string) {
                   </div>
                 ))}
               </div>
+              </template>
             </details>
           </section>}
 
+          <section class="prop-section prop-details-financial-section reveal">
+            <div class="property-feature-groups">
+              <section class="property-feature-group">
+                <h3>Details</h3>
+                <ul>
+                  {detailFeatures.map(([label, value]) => (
+                    <li>
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <section class="property-feature-group property-feature-group--financial">
+                <h3>Financial</h3>
+                <ul>
+                  {financialFeatures.map(([label, value]) => (
+                    <li>
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+          </section>
+
           <!-- Public-area map: coordinates when available, otherwise the configured public zone. -->
-          {mapLocation && <section class="prop-section reveal">
+          {mapLocation && <section class="prop-section prop-map-section prop-map-section--inline reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
                 <span>{t(locale, 'properties.neighborhood')}</span>
@@ -394,7 +547,31 @@ function featureIcon(feature: string) {
 
         <!-- ============ SIDEBAR (Solicitar info + Concertar visita) ============ -->
         <aside class="prop-sidebar">
-          <div class="booking-card reveal reveal--scale">
+          {mapLocation && <section class="property-zone-section property-zone-section--sidebar" aria-labelledby="property-zone-title">
+            <h2 id="property-zone-title">{t(locale, 'properties.neighborhood')}</h2>
+            <div class="prop-map">
+              <iframe
+                src={mapSrc}
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title={`${property.name[locale]} - ${property.location[locale]}`}
+              ></iframe>
+              <div class="prop-map__radius" aria-hidden="true"><span></span></div>
+              <div class="prop-map__overlay">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-7 8-13a8 8 0 0 0-16 0c0 6 8 13 8 13z"/>
+                  <circle cx="12" cy="9" r="3"/>
+                </svg>
+                <div>
+                  <strong>{mapLocation}</strong>
+                  <span>{locale === 'es'
+                    ? `${mapPrecisionLabel} · radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicación exacta se facilita al concertar la visita.`
+                    : `${mapPrecisionLabel} · ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
+                </div>
+              </div>
+            </div>
+          </section>}
+          <div id="tour-card" class="booking-card reveal reveal--scale">
             <div class="booking-card__top">
               <div class={`booking-card__chip booking-card__chip--${property.status === 'available' ? 'rent' : 'sale'}`}>
                 {statusLabel(property.status, locale)}
@@ -410,11 +587,34 @@ function featureIcon(feature: string) {
                 <span>{locale === 'es' ? 'Presencial' : 'In Person'}</span>
                 <span>{locale === 'es' ? 'Videollamada' : 'Via Video Chat'}</span>
               </div>
+              <div class="booking-card__tour-days" aria-hidden="true">
+                <span><small>{locale === 'es' ? 'jueves' : 'thursday'}</small><strong>21</strong><em>sept</em></span>
+                <span><small>{locale === 'es' ? 'viernes' : 'friday'}</small><strong>22</strong><em>sept</em></span>
+                <span><small>{locale === 'es' ? 'sábado' : 'saturday'}</small><strong>23</strong><em>sept</em></span>
+              </div>
+              <div class="booking-card__tour-nav" aria-hidden="true">
+                <span>‹</span>
+                <span>›</span>
+              </div>
               <div class="booking-card__price">
                 <span class="booking-card__from">{t(locale, 'common.from')}</span>
                 <span class="booking-card__amount">{formatPrice(property.price, locale)}</span>
                 <span class="booking-card__unit">{priceUnit}</span>
               </div>
+              <label class="booking-card__time">
+                <span>{locale === 'es' ? 'Elige una hora' : 'Choose a time'}</span>
+                <select aria-label={locale === 'es' ? 'Elige una hora' : 'Choose a time'}>
+                  <option>9:00 AM</option>
+                  <option>10:00 AM</option>
+                  <option>11:00 AM</option>
+                  <option>12:00 PM</option>
+                  <option>1:00 PM</option>
+                  <option>2:00 PM</option>
+                  <option>3:00 PM</option>
+                  <option>4:00 PM</option>
+                  <option>5:00 PM</option>
+                </select>
+              </label>
               {property.reference && (
                 <p class="booking-card__ref">
                   <span class="booking-card__ref-label">{locale === 'es' ? 'Referencia' : 'Reference'}</span>
@@ -422,7 +622,7 @@ function featureIcon(feature: string) {
                 </p>
               )}
               <div class="booking-card__cta-group">
-                <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary w-full text-base">
+                <a href="#get-in-touch" class="btn btn--primary w-full text-base">
                   <span class="label-desktop">{ctaLabel}</span>
                   <span class="label-mobile">{locale === 'es' ? 'Contactar agentes' : 'Contact Agents'}</span>
                 </a>
@@ -430,6 +630,14 @@ function featureIcon(feature: string) {
                   <span class="label-desktop">{visitLabel}</span>
                   <span class="label-mobile">{locale === 'es' ? 'Siguiente' : 'Next'}</span>
                 </a>
+              </div>
+              <div class="booking-card__agent">
+                <p>{locale === 'es' ? 'CONTACTAR AGENTES' : 'CONTACT AGENTS'}</p>
+                <div>
+                  <span aria-hidden="true">S</span>
+                  <strong>{locale === 'es' ? 'Global Move' : 'Global Move'}</strong>
+                  <a href={ctaHref} target="_blank" rel="noopener noreferrer">hello@globalmove.com</a>
+                </div>
               </div>
               <p class="booking-card__note booking-card__note--trust">
                 🔒 {locale === 'es'
@@ -474,6 +682,86 @@ function featureIcon(feature: string) {
       </div>
     </section>
   )}
+
+  <section id="get-in-touch" class="property-contact-section" aria-labelledby="get-in-touch-title">
+    <div class="container property-contact-section__inner">
+      <h2 id="get-in-touch-title">Get in Touch</h2>
+      <form class="property-contact-form" action="" method="post">
+        <label>
+          <span>Name</span>
+          <input type="text" name="name" placeholder="Name" autocomplete="name" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" placeholder="Email" autocomplete="email" />
+        </label>
+        <label>
+          <span>Phone</span>
+          <input type="tel" name="phone" placeholder="Phone" autocomplete="tel" />
+        </label>
+        <label class="property-contact-form__select">
+          <span>Select a Topic</span>
+          <select name="topic" aria-label="Select a Topic">
+            <option value="">Select a Topic</option>
+            <option value="buying">Buying</option>
+            <option value="selling">Selling</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>
+          <span>Your Message</span>
+          <textarea name="message" placeholder="Your Message" rows="3"></textarea>
+        </label>
+        <label class="property-contact-form__consent lp-tcr-content">
+          <span class="lp-tcr-checkbox">
+            <input
+              type="checkbox"
+              id="property-contact-termsAccepted"
+              name="termsAccepted"
+              required
+              oninvalid="this.setCustomValidity('Please accept the terms and conditions')"
+              oninput="this.setCustomValidity('')"
+            />
+          </span>
+          <span class="lp-tcr-message">
+            I agree to be contacted by
+            SERHANT.
+            via call, email, and text for real estate services. To opt out, you can reply 'stop' at any time or reply 'help' for assistance.
+            You can also click the unsubscribe link in the emails. Message and data rates may apply. Message frequency may vary.
+            <a href={`/${locale}/privacy/`} target="_blank">Privacy Policy</a>.
+          </span>
+        </label>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </section>
+
+  {mapLocation && <section class="property-zone-section" aria-labelledby="property-zone-title">
+    <div class="container">
+      <h2 id="property-zone-title">{t(locale, 'properties.neighborhood')}</h2>
+      <div class="prop-map">
+        <iframe
+          src={mapSrc}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title={`${property.name[locale]} - ${property.location[locale]}`}
+        ></iframe>
+        <div class="prop-map__radius" aria-hidden="true"><span></span></div>
+        <div class="prop-map__overlay">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-7 8-13a8 8 0 0 0-16 0c0 6 8 13 8 13z"/>
+            <circle cx="12" cy="9" r="3"/>
+          </svg>
+          <div>
+            <strong>{mapLocation}</strong>
+            <span>{locale === 'es'
+              ? `${mapPrecisionLabel} · radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicación exacta se facilita al concertar la visita.`
+              : `${mapPrecisionLabel} · ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>}
 <Lightbox />
 
 <!-- Mobile sticky bottom CTA bar (visible only on mobile) -->
@@ -507,13 +795,44 @@ function featureIcon(feature: string) {
   });
 
   const setupMobileAccordions = () => {
-    const shouldCollapse = window.matchMedia('(max-width: 540px)').matches;
     document.querySelectorAll<HTMLDetailsElement>('.prop-mobile-accordion').forEach((details) => {
-      details.open = !shouldCollapse;
+      details.open = true;
     });
   };
   setupMobileAccordions();
   window.addEventListener('resize', setupMobileAccordions, { passive: true });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-property-share]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const shareData = {
+        title: document.title,
+        text: document.querySelector<HTMLMetaElement>('meta[name="description"]')?.content ?? document.title,
+        url: window.location.href,
+      };
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+          return;
+        }
+        await navigator.clipboard?.writeText(window.location.href);
+      } catch {
+        // Sharing can be cancelled by the user; no UI error needed.
+      }
+    });
+  });
+
+  const setupPropertyDetailNav = () => {
+    const nav = document.querySelector<HTMLElement>('.prop-detail-nav');
+    if (!nav) return;
+
+    const update = () => {
+      nav.classList.toggle('is-scrolled', window.scrollY > 36);
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  };
+  setupPropertyDetailNav();
 </script>
 
 <style is:global>
@@ -684,7 +1003,7 @@ function featureIcon(feature: string) {
     line-height: 1.06;
     font-weight: 700;
     color: var(--color-navy);
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     margin-bottom: 0.75rem;
   }
   .prop-title-block__tagline {
@@ -723,6 +1042,13 @@ function featureIcon(feature: string) {
   .booking-card__mobile-availability,
   .booking-card__mobile-choice,
   .booking-card__mobile-tabs {
+    display: none;
+  }
+
+  .booking-card__tour-days,
+  .booking-card__tour-nav,
+  .booking-card__time,
+  .booking-card__agent {
     display: none;
   }
 
@@ -953,7 +1279,7 @@ function featureIcon(feature: string) {
     line-height: 1;
     font-weight: 700;
     margin-bottom: 1rem;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
   }
   .prop-process__step h3 {
     font-family: var(--font-sans);
@@ -1096,7 +1422,7 @@ function featureIcon(feature: string) {
     font-size: 1.85rem; /* mobile */
     color: var(--color-gold);
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
     white-space: nowrap;
   }
   @media (min-width: 540px)  { .booking-card__amount { font-size: 2rem; } }
@@ -1863,6 +2189,730 @@ function featureIcon(feature: string) {
   }
   @media (max-width: 720px) {
     .prop-mobile-cta { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .prop-sidebar {
+      width: 100%;
+      max-width: none;
+      margin: 1.6rem 0;
+      align-self: stretch;
+    }
+
+    .booking-card {
+      width: 100%;
+      max-width: none;
+      border: 0;
+      border-radius: 8px;
+      background: #001a72;
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .booking-card__top {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(2rem, 7vw, 2.85rem) clamp(1.25rem, 5vw, 2.15rem);
+    }
+
+    .booking-card__chip,
+    .booking-card__mobile-choice,
+    .booking-card__price,
+    .booking-card__ref,
+    .booking-card__note,
+    .booking-card__agent {
+      display: none !important;
+    }
+
+    .booking-card__mobile-title {
+      display: block;
+      order: 1;
+      margin: 0 0 2rem;
+      color: #fff;
+      text-align: center;
+      font-size: clamp(1.35rem, 5.4vw, 1.72rem);
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .booking-card__mobile-availability {
+      display: none;
+    }
+
+    .booking-card__tour-days {
+      order: 2;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.5rem, 2.4vw, 0.8rem);
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-card__tour-days span {
+      min-height: clamp(112px, 26vw, 136px);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 0.38rem;
+      padding: 0.8rem 0.3rem;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 6px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .booking-card__tour-days span:nth-child(3) {
+      background: #fff;
+      color: #001a72;
+    }
+
+    .booking-card__tour-days small,
+    .booking-card__tour-days em {
+      display: block;
+      color: currentColor;
+      font-style: normal;
+      font-size: clamp(0.8rem, 3vw, 0.98rem);
+      font-weight: 500;
+      line-height: 1.1;
+      opacity: 0.96;
+    }
+
+    .booking-card__tour-days strong {
+      display: block;
+      color: currentColor;
+      font-size: clamp(2.1rem, 9vw, 3rem);
+      line-height: 0.95;
+      font-weight: 900;
+    }
+
+    .booking-card__tour-nav {
+      order: 3;
+      display: flex;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .booking-card__tour-nav span {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .booking-card__time {
+      order: 4;
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-card__time span {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .booking-card__time select {
+      width: 100%;
+      height: 50px;
+      padding: 0 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      background: #001a72;
+      color: #fff;
+      font-size: 1.04rem;
+      font-weight: 800;
+      appearance: auto;
+    }
+
+    .booking-card__mobile-tabs {
+      order: 5;
+      width: min(100%, 310px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin: 0 auto 1.9rem;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .booking-card__mobile-tabs span {
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 800;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .booking-card__mobile-tabs span:first-child {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .booking-card__mobile-tabs span:last-child {
+      background: #001a72;
+    }
+
+    .booking-card__cta-group {
+      order: 6;
+      display: block;
+      text-align: center;
+    }
+
+    .booking-card__cta-group .btn:first-child {
+      display: none;
+    }
+
+    .booking-card__visit-cta {
+      width: min(100%, 200px) !important;
+      min-height: 50px;
+      margin-inline: auto;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #001a72;
+      box-shadow: none;
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+  @media (max-width: 540px) {
+    .prop-mobile-accordion > summary {
+      pointer-events: none;
+      cursor: default;
+      padding: 0;
+      margin-bottom: 0.85rem;
+      color: #001a72;
+      font-size: 1.08rem;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .prop-mobile-accordion > summary .prop-mobile-accordion__icon {
+      display: none;
+    }
+
+    .prop-gallery-wrap {
+      background: #000;
+      color: #fff;
+      padding-bottom: 0.8rem;
+    }
+
+    .prop-gallery-wrap .container {
+      background: #000;
+    }
+
+    .prop-body {
+      padding-top: 0;
+    }
+
+    .prop-title-block {
+      margin: -0.15rem -0.75rem 0;
+      padding: 0.85rem 0.75rem 0;
+      background: #000;
+    }
+
+    .prop-title-block__title {
+      color: #fff;
+      font-size: 1.18rem;
+      line-height: 1.12;
+      margin-bottom: 0.18rem;
+    }
+
+    .prop-mobile-summary {
+      margin: 0 -0.75rem;
+      padding: 0 0.75rem 0.9rem;
+      background: #000;
+      color: #fff;
+    }
+
+    .prop-mobile-summary strong {
+      color: #fff;
+      font-size: 1.06rem;
+    }
+
+    .prop-mobile-summary strong span {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.7rem;
+    }
+
+    .prop-mobile-summary p,
+    .prop-mobile-summary > span {
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .prop-quick-specs {
+      margin: 0 -0.75rem 0;
+      padding: 0.35rem 0.75rem 0.95rem;
+      background: #000;
+      color: #fff;
+    }
+
+    .prop-quick-spec {
+      color: #fff;
+      font-size: 0.58rem;
+      letter-spacing: 0.035em;
+    }
+
+    .prop-quick-spec strong {
+      color: #fff;
+    }
+
+    .prop-section {
+      margin-bottom: 1.2rem;
+      padding-top: 1.05rem;
+      border-top: 1px solid rgba(10, 29, 63, 0.08);
+    }
+
+    .prop-section__title,
+    .prop-section__header h2 {
+      color: #001a72;
+      font-size: 1.08rem;
+      font-weight: 900;
+    }
+
+    .prop-description__text,
+    .prop-description__extra {
+      font-size: 0.82rem;
+      line-height: 1.42;
+      color: #1a1a1a;
+    }
+
+    .prop-description__toggle {
+      display: none;
+    }
+
+    .prop-description__extra[hidden] {
+      display: block;
+    }
+
+    .prop-overview__list dt,
+    .prop-overview__list dd {
+      font-size: 0.7rem;
+      line-height: 1.28;
+    }
+
+    .amenities-grid {
+      margin-top: 0;
+      gap: 0.08rem;
+    }
+
+    .amenity-item {
+      font-size: 0.72rem;
+      line-height: 1.28;
+      font-weight: 800;
+    }
+
+    .prop-map {
+      aspect-ratio: 1 / 0.8;
+      border-radius: 0;
+      margin-inline: -0.75rem;
+    }
+
+    .prop-map__overlay {
+      display: none;
+    }
+
+    .prop-sidebar {
+      margin: 1.4rem -0.75rem 1.55rem;
+    }
+
+    .booking-card {
+      order: initial;
+      width: 100%;
+      border-radius: 0;
+      background: #001a72;
+    }
+
+    .booking-card__top {
+      padding: 1.25rem 1.05rem 1.05rem;
+    }
+
+    .booking-card__chip {
+      margin-bottom: 1.05rem;
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    .booking-card__mobile-title {
+      margin-bottom: 1rem;
+      font-size: 1.02rem;
+    }
+
+    .booking-card__mobile-choice {
+      margin: 0.8rem 0 0.4rem;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .booking-card__tour-days {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.45rem;
+      margin-bottom: 0.62rem;
+    }
+
+    .booking-card__tour-days span {
+      min-height: 72px;
+      padding: 0.46rem 0.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 3px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .booking-card__tour-days small,
+    .booking-card__tour-days em {
+      display: block;
+      font-style: normal;
+      font-size: 0.52rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .booking-card__tour-days strong {
+      display: block;
+      margin: 0.18rem 0;
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .booking-card__tour-nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .booking-card__tour-nav span {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .booking-card__mobile-tabs {
+      margin-bottom: 0.85rem;
+    }
+
+    .booking-card__mobile-tabs span {
+      min-height: 32px;
+      font-size: 0.68rem;
+    }
+
+    .booking-card__price {
+      margin: 0.88rem 0 0.9rem;
+    }
+
+    .booking-card__from {
+      font-size: 0.84rem;
+    }
+
+    .booking-card__amount {
+      font-size: 2rem;
+    }
+
+    .booking-card__unit {
+      font-size: 0.82rem;
+    }
+
+    .booking-card__time {
+      display: block;
+      margin-bottom: 0.72rem;
+    }
+
+    .booking-card__time span {
+      display: block;
+      margin-bottom: 0.28rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.58rem;
+      font-weight: 800;
+    }
+
+    .booking-card__time select {
+      width: 100%;
+      height: 31px;
+      padding: 0 0.55rem;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .booking-card .btn {
+      min-height: 42px;
+      font-size: 0.78rem;
+    }
+
+    .booking-card__agent {
+      display: block;
+      margin-top: 0.85rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+    }
+
+    .booking-card__agent > p {
+      margin: 0 0 0.45rem;
+      color: #fff;
+      font-size: 0.58rem;
+      font-weight: 900;
+    }
+
+    .booking-card__agent > div {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 0.45rem;
+      align-items: center;
+      padding: 0.48rem;
+      border-radius: 3px;
+      background: #fff;
+      color: #001a72;
+      text-align: left;
+    }
+
+    .booking-card__agent span {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 2px;
+      background: #f1f1f1;
+      color: #001a72;
+      font-size: 1.35rem;
+      font-weight: 900;
+      grid-row: span 2;
+    }
+
+    .booking-card__agent strong {
+      display: block;
+      font-size: 0.66rem;
+      line-height: 1.1;
+    }
+
+    .booking-card__agent a {
+      display: block;
+      margin-top: 0.1rem;
+      font-size: 0.58rem;
+      font-weight: 900;
+      color: #001a72;
+      word-break: break-word;
+    }
+
+    .prop-mobile-cta {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .prop-sidebar {
+      width: 100%;
+      max-width: none;
+      margin: 1.6rem 0;
+      align-self: stretch;
+    }
+
+    .booking-card {
+      width: 100%;
+      max-width: none;
+      border-radius: 8px;
+      background: #001a72;
+    }
+
+    .booking-card__top {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(2rem, 7vw, 2.85rem) clamp(1.25rem, 5vw, 2.15rem);
+    }
+
+    .booking-card__chip,
+    .booking-card__mobile-choice,
+    .booking-card__price,
+    .booking-card__ref,
+    .booking-card__note,
+    .booking-card__agent,
+    .booking-card__cta-group .btn:first-child {
+      display: none !important;
+    }
+
+    .booking-card__mobile-title {
+      display: block;
+      order: 1;
+      margin: 0 0 2rem;
+      color: #fff;
+      text-align: center;
+      font-size: clamp(1.35rem, 5.4vw, 1.72rem);
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .booking-card__tour-days {
+      order: 2;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.5rem, 2.4vw, 0.8rem);
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-card__tour-days span {
+      min-height: clamp(112px, 26vw, 136px);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 0.38rem;
+      padding: 0.8rem 0.3rem;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 6px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .booking-card__tour-days span:nth-child(3) {
+      background: #fff;
+      color: #001a72;
+    }
+
+    .booking-card__tour-days small,
+    .booking-card__tour-days em {
+      display: block;
+      color: currentColor;
+      font-style: normal;
+      font-size: clamp(0.8rem, 3vw, 0.98rem);
+      font-weight: 500;
+      line-height: 1.1;
+    }
+
+    .booking-card__tour-days strong {
+      display: block;
+      color: currentColor;
+      font-size: clamp(2.1rem, 9vw, 3rem);
+      line-height: 0.95;
+      font-weight: 900;
+    }
+
+    .booking-card__tour-nav {
+      order: 3;
+      display: flex;
+      justify-content: center;
+      gap: 0.55rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .booking-card__tour-nav span {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .booking-card__time {
+      order: 4;
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .booking-card__time span {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .booking-card__time select {
+      width: 100%;
+      height: 50px;
+      padding: 0 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      background: #001a72;
+      color: #fff;
+      font-size: 1.04rem;
+      font-weight: 800;
+    }
+
+    .booking-card__mobile-tabs {
+      order: 5;
+      width: min(100%, 310px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin: 0 auto 1.9rem;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .booking-card__mobile-tabs span {
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .booking-card__mobile-tabs span:first-child {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    .booking-card__mobile-tabs span:last-child {
+      background: #001a72;
+      color: #fff;
+    }
+
+    .booking-card__cta-group {
+      order: 6;
+      display: block;
+      text-align: center;
+    }
+
+    .booking-card__visit-cta {
+      width: min(100%, 200px) !important;
+      min-height: 50px;
+      margin-inline: auto;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: #001a72;
+      box-shadow: none;
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .prop-mobile-cta {
+      display: none !important;
+    }
   }
   .prop-mobile-cta__price {
     display: flex;
@@ -1919,6 +2969,1636 @@ function featureIcon(feature: string) {
     .booking-card__from { white-space: nowrap; }
     .booking-card__amount {
       font-size: 1.75rem; /* smaller tablet so 3 elements fit */
+    }
+  }
+
+  @media (max-width: 720px) {
+    :global(body:has(.prop-gallery-wrap) .site-header) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      z-index: 500 !important;
+      top: 1.1rem !important;
+      padding-inline: clamp(1.2rem, 5vw, 1.8rem) !important;
+      pointer-events: none;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__inner) {
+      width: min(100%, 500px) !important;
+      height: 86px !important;
+      margin-inline: auto !important;
+      padding-inline: clamp(1.5rem, 5vw, 2rem) !important;
+      background: #fff !important;
+      border: 0 !important;
+      border-radius: 999px !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__wordmark span) {
+      color: #001a72 !important;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__icon-btn),
+    :global(body:has(.prop-gallery-wrap) .site-header__toggle) {
+      width: 48px !important;
+      height: 48px !important;
+      color: #001a72 !important;
+      border-color: rgba(0, 26, 114, 0.14) !important;
+      background: #fff !important;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__icon-btn svg) {
+      width: 19px !important;
+      height: 19px !important;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__toggle span) {
+      width: 20px !important;
+      height: 2.5px !important;
+      background: #001a72 !important;
+    }
+
+    .prop-gallery-wrap {
+      padding-top: 8.95rem !important;
+      padding-bottom: 0.7rem !important;
+      background: #000 !important;
+    }
+
+    .prop-gallery-wrap .container,
+    .prop-gallery {
+      background: #000 !important;
+    }
+
+    .prop-gallery__main {
+      aspect-ratio: 1.52 / 1 !important;
+    }
+
+    .prop-title-block {
+      margin-top: -1px !important;
+      margin-bottom: -1px !important;
+      padding-top: 1rem !important;
+      padding-bottom: 0 !important;
+      background: #000 !important;
+      border: 0 !important;
+    }
+
+    .prop-title-block__title {
+      margin: 0 !important;
+      padding: 0 !important;
+      color: #fff !important;
+      text-decoration: none !important;
+      border: 0 !important;
+    }
+
+    .prop-title-block::before,
+    .prop-title-block::after,
+    .prop-title-block__title::before,
+    .prop-title-block__title::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .prop-mobile-summary {
+      margin-top: -1px !important;
+      padding-top: 0.42rem !important;
+      background: #000 !important;
+      border: 0 !important;
+    }
+
+    .prop-quick-specs {
+      margin-top: -1px !important;
+      background: #000 !important;
+      border: 0 !important;
+    }
+  }
+
+  .prop-gallery__signature,
+  .prop-mobile-actions {
+    display: none;
+  }
+
+  .prop-share-button,
+  .prop-section--legacy-description {
+    display: none;
+  }
+
+  .prop-detail-nav {
+    display: none;
+  }
+
+  @media (max-width: 720px) {
+    :global(body:has(.prop-gallery-wrap) .site-header) {
+      display: block;
+      top: 1.1rem;
+      padding-inline: clamp(1.1rem, 5vw, 1.8rem);
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__inner) {
+      width: min(100%, 500px);
+      height: 86px;
+      padding-inline: clamp(1.45rem, 5vw, 2rem);
+      background: #fff !important;
+      border-color: rgba(0, 26, 114, 0.08) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__wordmark span) {
+      color: #001a72;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__icon-btn),
+    :global(body:has(.prop-gallery-wrap) .site-header__toggle) {
+      color: #001a72;
+      border-color: rgba(0, 26, 114, 0.16);
+      background: #fff;
+    }
+
+    :global(body:has(.prop-gallery-wrap) .site-header__toggle span) {
+      background: #001a72;
+    }
+
+    .prop-gallery-wrap {
+      padding-top: 1.15rem;
+      padding-bottom: 0.7rem;
+      background: #000;
+      color: #fff;
+    }
+
+    :global(.site-header > .site-header__inner) {
+      display: none !important;
+    }
+
+    .prop-detail-nav {
+      width: min(calc(100% - 2.4rem), 500px);
+      height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0 auto 3.85rem;
+      padding: 0 clamp(1.55rem, 5vw, 2.1rem);
+      border-radius: 999px;
+      background: #fff;
+      color: #001a72;
+    }
+
+    .prop-detail-nav__wordmark {
+      color: #001a72;
+      font-family: var(--font-display, var(--font-sans));
+      font-size: clamp(1.38rem, 5.7vw, 1.75rem);
+      line-height: 1;
+      font-weight: 900;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .prop-detail-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .prop-detail-nav__icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid rgba(0, 26, 114, 0.14);
+      border-radius: 50%;
+      background: #fff;
+      color: #001a72;
+    }
+
+    .prop-detail-nav__icon svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .prop-detail-nav__toggle {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .prop-detail-nav__toggle span {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 20px;
+      height: 2.5px;
+      margin-left: -10px;
+      border-radius: 999px;
+      background: #001a72;
+      transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease);
+    }
+
+    .prop-detail-nav__toggle span:nth-child(1) { transform: translateY(-7px); }
+    .prop-detail-nav__toggle span:nth-child(2) { transform: translateY(-50%); }
+    .prop-detail-nav__toggle span:nth-child(3) { transform: translateY(7px); }
+    .prop-detail-nav__toggle.is-open span:nth-child(1) { transform: translateY(-50%) rotate(45deg); }
+    .prop-detail-nav__toggle.is-open span:nth-child(2) { opacity: 0; }
+    .prop-detail-nav__toggle.is-open span:nth-child(3) { transform: translateY(-50%) rotate(-45deg); }
+
+    .prop-gallery-wrap .container {
+      padding-inline: clamp(1.1rem, 4vw, 1.8rem);
+      background: #000;
+    }
+
+    .prop-breadcrumb {
+      display: none;
+    }
+
+    .prop-gallery {
+      display: block;
+      border-radius: 0;
+      overflow: visible;
+      background: #000;
+    }
+
+    .prop-gallery__main {
+      aspect-ratio: 1.45 / 1;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .prop-gallery__main img {
+      border-radius: 5px;
+    }
+
+    .prop-gallery__signature {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      display: block;
+      max-width: 72%;
+      padding: 0.62rem 1rem 0.7rem;
+      border-bottom-right-radius: 999px;
+      background: #fff;
+      color: #000;
+      font-size: 0.9rem;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .prop-gallery__badge {
+      top: 0.72rem;
+      right: 0.72rem;
+      left: auto;
+      z-index: 3;
+      padding: 0.48rem 0.7rem;
+      border-radius: 4px;
+      background: #fff;
+      color: #001a72;
+      font-size: 0.62rem;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+    }
+
+    .prop-gallery__thumbs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.62rem;
+      margin-top: 0.72rem;
+    }
+
+    .prop-gallery__thumb {
+      aspect-ratio: 1.1 / 1;
+      min-height: 0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .prop-body {
+      padding-top: 0;
+      background: #fff;
+    }
+
+    .prop-body .container {
+      padding-inline: clamp(1.1rem, 4vw, 1.8rem);
+      max-width: none;
+    }
+
+    .prop-title-block {
+      margin: -0.05rem calc(clamp(1.1rem, 4vw, 1.8rem) * -1) 0;
+      padding: 1.05rem clamp(1.1rem, 4vw, 1.8rem) 0;
+      background: #000;
+    }
+
+    .prop-title-block__title {
+      color: #fff;
+      font-size: clamp(1.55rem, 6.5vw, 2rem);
+      line-height: 1.05;
+      margin-bottom: 0.35rem;
+      font-weight: 900;
+    }
+
+    .prop-mobile-summary {
+      margin: 0 calc(clamp(1.1rem, 4vw, 1.8rem) * -1);
+      padding: 0 clamp(1.1rem, 4vw, 1.8rem) 0.45rem;
+      background: #000;
+      color: #fff;
+    }
+
+    .prop-mobile-summary p {
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 0.92rem;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .prop-mobile-summary strong {
+      display: block;
+      margin-top: 0.18rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.2rem;
+      line-height: 1.08;
+      font-weight: 900;
+    }
+
+    .prop-mobile-summary strong span {
+      margin-left: 0.2rem;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .prop-quick-specs {
+      margin: 0 calc(clamp(1.1rem, 4vw, 1.8rem) * -1);
+      padding: 0.42rem clamp(1.1rem, 4vw, 1.8rem) 1.25rem;
+      background: #000;
+      color: rgba(255, 255, 255, 0.74);
+      border-bottom: 0;
+    }
+
+    .prop-quick-spec {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.68rem;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .prop-quick-spec svg {
+      display: none;
+    }
+
+    .prop-quick-spec strong {
+      color: #fff;
+    }
+
+    .prop-mobile-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin: 0 calc(clamp(1.1rem, 4vw, 1.8rem) * -1) 0;
+      padding: 1rem clamp(1.1rem, 4vw, 1.8rem) 1.05rem;
+      background: #fff;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .prop-mobile-actions a {
+      min-height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      font-size: 0.94rem;
+      line-height: 1;
+      font-weight: 900;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .prop-mobile-actions a:first-child {
+      border: 1px solid rgba(0, 26, 114, 0.16);
+      background: #fff;
+      color: #000;
+    }
+
+    .prop-mobile-actions a:last-child {
+      background: #001a72;
+      color: #fff;
+    }
+  }
+
+  @media (max-width: 720px) {
+    :global(.site-header) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      z-index: 500 !important;
+      top: 1.1rem !important;
+      padding-inline: clamp(1.2rem, 5vw, 1.8rem) !important;
+      pointer-events: none;
+    }
+
+    :global(.site-header__inner) {
+      width: min(100%, 500px) !important;
+      height: 86px !important;
+      margin-inline: auto !important;
+      padding-inline: clamp(1.5rem, 5vw, 2rem) !important;
+      background: #fff !important;
+      border: 0 !important;
+      border-radius: 999px !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    :global(.site-header__wordmark span) {
+      color: #001a72 !important;
+    }
+
+    :global(.site-header__icon-btn),
+    :global(.site-header__toggle) {
+      width: 48px !important;
+      height: 48px !important;
+      color: #001a72 !important;
+      border-color: rgba(0, 26, 114, 0.14) !important;
+      background: #fff !important;
+    }
+
+    :global(.site-header__icon-btn svg) {
+      width: 19px !important;
+      height: 19px !important;
+    }
+
+    :global(.site-header__toggle span) {
+      width: 20px !important;
+      height: 2.5px !important;
+      background: #001a72 !important;
+    }
+
+    .prop-gallery-wrap {
+      padding-top: 8.95rem !important;
+    }
+
+    .prop-title-block,
+    .prop-mobile-summary,
+    .prop-quick-specs {
+      background: #000 !important;
+      border: 0 !important;
+    }
+
+    .prop-title-block {
+      margin-top: -1px !important;
+      margin-bottom: -1px !important;
+      padding-top: 1rem !important;
+      padding-bottom: 0 !important;
+    }
+
+    .prop-title-block__title {
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      text-decoration: none !important;
+    }
+
+    .prop-title-block::before,
+    .prop-title-block::after,
+    .prop-title-block__title::before,
+    .prop-title-block__title::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .prop-mobile-summary,
+    .prop-quick-specs {
+      margin-top: -1px !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    :global(.site-header > .site-header__inner) {
+      display: none !important;
+    }
+
+    .prop-gallery-wrap {
+      padding-top: 1.15rem !important;
+    }
+
+    .prop-detail-nav {
+      display: flex !important;
+    }
+
+    .prop-share-button {
+      width: auto;
+      height: auto;
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-start;
+      margin: -1px calc(clamp(1.1rem, 4vw, 1.8rem) * -1) 0;
+      padding: 0.1rem clamp(1.1rem, 4vw, 1.8rem) 1.05rem;
+      border: 0;
+      border-radius: 0;
+      background: #000;
+      color: #fff;
+    }
+
+    .prop-share-button svg {
+      box-sizing: content-box;
+      width: 19px;
+      height: 19px;
+      padding: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 50%;
+    }
+
+    .prop-share-button span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .prop-section--description {
+      margin-top: 0 !important;
+      padding-top: 1.05rem !important;
+      border-top: 0 !important;
+    }
+
+    .prop-section--legacy-description {
+      display: none !important;
+    }
+
+    .prop-section {
+      margin-bottom: 1.35rem !important;
+      padding-top: 1.05rem !important;
+      border-top: 1px solid rgba(0, 26, 114, 0.1) !important;
+    }
+
+    .prop-section--description {
+      border-top: 0 !important;
+    }
+
+    .prop-mobile-accordion > summary,
+    .prop-section__title,
+    .prop-section__header h2 {
+      margin: 0 0 0.9rem !important;
+      color: #001a72 !important;
+      font-size: 1.04rem !important;
+      line-height: 1.15 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+    }
+
+    .prop-description {
+      color: #1c2430 !important;
+      line-height: 1.48 !important;
+    }
+
+    .prop-description__text,
+    .prop-description__extra {
+      margin: 0 0 0.85rem !important;
+      color: #1c2430 !important;
+      font-size: 0.78rem !important;
+      line-height: 1.48 !important;
+      font-weight: 500 !important;
+    }
+
+    .prop-description__toggle {
+      display: inline-flex !important;
+      padding: 0 !important;
+      border: 0 !important;
+      color: #001a72 !important;
+      background: transparent !important;
+      font-size: 0.66rem !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+      text-transform: none !important;
+    }
+
+    .prop-description__toggle::after {
+      content: "⌄";
+      margin-left: 0.35rem;
+      font-size: 0.8rem;
+      line-height: 0.8;
+    }
+
+    .prop-overview__list {
+      border-top: 1px solid rgba(0, 26, 114, 0.1) !important;
+    }
+
+    .prop-overview__list div {
+      grid-template-columns: minmax(108px, 0.46fr) 1fr !important;
+      gap: 0.75rem !important;
+      padding: 0.95rem 0 !important;
+      border-bottom: 1px solid rgba(0, 26, 114, 0.1) !important;
+    }
+
+    .prop-overview__list dt {
+      color: #111 !important;
+      font-size: 0.64rem !important;
+      line-height: 1.25 !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-overview__list dd {
+      color: #1c2430 !important;
+      font-size: 0.68rem !important;
+      line-height: 1.34 !important;
+      font-weight: 700 !important;
+    }
+
+    .amenities-grid {
+      display: block !important;
+    }
+
+    .amenity-item {
+      display: grid !important;
+      grid-template-columns: 7px 1fr !important;
+      align-items: start !important;
+      gap: 0.45rem !important;
+      padding: 0 !important;
+      margin: 0 0 0.38rem !important;
+      background: transparent !important;
+      color: #111 !important;
+      font-size: 0.68rem !important;
+      line-height: 1.28 !important;
+      font-weight: 800 !important;
+    }
+
+    .amenity-item svg {
+      width: 5px !important;
+      height: 5px !important;
+      margin-top: 0.35rem !important;
+      color: #001a72 !important;
+      fill: #001a72 !important;
+      stroke-width: 0 !important;
+    }
+
+    .prop-section--description .prop-description {
+      color: #000 !important;
+      line-height: 1.5 !important;
+    }
+
+    .prop-section--description .prop-description__text,
+    .prop-section--description .prop-description__extra {
+      margin: 0 0 0.9rem !important;
+      color: #000 !important;
+      font-size: 0.84rem !important;
+      line-height: 1.5 !important;
+      font-weight: 650 !important;
+    }
+
+    .prop-section--description .prop-description__toggle {
+      display: none !important;
+    }
+
+    .prop-title-block {
+      padding-top: 0.82rem !important;
+    }
+
+    .prop-title-block__title {
+      font-size: clamp(1.32rem, 5.45vw, 1.55rem) !important;
+      line-height: 1.03 !important;
+      margin-bottom: 0.22rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+    }
+
+    .prop-mobile-summary {
+      padding-bottom: 0.32rem !important;
+    }
+
+    .prop-mobile-summary p {
+      color: rgba(255, 255, 255, 0.62) !important;
+      font-size: 0.72rem !important;
+      line-height: 1.25 !important;
+      font-weight: 800 !important;
+    }
+
+    .prop-mobile-summary strong {
+      margin-top: 0.1rem !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+      font-size: 0.9rem !important;
+      line-height: 1.05 !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-mobile-summary strong span {
+      font-size: 0.58rem !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-quick-specs {
+      padding-top: 0.2rem !important;
+      padding-bottom: 0.78rem !important;
+      gap: 0.55rem !important;
+    }
+
+    .prop-quick-spec {
+      font-size: 0.52rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0.045em !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-share-button {
+      width: calc(100% + (clamp(1.1rem, 4vw, 1.8rem) * 2)) !important;
+      box-sizing: border-box !important;
+      margin: -1px calc(clamp(1.1rem, 4vw, 1.8rem) * -1) -1px !important;
+      padding: 0 clamp(1.1rem, 4vw, 1.8rem) 1.1rem !important;
+      background: #000 !important;
+    }
+
+    .prop-share-button svg {
+      width: 15px !important;
+      height: 15px !important;
+      padding: 11px !important;
+      border-color: rgba(255, 255, 255, 0.28) !important;
+    }
+
+    .prop-mobile-actions {
+      margin-top: 0 !important;
+      border-top: 0 !important;
+    }
+  }
+
+  /* SERHANT-like property masthead: black first section on all breakpoints. */
+  .prop-gallery-wrap {
+    background: #000 !important;
+    color: #fff !important;
+  }
+
+  .prop-gallery-wrap .container {
+    background: #000 !important;
+  }
+
+  .prop-title-block,
+  .prop-mobile-summary,
+  .prop-quick-specs {
+    background: #000 !important;
+    color: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .prop-title-block__meta,
+  .prop-title-block__tagline {
+    color: rgba(255, 255, 255, 0.54) !important;
+  }
+
+  .prop-title-block__type,
+  .prop-title-block__city,
+  .prop-title-block__reference {
+    color: rgba(255, 255, 255, 0.62) !important;
+    text-decoration: none !important;
+  }
+
+  .prop-title-block__title {
+    color: #fff !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .prop-quick-spec {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.72) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    text-transform: uppercase;
+  }
+
+  .prop-quick-spec strong,
+  .prop-quick-spec span,
+  .prop-quick-spec .text-emerald-700,
+  .prop-quick-spec .text-amber-700 {
+    color: inherit !important;
+  }
+
+  .prop-quick-spec svg {
+    display: none !important;
+  }
+
+  @media (min-width: 721px) {
+    .prop-gallery-wrap {
+      padding-bottom: 2.2rem !important;
+    }
+
+    .prop-body {
+      background: linear-gradient(#000 0 15rem, #fff 15rem 100%) !important;
+      padding-top: 0 !important;
+    }
+
+    .prop-title-block {
+      margin: 0 0 0.25rem !important;
+      padding: 1.25rem 0 0 !important;
+    }
+
+    .prop-title-block__meta {
+      margin-bottom: 0.5rem !important;
+      font-size: 0.78rem !important;
+      line-height: 1.3 !important;
+      font-weight: 800 !important;
+      letter-spacing: 0 !important;
+      text-transform: none !important;
+    }
+
+    .prop-title-block__title {
+      max-width: 920px;
+      margin: 0 0 0.35rem !important;
+      font-size: clamp(1.7rem, 2.3vw, 2.35rem) !important;
+      line-height: 1.02 !important;
+    }
+
+    .prop-title-block__tagline {
+      margin: 0 !important;
+      font-size: 0.98rem !important;
+      line-height: 1.35 !important;
+      font-weight: 800 !important;
+    }
+
+    .prop-quick-specs {
+      margin: 0 0 1.4rem !important;
+      padding: 0.9rem 0 0 !important;
+      gap: 1.1rem !important;
+      border-radius: 0 !important;
+    }
+
+    .prop-quick-spec {
+      position: relative;
+      gap: 0 !important;
+      font-size: 0.7rem !important;
+      line-height: 1.15 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.04em !important;
+    }
+
+    .prop-quick-spec + .prop-quick-spec::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      display: inline-block;
+      margin-right: 1.1rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      vertical-align: middle;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .prop-body {
+      background: #fff !important;
+    }
+
+    .prop-title-block__title {
+      font-size: 21px !important;
+      line-height: 1.05 !important;
+    }
+
+    .prop-mobile-summary p {
+      font-size: 13px !important;
+      color: rgba(255, 255, 255, 0.62) !important;
+    }
+
+    .prop-mobile-summary strong {
+      font-size: 18px !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .prop-quick-spec {
+      font-size: 0.5rem !important;
+      color: rgba(255, 255, 255, 0.74) !important;
+    }
+
+    .prop-description__text,
+    .prop-description__extra,
+    .prop-map__overlay span,
+    .rules-list li {
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.5 !important;
+      font-weight: 500 !important;
+    }
+
+    .prop-section--description .prop-description__text,
+    .prop-section--description .prop-description__extra {
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.5 !important;
+      font-weight: 500 !important;
+    }
+
+    .prop-overview__list dd {
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.42 !important;
+      font-weight: 500 !important;
+    }
+
+    .prop-overview .prop-section__title,
+    .prop-features-section .prop-mobile-accordion > summary {
+      color: #001a72 !important;
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 24px !important;
+      line-height: 1.1 !important;
+      font-weight: 900 !important;
+      margin-bottom: 2rem !important;
+    }
+
+    .prop-overview__list {
+      border-top: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .prop-overview__list div {
+      display: grid !important;
+      grid-template-columns: minmax(150px, 0.48fr) 1fr !important;
+      gap: 1.2rem !important;
+      padding: 1.35rem 0 !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .prop-overview__list dt {
+      color: #000 !important;
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.3 !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-overview__list dd {
+      color: #000 !important;
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 16px !important;
+      line-height: 1.35 !important;
+      font-weight: 500 !important;
+    }
+
+    .prop-features-section {
+      border-top: 0 !important;
+      padding-top: 1.35rem !important;
+    }
+
+    .property-feature-groups {
+      display: grid;
+      gap: 1.65rem;
+    }
+
+    .property-feature-group--exterior {
+      padding-top: 1.4rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .property-feature-group h3 {
+      margin: 0 0 1rem;
+      color: #001a72;
+      font-family: "Montserrat", var(--font-sans), sans-serif;
+      font-size: 23px;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .property-feature-group ul {
+      display: grid;
+      gap: 0.72rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .property-feature-group li {
+      position: relative;
+      display: grid;
+      gap: 0.38rem;
+      padding-left: 1rem;
+      color: #000;
+      font-family: "Montserrat", var(--font-sans), sans-serif;
+      font-size: 16px;
+      line-height: 1.38;
+      font-weight: 500;
+    }
+
+    .property-feature-group li::before {
+      content: "";
+      position: absolute;
+      top: 0.58em;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #001a72;
+    }
+
+    .property-feature-group li span {
+      color: #000;
+      font-weight: 500;
+    }
+
+    .property-feature-group li strong {
+      color: #000;
+      font-weight: 900;
+    }
+
+    .prop-title-block,
+    .prop-mobile-summary,
+    .prop-quick-specs,
+    .prop-share-button {
+      position: relative;
+      z-index: 1;
+    }
+
+    .prop-title-block {
+      margin-bottom: -2px !important;
+    }
+
+    .prop-mobile-summary {
+      margin-top: -2px !important;
+      margin-bottom: -2px !important;
+    }
+
+    .prop-quick-specs {
+      width: calc(100% + (clamp(1.1rem, 4vw, 1.8rem) * 2)) !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 0 !important;
+      margin: -2px calc(clamp(1.1rem, 4vw, 1.8rem) * -1) -2px !important;
+      padding: 0.45rem clamp(1.1rem, 4vw, 1.8rem) 0.9rem !important;
+      overflow-x: auto !important;
+      border-radius: 0 !important;
+      background: #000 !important;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .prop-quick-specs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .prop-quick-spec {
+      display: inline-flex !important;
+      align-items: center !important;
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.72) !important;
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 10px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.04em !important;
+      white-space: nowrap !important;
+    }
+
+    .prop-quick-spec--status {
+      display: none !important;
+    }
+
+    .prop-quick-spec + .prop-quick-spec::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      display: inline-block;
+      flex: 0 0 auto;
+      margin: 0 0.82rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .prop-quick-spec span,
+    .prop-quick-spec strong {
+      color: rgba(255, 255, 255, 0.72) !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-share-button {
+      width: calc(100% + (clamp(1.1rem, 4vw, 1.8rem) * 2)) !important;
+      margin: -2px calc(clamp(1.1rem, 4vw, 1.8rem) * -1) -2px !important;
+      padding: 0 clamp(1.1rem, 4vw, 1.8rem) 1.2rem !important;
+      background: #000 !important;
+    }
+
+    .prop-title-block {
+      box-shadow: 0 8px 0 #000 !important;
+    }
+
+    .prop-mobile-summary {
+      position: relative !important;
+      z-index: 2 !important;
+      border-top: 0 !important;
+    }
+
+    .prop-mobile-summary::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -8px;
+      height: 10px;
+      background: #000;
+      pointer-events: none;
+    }
+  }
+
+  @media (min-width: 721px) {
+    .prop-body {
+      background: #000 !important;
+      padding-top: 0 !important;
+    }
+
+    .prop-body > .container,
+    .prop-layout,
+    .prop-main {
+      background: transparent !important;
+    }
+
+    .prop-title-block {
+      margin-bottom: -1px !important;
+      padding-bottom: 0 !important;
+      background: #000 !important;
+    }
+
+    .prop-title-block__title {
+      font-size: clamp(2rem, 2.7vw, 2.9rem) !important;
+      line-height: 1 !important;
+      margin-bottom: 0.45rem !important;
+    }
+
+    .prop-title-block__tagline {
+      color: rgba(255, 255, 255, 0.58) !important;
+      font-size: 1.02rem !important;
+    }
+
+    .prop-quick-specs {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 0 !important;
+      margin: -1px 0 -1px !important;
+      padding: 0.85rem 0 1.05rem !important;
+      background: #000 !important;
+      border-radius: 0 !important;
+    }
+
+    .prop-quick-spec {
+      display: inline-flex !important;
+      align-items: center !important;
+      flex: 0 0 auto !important;
+      gap: 0 !important;
+      padding: 0 !important;
+      color: rgba(255, 255, 255, 0.72) !important;
+      font-family: "Montserrat", var(--font-sans), sans-serif !important;
+      font-size: 10px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.04em !important;
+      white-space: nowrap !important;
+      background: transparent !important;
+    }
+
+    .prop-quick-spec--status {
+      display: none !important;
+    }
+
+    .prop-quick-spec + .prop-quick-spec::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      display: inline-block;
+      flex: 0 0 auto;
+      margin: 0 1.1rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .prop-quick-spec span,
+    .prop-quick-spec strong {
+      color: rgba(255, 255, 255, 0.72) !important;
+      font-size: inherit !important;
+      line-height: inherit !important;
+      font-weight: 900 !important;
+    }
+
+    .prop-share-button {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      margin: -1px 0 0 !important;
+      padding: 0 0 3.25rem !important;
+      background: #000 !important;
+      color: #fff !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    .prop-share-button svg {
+      width: 15px !important;
+      height: 15px !important;
+      padding: 11px !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      border-radius: 50% !important;
+      box-sizing: content-box !important;
+    }
+
+    .prop-share-button span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .prop-section {
+      background: #fff !important;
+      box-shadow: 0 0 0 100vmax #fff;
+      clip-path: inset(0 -100vmax);
+      margin-bottom: 0 !important;
+      padding-bottom: 3rem !important;
+    }
+
+    .prop-section--description {
+      margin-top: 0 !important;
+      padding-top: 3rem !important;
+      border-top: 0 !important;
+    }
+
+    .prop-sidebar {
+      z-index: 2;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .property-contact-section {
+    background: #001a72;
+    padding: clamp(3rem, 7vw, 5.5rem) 0;
+    scroll-margin-top: 6rem;
+  }
+
+  .property-contact-section__inner {
+    display: grid;
+    gap: 1.6rem;
+    max-width: 760px;
+  }
+
+  .property-contact-section h2 {
+    margin: 0;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .property-contact-form {
+    display: grid;
+    gap: 1.15rem;
+    justify-items: center;
+    padding: clamp(1.55rem, 5vw, 2.4rem);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .property-contact-form label {
+    display: grid;
+    gap: 0.35rem;
+    width: min(352px, 100%);
+  }
+
+  .property-contact-form label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .property-contact-form input,
+  .property-contact-form select,
+  .property-contact-form textarea {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.24);
+    border-radius: 8px;
+    background: #fff;
+    color: #000;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 500;
+    padding: 0 1.05rem;
+    outline: none;
+  }
+
+  .property-contact-form textarea {
+    height: 74px;
+    min-height: 74px;
+    padding-top: 0.78rem;
+    padding-bottom: 0.78rem;
+    resize: vertical;
+  }
+
+  .property-contact-form input::placeholder,
+  .property-contact-form textarea::placeholder {
+    color: #b8bbc3;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .property-contact-form select {
+    color: #b8bbc3;
+    font-size: 14px;
+    font-weight: 500;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #b8bbc3 50%), linear-gradient(135deg, #b8bbc3 50%, transparent 50%);
+    background-position: calc(100% - 24px) 50%, calc(100% - 17px) 50%;
+    background-size: 7px 7px, 7px 7px;
+    background-repeat: no-repeat;
+  }
+
+  .property-contact-form select option {
+    color: #001a72;
+    background: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .property-contact-form__consent {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.7rem !important;
+    margin-top: 0.65rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .property-contact-form .lp-tcr-content {
+    width: min(352px, 100%);
+  }
+
+  .property-contact-form .lp-tcr-checkbox {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  .property-contact-form__consent input,
+  .property-contact-form .lp-tcr-checkbox input {
+    width: 14px;
+    height: 14px;
+    min-height: 0;
+    max-height: 14px;
+    margin-top: 0.18rem;
+    padding: 0;
+    border-radius: 3px;
+  }
+
+  .property-contact-form__consent span,
+  .property-contact-form .lp-tcr-message {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    color: rgb(104, 104, 104);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  .property-contact-form__consent a {
+    color: #001a72;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .property-contact-form button {
+    justify-self: center;
+    min-width: 116px;
+    min-height: 46px;
+    margin-top: 0.15rem;
+    border: 0;
+    border-radius: 999px;
+    background: #001a72;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  @media (max-width: 720px) {
+    .property-contact-section {
+      padding: 2.5rem 0 4rem;
+    }
+
+    .property-contact-section__inner {
+      padding-inline: clamp(1.1rem, 4vw, 1.8rem);
+    }
+
+    .property-contact-section h2 {
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .property-contact-form {
+      gap: 1rem;
+      padding: 1.65rem 1.35rem 2.15rem;
+    }
+  }
+
+  .prop-map-section--inline {
+    display: none !important;
+  }
+
+  .prop-description__read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.1rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 0.72rem;
+    line-height: 1;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .prop-description__read-more::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .property-feature-group--financial {
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .property-zone-section {
+    background: #fff;
+    padding: clamp(3rem, 7vw, 5rem) 0;
+  }
+
+  .property-zone-section h2 {
+    margin: 0 0 1.4rem;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.05;
+    font-weight: 900;
+  }
+
+  .property-zone-section .prop-map {
+    margin: 0;
+  }
+
+  .prop-section--description .prop-mobile-accordion > summary {
+    color: #001a72 !important;
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 24px !important;
+    line-height: 1.14 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .prop-section--description .label-mobile,
+  .prop-section--description .label-desktop {
+    font: inherit !important;
+    color: inherit !important;
+  }
+
+  .prop-description__read-more {
+    font-family: "Montserrat", var(--font-sans), sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+    letter-spacing: 0 !important;
+  }
+
+  @media (max-width: 720px) {
+    .prop-title-block__title {
+      line-height: 1.14 !important;
+      padding-bottom: 0.12em !important;
+      margin-bottom: 0.3rem !important;
+      overflow: visible !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .prop-gallery-wrap {
+      padding-top: 8.55rem !important;
+    }
+
+    .prop-detail-nav {
+      position: fixed !important;
+      top: 1.1rem !important;
+      left: 50% !important;
+      z-index: 650 !important;
+      width: min(calc(100% - 2.4rem), 500px) !important;
+      height: 86px !important;
+      margin: 0 !important;
+      transform: translateX(-50%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      border-radius: 999px !important;
+      background: #fff !important;
+      color: #001a72 !important;
+      transition:
+        background-color 220ms ease,
+        color 220ms ease,
+        box-shadow 220ms ease,
+        backdrop-filter 220ms ease;
+    }
+
+    .prop-detail-nav__wordmark {
+      color: inherit !important;
+    }
+
+    .prop-detail-nav__icon {
+      color: inherit !important;
+      background: transparent !important;
+      border-color: rgba(0, 26, 114, 0.16) !important;
+    }
+
+    .prop-detail-nav__toggle span {
+      background: currentColor !important;
+    }
+
+    .prop-detail-nav.is-scrolled {
+      background: rgba(0, 26, 114, 0.84) !important;
+      color: #fff !important;
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .prop-detail-nav.is-scrolled .prop-detail-nav__icon {
+      border-color: rgba(255, 255, 255, 0.22) !important;
+    }
+  }
+
+  .property-zone-section:not(.property-zone-section--sidebar) {
+    display: none !important;
+  }
+
+  .property-zone-section--sidebar {
+    margin: 0 0 1.2rem;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .property-zone-section--sidebar h2 {
+    font-size: 24px !important;
+    line-height: 1.12 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .property-zone-section--sidebar .prop-map {
+    min-height: 260px;
+    margin: 0 !important;
+  }
+
+  @media (max-width: 960px) {
+    .property-zone-section--sidebar {
+      margin-bottom: 1.4rem;
     }
   }
 </style>
