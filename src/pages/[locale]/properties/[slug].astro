@@ -5132,7 +5132,8 @@ function featureIcon(feature: string) {
 
   .booking-card__request-form {
     display: grid;
-    gap: 1.35rem;
+    justify-items: center;
+    gap: 1.05rem;
     color: #fff;
     font-family: "Montserrat", var(--font-sans), sans-serif;
   }
@@ -5149,28 +5150,30 @@ function featureIcon(feature: string) {
 
   .booking-card__request-form label:not(.booking-card__request-consent) {
     display: grid;
-    gap: 0.72rem;
+    gap: 0.5rem;
+    width: min(352px, 100%);
   }
 
   .booking-card__request-form label:not(.booking-card__request-consent) > span {
     color: #fff;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 16px;
-    line-height: 1.25;
-    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 500;
   }
 
   .booking-card__request-form input:not([type="checkbox"]) {
     width: 100%;
-    height: 50px;
-    padding: 0 1rem;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 1.05rem;
     border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 8px;
     background: transparent;
     color: #fff;
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 14px;
-    line-height: 1.2;
+    line-height: 1.35;
     font-weight: 500;
     outline: none;
   }
@@ -5183,24 +5186,26 @@ function featureIcon(feature: string) {
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: start;
-    gap: 0.85rem;
-    margin-top: 0.2rem;
+    gap: 0.7rem;
+    width: min(352px, 100%);
+    margin-top: 0.45rem;
   }
 
   .booking-card__request-consent input {
     width: 14px;
     height: 14px;
-    margin-top: 0.22rem;
+    min-height: 0;
+    margin-top: 0.18rem;
     accent-color: #fff;
   }
 
   .booking-card__request-consent span {
-    color: rgba(255, 255, 255, 0.68);
+    color: rgba(255, 255, 255, 0.72);
     text-align: center;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 14px;
-    line-height: 1.25;
-    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 500;
   }
 
   .booking-card__request-consent a {
@@ -5211,17 +5216,17 @@ function featureIcon(feature: string) {
 
   .booking-card__request-form button[type="submit"] {
     justify-self: center;
-    min-width: 180px;
-    min-height: 50px;
-    padding: 0 1.5rem;
+    min-width: 156px;
+    min-height: 46px;
+    padding: 0 1.35rem;
     border: 0;
     border-radius: 999px;
     background: #fff;
     color: #001a72;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 16px;
-    line-height: 1.2;
-    font-weight: 800;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
     cursor: pointer;
   }
 
@@ -5230,24 +5235,24 @@ function featureIcon(feature: string) {
     color: #fff;
     text-align: center;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.35;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   .booking-card__request-change {
     justify-self: center;
-    min-width: 132px;
-    min-height: 50px;
-    padding: 0 1.4rem;
+    min-width: 124px;
+    min-height: 46px;
+    padding: 0 1.25rem;
     border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 999px;
     background: transparent;
     color: #fff;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 16px;
-    line-height: 1.2;
-    font-weight: 800;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
     cursor: pointer;
   }
 
@@ -5263,11 +5268,11 @@ function featureIcon(feature: string) {
     }
 
     .booking-card__request-form {
-      gap: 1.25rem;
+      gap: 1rem;
     }
 
     .booking-card__request-consent span {
-      font-size: 13px;
+      font-size: 12px;
     }
   }
 </style>
