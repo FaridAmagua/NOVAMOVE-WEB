@@ -206,6 +206,14 @@ async function loadFixture(): Promise<Property[]> {
   return fallbackProperties;
 }
 
+function withHardcodedProperties(properties: Property[]): Property[] {
+  const hardcodedSlugs = new Set(fallbackProperties.map((property) => property.slug));
+  return [
+    ...fallbackProperties,
+    ...properties.filter((property) => !hardcodedSlugs.has(property.slug)),
+  ];
+}
+
 // ── API pública ──────────────────────────────────────────────────────────
 
 export async function getProperties(): Promise<PropertySource> {
@@ -214,7 +222,7 @@ export async function getProperties(): Promise<PropertySource> {
       const nivoraProps = await fetchNivoraCatalog();
       return {
         name: 'nivora',
-        properties: nivoraProps.map(fromNivora),
+        properties: withHardcodedProperties(nivoraProps.map(fromNivora)),
         fetchedAt: Date.now(),
       };
     } catch (err) {
@@ -234,7 +242,7 @@ export async function getProperties(): Promise<PropertySource> {
   const nivoraProps = await fetchNivoraCatalog();
   return {
     name: 'nivora',
-    properties: nivoraProps.map(fromNivora),
+    properties: withHardcodedProperties(nivoraProps.map(fromNivora)),
     fetchedAt: Date.now(),
   };
 }

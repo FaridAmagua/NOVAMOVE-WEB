@@ -345,14 +345,17 @@ function featureIcon(feature: string) {
                 </span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
-              <div class="prop-description">
+              <div class="prop-description" data-description-collapse>
                 <p class="prop-description__text">{property.description[locale]}</p>
-                <p class="prop-description__extra">
+                <p class="prop-description__extra" hidden>
                   {locale === 'es'
-                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
-                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
+                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes. La vivienda combina espacios interiores amplios, zonas exteriores pensadas para disfrutar todo el año y una ubicación cómoda para acceder a restaurantes, servicios, playa y los principales puntos de interés de la zona.`
+                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients. The home combines generous interior spaces, outdoor areas designed for year-round living, and a convenient location close to restaurants, services, the beach, and the area's main points of interest.`}
                 </p>
-                <button type="button" class="prop-description__read-more">Read More</button>
+                <button type="button" class="prop-description__read-more" data-description-toggle>
+                  <span data-description-label-more>Read More</span>
+                  <span data-description-label-less hidden>Read Less</span>
+                </button>
               </div>
             </details>
           </section>
@@ -792,6 +795,25 @@ function featureIcon(feature: string) {
       if (labelMore) labelMore.hidden = !isOpen;
       if (labelLess) labelLess.hidden = isOpen;
     });
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-description-collapse]').forEach((root) => {
+    const toggle = root.querySelector<HTMLButtonElement>('[data-description-toggle]');
+    const extra = root.querySelector<HTMLElement>('.prop-description__extra');
+    if (!toggle || !extra) return;
+
+    const labelMore = toggle.querySelector<HTMLElement>('[data-description-label-more]');
+    const labelLess = toggle.querySelector<HTMLElement>('[data-description-label-less]');
+
+    toggle.addEventListener('click', () => {
+      const shouldOpen = extra.hidden;
+      extra.hidden = !shouldOpen;
+      if (labelMore) labelMore.hidden = shouldOpen;
+      if (labelLess) labelLess.hidden = !shouldOpen;
+      toggle.setAttribute('aria-expanded', String(shouldOpen));
+    });
+
+    toggle.setAttribute('aria-expanded', String(!extra.hidden));
   });
 
   const setupMobileAccordions = () => {
@@ -4594,6 +4616,10 @@ function featureIcon(feature: string) {
   .property-zone-section--sidebar .prop-map {
     min-height: 260px;
     margin: 0 !important;
+  }
+
+  .prop-section--description .prop-description__extra[hidden] {
+    display: none !important;
   }
 
   @media (max-width: 960px) {
