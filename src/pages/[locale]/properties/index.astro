@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import PageHero from '../../../components/PageHero.astro';
 import { t, supportedLocales, type Locale } from '../../../utils/i18n';
 import {
   formatPrice,
@@ -40,15 +39,8 @@ if (sort === 'price-asc') {
 <BaseLayout
   title={t(locale, 'properties.title')}
   description={t(locale, 'properties.subtitle')}
-  transparentHeader={true}
+  transparentHeader={false}
 >
-  <PageHero
-    eyebrow={t(locale, 'properties.title')}
-    title={locale === 'es' ? 'Propiedades<br/><span class="">seleccionadas.</span>' : 'Handpicked<br/><span class="">properties.</span>'}
-    subtitle={t(locale, 'properties.subtitle')}
-    image="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=2000&q=80"
-  />
-
   <section class="properties-listing">
     <div class="container properties-listing__inner">
       <!-- Filters -->
@@ -161,7 +153,7 @@ if (sort === 'price-asc') {
 
 <style>
   .properties-listing {
-    padding-block: clamp(3.75rem, 7vw, 6.5rem);
+    padding: calc(var(--header-height, 92px) + clamp(1.25rem, 3vw, 2.25rem)) 0 clamp(3.75rem, 7vw, 6.5rem);
     background: var(--color-white);
   }
 
@@ -356,7 +348,7 @@ if (sort === 'price-asc') {
 
   @media (max-width: 640px) {
     .properties-listing {
-      padding-block: 2.25rem 3.5rem;
+      padding: calc(var(--header-height, 72px) + 1rem) 0 3.5rem;
     }
 
     .properties-toolbar {
