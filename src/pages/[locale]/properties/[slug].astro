@@ -87,45 +87,45 @@ const processSteps = locale === 'es'
     ];
 
 const overviewItems = [
-  ['Property Type', 'Other'],
-  ['Location', '21 & 407 Fairfield Pond Ln, Sagaponack, NY 11962'],
-  ['Year Built', '1998'],
+  [locale === 'es' ? 'Tipo de propiedad' : 'Property Type', locale === 'es' ? 'Otro' : 'Other'],
+  [locale === 'es' ? 'Ubicación' : 'Location', '21 & 407 Fairfield Pond Ln, Sagaponack, NY 11962'],
+  [locale === 'es' ? 'Año de construcción' : 'Year Built', '1998'],
   ['MLS ID', '924260'],
-  ['Listing Last Updated', '9/15/2026 6:03 PM'],
+  [locale === 'es' ? 'Última actualización' : 'Listing Last Updated', '9/15/2026 6:03 PM'],
 ];
 
 const interiorFeatures = [
-  ['Total Bedrooms', property.bedrooms ? String(property.bedrooms) : '8'],
-  ['Full Bathrooms', property.bathrooms ? String(property.bathrooms) : '7'],
-  ['Half Bathrooms', '3'],
-  ['Flooring', 'Hardwood, Tile, Stone'],
-  ['Laundry Room', 'Laundry Room'],
-  ['Fireplace', 'Fireplace'],
-  ['Appliances', 'Dishwasher, Dryer, Refrigerator, Microwave, Oven, Stainless Steel Appliance(s), Washer'],
-  ['Other Interior Features', 'Primary Bedroom, En Suite Bathroom, Walk-In Closet(s), Media Room, Study, Exercise Room, Entrance Foyer, Family Room, Living Room, Great Room, Dining Room, Breakfast Area'],
+  [locale === 'es' ? 'Dormitorios totales' : 'Total Bedrooms', property.bedrooms ? String(property.bedrooms) : '8'],
+  [locale === 'es' ? 'Baños completos' : 'Full Bathrooms', property.bathrooms ? String(property.bathrooms) : '7'],
+  [locale === 'es' ? 'Medios baños' : 'Half Bathrooms', '3'],
+  [locale === 'es' ? 'Suelos' : 'Flooring', locale === 'es' ? 'Madera, baldosa, piedra' : 'Hardwood, Tile, Stone'],
+  [locale === 'es' ? 'Lavandería' : 'Laundry Room', locale === 'es' ? 'Lavandería' : 'Laundry Room'],
+  [locale === 'es' ? 'Chimenea' : 'Fireplace', locale === 'es' ? 'Chimenea' : 'Fireplace'],
+  [locale === 'es' ? 'Electrodomésticos' : 'Appliances', locale === 'es' ? 'Lavavajillas, secadora, frigorífico, microondas, horno, electrodomésticos de acero inoxidable, lavadora' : 'Dishwasher, Dryer, Refrigerator, Microwave, Oven, Stainless Steel Appliance(s), Washer'],
+  [locale === 'es' ? 'Otras características interiores' : 'Other Interior Features', locale === 'es' ? 'Dormitorio principal, baño en suite, vestidores, sala multimedia, estudio, gimnasio, recibidor, sala familiar, salón, comedor, zona de desayuno' : 'Primary Bedroom, En Suite Bathroom, Walk-In Closet(s), Media Room, Study, Exercise Room, Entrance Foyer, Family Room, Living Room, Great Room, Dining Room, Breakfast Area'],
 ];
 
 const exteriorFeatures = [
-  ['Stories', '2'],
-  ['Garage Spaces', '3.0'],
-  ['Water Source', 'Private Well'],
-  ['Pool', 'Gunite, Heated, In Ground, Private'],
-  ['Roof', 'Cedar'],
-  ['Lot Features', 'Cul-De-Sac, Fenced, On Golf Course, Sprinklers In Ground'],
-  ['Parking', 'Attached'],
-  ['Heat Type', 'Forced Air, Geothermal'],
-  ['Air Conditioning', 'Central Air'],
+  [locale === 'es' ? 'Plantas' : 'Stories', '2'],
+  [locale === 'es' ? 'Plazas de garaje' : 'Garage Spaces', '3.0'],
+  [locale === 'es' ? 'Suministro de agua' : 'Water Source', locale === 'es' ? 'Pozo privado' : 'Private Well'],
+  [locale === 'es' ? 'Piscina' : 'Pool', locale === 'es' ? 'Gunita, climatizada, enterrada, privada' : 'Gunite, Heated, In Ground, Private'],
+  [locale === 'es' ? 'Cubierta' : 'Roof', locale === 'es' ? 'Cedro' : 'Cedar'],
+  [locale === 'es' ? 'Características de parcela' : 'Lot Features', locale === 'es' ? 'Calle sin salida, vallada, junto a campo de golf, riego instalado' : 'Cul-De-Sac, Fenced, On Golf Course, Sprinklers In Ground'],
+  [locale === 'es' ? 'Aparcamiento' : 'Parking', locale === 'es' ? 'Anexo' : 'Attached'],
+  [locale === 'es' ? 'Calefacción' : 'Heat Type', locale === 'es' ? 'Aire forzado, geotermia' : 'Forced Air, Geothermal'],
+  [locale === 'es' ? 'Aire acondicionado' : 'Air Conditioning', locale === 'es' ? 'Aire central' : 'Central Air'],
 ];
 
 const detailFeatures = [
-  ['Neighborhood', 'Sagaponack'],
-  ['Architecture Styles', 'Contemporary'],
-  ['Water Frontage', 'Ocean Front, Waterfront'],
-  ['View Description', 'Ocean, Water'],
+  [locale === 'es' ? 'Barrio' : 'Neighborhood', 'Sagaponack'],
+  [locale === 'es' ? 'Estilo arquitectónico' : 'Architecture Styles', locale === 'es' ? 'Contemporáneo' : 'Contemporary'],
+  [locale === 'es' ? 'Frente de agua' : 'Water Frontage', locale === 'es' ? 'Frente al océano, waterfront' : 'Ocean Front, Waterfront'],
+  [locale === 'es' ? 'Vistas' : 'View Description', locale === 'es' ? 'Océano, agua' : 'Ocean, Water'],
 ];
 
 const financialFeatures = [
-  ['Price', '$89,000,000'],
+  [locale === 'es' ? 'Precio' : 'Price', '$89,000,000'],
 ];
 
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
@@ -212,11 +212,11 @@ function featureIcon(feature: string) {
           tabindex="0"
           aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
         >
-          <span class="prop-gallery__signature">GLOBAL.MOVE Signature</span>
+          <span class="prop-gallery__signature">{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</span>
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
                style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
           <span class={`prop-gallery__badge prop-gallery__badge--${property.status === 'available' ? 'rent' : 'sale'}`}>
-            {statusLabel(property.status, locale)}
+            {property.status === 'available' ? (locale === 'es' ? 'Para alquiler' : 'For Rent') : statusLabel(property.status, locale)}
           </span>
           <span class="prop-gallery__zoom" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -276,6 +276,9 @@ function featureIcon(feature: string) {
                 </>
               )}
             </div>
+            {property.status === 'available' && (
+              <span class="prop-title-block__status">{statusLabel(property.status, locale)}</span>
+            )}
             <h1 class="prop-title-block__title">{property.name[locale]}</h1>
             <p class="prop-title-block__tagline">{property.tagline[locale]}</p>
           </header>
@@ -331,8 +334,8 @@ function featureIcon(feature: string) {
           </button>
 
           <div class="prop-mobile-actions reveal">
-            <a href="#get-in-touch">{locale === 'es' ? 'Get in Touch' : 'Get in Touch'}</a>
-            <a href="#tour-card">{locale === 'es' ? 'Schedule a Tour' : 'Schedule a Tour'}</a>
+            <a href="#get-in-touch">{locale === 'es' ? 'Contactar' : 'Get in Touch'}</a>
+            <a href="#tour-card">{locale === 'es' ? 'Agendar visita' : 'Schedule a Tour'}</a>
           </div>
 
           <!-- Description with collapse -->
@@ -341,7 +344,7 @@ function featureIcon(feature: string) {
               <summary>
                 <span>
                   <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
-                  <span class="label-mobile">Property Description</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
                 </span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
@@ -353,15 +356,15 @@ function featureIcon(feature: string) {
                     : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients. The home combines generous interior spaces, outdoor areas designed for year-round living, and a convenient location close to restaurants, services, the beach, and the area's main points of interest.`}
                 </p>
                 <button type="button" class="prop-description__read-more" data-description-toggle>
-                  <span data-description-label-more>Read More</span>
-                  <span data-description-label-less hidden>Read Less</span>
+                  <span data-description-label-more>{locale === 'es' ? 'Leer más' : 'Read More'}</span>
+                  <span data-description-label-less hidden>{locale === 'es' ? 'Leer menos' : 'Read Less'}</span>
                 </button>
               </div>
             </details>
           </section>
 
           <section class="prop-overview prop-section reveal">
-            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Overview' : 'Overview'}</h2>
+            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Resumen' : 'Overview'}</h2>
             <dl class="prop-overview__list">
               {overviewItems.map(([label, value]) => (
                 <div>
@@ -415,12 +418,12 @@ function featureIcon(feature: string) {
           {features.length > 0 && <section class="prop-section prop-features-section reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
-                <span>Property Features & Amenities</span>
+                <span>{locale === 'es' ? 'Características y amenidades' : 'Property Features & Amenities'}</span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
               <div class="property-feature-groups">
                 <section class="property-feature-group">
-                  <h3>Interior</h3>
+                  <h3>{locale === 'es' ? 'Interior' : 'Interior'}</h3>
                   <ul>
                     {interiorFeatures.map(([label, value]) => (
                       <li>
@@ -431,7 +434,7 @@ function featureIcon(feature: string) {
                   </ul>
                 </section>
                 <section class="property-feature-group property-feature-group--exterior">
-                  <h3>Exterior</h3>
+                  <h3>{locale === 'es' ? 'Exterior' : 'Exterior'}</h3>
                   <ul>
                     {exteriorFeatures.map(([label, value]) => (
                       <li>
@@ -674,29 +677,31 @@ function featureIcon(feature: string) {
               </p>
               <div class="booking-card__form-view" data-tour-form hidden>
                 <form class="booking-card__request-form" data-tour-request-form>
-                  <h2>Schedule a Tour</h2>
+                  <h2>{locale === 'es' ? 'Agendar una visita' : 'Schedule a Tour'}</h2>
                   <label>
-                    <span>Full Name</span>
+                    <span>{locale === 'es' ? 'Nombre completo' : 'Full Name'}</span>
                     <input type="text" name="fullName" autocomplete="name" />
                   </label>
                   <label>
-                    <span>Phone</span>
+                    <span>{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
                     <input type="tel" name="phone" autocomplete="tel" />
                   </label>
                   <label>
-                    <span>Email Address</span>
+                    <span>{locale === 'es' ? 'Correo electrónico' : 'Email Address'}</span>
                     <input type="email" name="email" autocomplete="email" />
                   </label>
                   <label class="booking-card__request-consent">
                     <input type="checkbox" name="tourConsent" required />
                     <span>
-                      By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls and text messages exclusively from Serhant Real Estate, Inc. (“SERHANT”), including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I also agree to receive marketing emails from SERHANT and its affiliates. I acknowledge my consent is not required to obtain any good or service and to be connected with sellers that can fit my needs without providing consent I can call 1-877-SERHANT. To opt out from texts, I can reply, ‘stop’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply. I acknowledge that I have read and agree to the <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Terms of Use</a>.
+                      {locale === 'es'
+                        ? <>Al hacer clic en “Enviar solicitud”, acepto que Global Move me contacte por llamada, correo electrónico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. He leído y acepto la <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Política de privacidad</a> y los <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Términos de uso</a>.</>
+                        : <>By clicking “Send Request” below, I agree to be contacted by Global Move via call, email, and text for real estate services. I can opt out at any time. I acknowledge that I have read and agree to the <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Terms of Use</a>.</>}
                     </span>
                   </label>
-                  <button type="submit">Send Request</button>
+                  <button type="submit">{locale === 'es' ? 'Enviar solicitud' : 'Send Request'}</button>
                   <p class="booking-card__request-summary" data-tour-summary></p>
                   <button type="button" class="booking-card__request-change" data-tour-change>
-                    Change
+                    {locale === 'es' ? 'Cambiar' : 'Change'}
                   </button>
                 </form>
               </div>
@@ -741,32 +746,32 @@ function featureIcon(feature: string) {
 
   <section id="get-in-touch" class="property-contact-section" aria-labelledby="get-in-touch-title">
     <div class="container property-contact-section__inner">
-      <h2 id="get-in-touch-title">Get in Touch</h2>
+      <h2 id="get-in-touch-title">{locale === 'es' ? 'Contacta con nosotros' : 'Get in Touch'}</h2>
       <form class="property-contact-form" action="" method="post">
         <label>
-          <span>Name</span>
-          <input type="text" name="name" placeholder="Name" autocomplete="name" />
+          <span>{locale === 'es' ? 'Nombre' : 'Name'}</span>
+          <input type="text" name="name" placeholder={locale === 'es' ? 'Nombre' : 'Name'} autocomplete="name" />
         </label>
         <label>
           <span>Email</span>
           <input type="email" name="email" placeholder="Email" autocomplete="email" />
         </label>
         <label>
-          <span>Phone</span>
-          <input type="tel" name="phone" placeholder="Phone" autocomplete="tel" />
+          <span>{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
+          <input type="tel" name="phone" placeholder={locale === 'es' ? 'Teléfono' : 'Phone'} autocomplete="tel" />
         </label>
         <label class="property-contact-form__select">
-          <span>Select a Topic</span>
-          <select name="topic" aria-label="Select a Topic">
-            <option value="">Select a Topic</option>
-            <option value="buying">Buying</option>
-            <option value="selling">Selling</option>
-            <option value="other">Other</option>
+          <span>{locale === 'es' ? 'Selecciona un tema' : 'Select a Topic'}</span>
+          <select name="topic" aria-label={locale === 'es' ? 'Selecciona un tema' : 'Select a Topic'}>
+            <option value="">{locale === 'es' ? 'Selecciona un tema' : 'Select a Topic'}</option>
+            <option value="buying">{locale === 'es' ? 'Compra' : 'Buying'}</option>
+            <option value="selling">{locale === 'es' ? 'Venta' : 'Selling'}</option>
+            <option value="other">{locale === 'es' ? 'Otro' : 'Other'}</option>
           </select>
         </label>
         <label>
-          <span>Your Message</span>
-          <textarea name="message" placeholder="Your Message" rows="3"></textarea>
+          <span>{locale === 'es' ? 'Tu mensaje' : 'Your Message'}</span>
+          <textarea name="message" placeholder={locale === 'es' ? 'Tu mensaje' : 'Your Message'} rows="3"></textarea>
         </label>
         <label class="property-contact-form__consent lp-tcr-content">
           <span class="lp-tcr-checkbox">
@@ -775,19 +780,17 @@ function featureIcon(feature: string) {
               id="property-contact-termsAccepted"
               name="termsAccepted"
               required
-              oninvalid="this.setCustomValidity('Please accept the terms and conditions')"
+              oninvalid={locale === 'es' ? "this.setCustomValidity('Acepta los términos y condiciones')" : "this.setCustomValidity('Please accept the terms and conditions')"}
               oninput="this.setCustomValidity('')"
             />
           </span>
           <span class="lp-tcr-message">
-            I agree to be contacted by
-            SERHANT.
-            via call, email, and text for real estate services. To opt out, you can reply 'stop' at any time or reply 'help' for assistance.
-            You can also click the unsubscribe link in the emails. Message and data rates may apply. Message frequency may vary.
-            <a href={`/${locale}/privacy/`} target="_blank">Privacy Policy</a>.
+            {locale === 'es'
+              ? <>Acepto que Global Move me contacte por llamada, correo electrónico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. <a href={`/${locale}/privacy/`} target="_blank">Política de privacidad</a>.</>
+              : <>I agree to be contacted by Global Move via call, email, and text for real estate services. To opt out, you can reply 'stop' at any time or use the unsubscribe link in emails. Message and data rates may apply. <a href={`/${locale}/privacy/`} target="_blank">Privacy Policy</a>.</>}
           </span>
         </label>
-        <button type="submit">Submit</button>
+        <button type="submit">{locale === 'es' ? 'Enviar' : 'Submit'}</button>
       </form>
     </div>
   </section>
@@ -958,7 +961,7 @@ function featureIcon(feature: string) {
     const setSummary = () => {
       if (!summary || !selectedDate || !timeSelect.value) return;
       const date = new Date(`${selectedDate}T12:00:00`);
-      summary.textContent = `${summaryFormatter.format(date)} at ${timeSelect.value}`;
+      summary.textContent = `${summaryFormatter.format(date)} ${locale === 'es-ES' ? 'a las' : 'at'} ${timeSelect.value}`;
     };
 
     const showRequestForm = () => {
@@ -1239,6 +1242,23 @@ function featureIcon(feature: string) {
     text-decoration: underline;
     text-decoration-color: var(--color-gold);
     text-underline-offset: 3px;
+  }
+  .prop-title-block__status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-bottom: 0.72rem;
+    padding: 0.42rem 0.72rem;
+    border: 1px solid rgba(5, 122, 69, 0.16);
+    border-radius: 4px;
+    background: #e8f7ef;
+    color: #057a45;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 0.72rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
   .prop-title-block__title {
     font-family: var(--font-sans);
@@ -4009,6 +4029,12 @@ function featureIcon(feature: string) {
     color: #fff !important;
     font-weight: 900 !important;
     letter-spacing: 0 !important;
+  }
+
+  .prop-title-block__status {
+    background: #e8f7ef !important;
+    color: #057a45 !important;
+    border-color: rgba(5, 122, 69, 0.16) !important;
   }
 
   .prop-quick-spec {

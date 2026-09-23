@@ -29,6 +29,16 @@ const regions = [
 export async function getStaticPaths() {
   return supportedLocales.map(locale => ({ params: { locale } }));
 }
+
+const neighborhoods = [
+  { slug: 'salamanca-ibiza', label: 'SALAMANCA - IBIZA' },
+  { slug: 'la-latina-sol', label: 'LA LATINA - SOL' },
+  { slug: 'chamberi-malasana', label: 'CHAMBERI - MALASAÑA' },
+  { slug: 'chueca-justicia', label: 'CHUECA - JUSTICIA' },
+  { slug: 'atocha-pacifico', label: 'ATOCHA - PACIFICO' },
+  { slug: 'chamartin-viso', label: 'CHAMARTIN - VISO' },
+  { slug: 'rios-rosas-cuatro-caminos', label: 'RIOS ROSAS - CUATRO CAMINOS' },
+];
 ---
 
 <BaseLayout transparentHeader={true}>
@@ -54,11 +64,13 @@ export async function getStaticPaths() {
     <div class="container home-hero__content pt-[calc(var(--header-height)+5rem)] pb-24">
       <h1 class="home-hero__title reveal text-white"
           style="--reveal-delay: 120ms;">
-        <>Make a Move For Your<br/><span>Future</span></>
+        {locale === 'es' ? <>Haz una mudanza para tu<br/><span>futuro</span></> : <>Make a Move For Your<br/><span>Future</span></>}
       </h1>
       <p class="home-hero__subtitle reveal"
          style="--reveal-delay: 280ms;">
-        Earth's Most Followed and Subscribed to Real Estate Brand
+        {locale === 'es'
+          ? 'La marca inmobiliaria con mayor seguimiento y suscriptores del mundo'
+          : "Earth's Most Followed and Subscribed to Real Estate Brand"}
       </p>
 
       <form class="home-hero__search reveal" action={`/${locale}/properties/`} method="get" role="search" style="--reveal-delay: 420ms;">
@@ -98,17 +110,12 @@ export async function getStaticPaths() {
   <section class="home-regions" aria-labelledby="regions-heading">
     <div class="container">
       <h2 id="regions-heading" class="home-section-title reveal">
-        {locale === 'es' ? 'Nuestras regiones' : 'Our Regions'}
+        {locale === 'es' ? 'Nuestros barrios' : 'Our Neighborhoods'}
       </h2>
       <div class="home-regions__grid reveal reveal--fade">
-        {regions.map((region) => (
+        {neighborhoods.map((region) => (
           <a class="home-region-pill" href={`/${locale}/properties/?dest=madrid&zone=${region.slug}`}>
             <span>{region.label}</span>
-            {['salamanca', 'chamberi', 'chamartin', 'retiro'].includes(region.slug) && (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-                <path d="M9 18l6-6-6-6"></path>
-              </svg>
-            )}
           </a>
         ))}
       </div>
@@ -140,10 +147,10 @@ export async function getStaticPaths() {
                 sizes="(max-width: 720px) 100vw, 33vw"
                 style={`object-position: ${property.imagePosition ?? 'center 62%'};`}
               />
-              <span class="home-property-card__status">
+              <span class={`home-property-card__status home-property-card__status--${property.status}`}>
                 {statusLabel(property.status, locale)}
               </span>
-              <figcaption>GLOBAL.MOVE Signature</figcaption>
+              <figcaption>{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</figcaption>
             </figure>
             <div class="home-property-card__body">
               <strong>{formatPrice(property.price, locale)}</strong>
@@ -315,7 +322,7 @@ export async function getStaticPaths() {
 
   .home-regions__grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.7rem 0.85rem;
     margin-top: clamp(2rem, 4vw, 3.5rem);
   }
@@ -464,6 +471,12 @@ export async function getStaticPaths() {
     font-weight: 700;
     letter-spacing: 0;
     text-transform: uppercase;
+  }
+
+  .home-property-card__status--available {
+    background: #e8f7ef;
+    color: #057a45;
+    border: 1px solid rgba(5, 122, 69, 0.16);
   }
 
   .home-property-card__body div {
