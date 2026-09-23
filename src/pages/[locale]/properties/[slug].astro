@@ -327,8 +327,11 @@ function featureIcon(feature: string) {
 
           <button type="button" class="prop-share-button reveal" data-property-share aria-label={locale === 'es' ? 'Compartir propiedad' : 'Share property'}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6.5 17.5 17.5 6.5"></path>
-              <path d="M10 6.5h7.5V14"></path>
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <path d="M8.7 10.7 15.3 6.3"></path>
+              <path d="M8.7 13.3 15.3 17.7"></path>
             </svg>
             <span>{locale === 'es' ? 'Compartir' : 'Share'}</span>
           </button>

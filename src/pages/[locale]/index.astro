@@ -147,12 +147,19 @@ const neighborhoods = [
                 sizes="(max-width: 720px) 100vw, 33vw"
                 style={`object-position: ${property.imagePosition ?? 'center 62%'};`}
               />
-              <span class={`home-property-card__status home-property-card__status--${property.status}`}>
-                {statusLabel(property.status, locale)}
+              <span class="home-property-card__transaction">
+                {property.transaction === 'sale'
+                  ? (locale === 'es' ? 'Para compra' : 'For Sale')
+                  : (locale === 'es' ? 'Para alquiler' : 'For Rent')}
               </span>
               <figcaption>{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</figcaption>
             </figure>
             <div class="home-property-card__body">
+              <div class="home-property-card__badges">
+                <span class={`home-property-card__status home-property-card__status--${property.status}`}>
+                  {statusLabel(property.status, locale)}
+                </span>
+              </div>
               <strong>{formatPrice(property.price, locale)}</strong>
               <p>{property.location[locale]}</p>
               <dl>
@@ -412,9 +419,9 @@ const neighborhoods = [
   }
 
   .home-property-card__status {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
     padding: 0.5rem 0.92rem;
     background: rgba(255, 255, 255, 0.92);
     color: #071b68;
@@ -473,19 +480,48 @@ const neighborhoods = [
     text-transform: uppercase;
   }
 
+  .home-property-card__badges {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.72rem;
+  }
+
+  .home-property-card__transaction {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.5rem 0.92rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #071b68;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 0.82rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .home-property-card__status--available {
     background: #e8f7ef;
     color: #057a45;
     border: 1px solid rgba(5, 122, 69, 0.16);
   }
 
-  .home-property-card__body div {
+  .home-property-card__body dl div {
     display: inline-flex;
     align-items: baseline;
     gap: 0.28rem;
   }
 
-  .home-property-card__body div + div::before {
+  .home-property-card__body dl div + div::before {
     content: ".";
     margin-right: 0.35rem;
   }
@@ -610,8 +646,13 @@ const neighborhoods = [
     }
 
     .home-property-card__status {
+      padding: 0.42rem 0.72rem;
+      font-size: 0.68rem;
+    }
+
+    .home-property-card__transaction {
       top: 0.75rem;
-      left: 0.75rem;
+      right: 0.75rem;
       padding: 0.42rem 0.72rem;
       font-size: 0.68rem;
     }
