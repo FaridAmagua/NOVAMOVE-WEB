@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageHero from '../../components/PageHero.astro';
 import { t, supportedLocales, type Locale } from '../../utils/i18n';
 
 const locale = Astro.params.locale as Locale;
@@ -12,16 +11,10 @@ export async function getStaticPaths() {
 
 <BaseLayout
   title={t(locale, 'about.title')}
-  transparentHeader={true}
+  transparentHeader={false}
 >
-  <PageHero
-    eyebrow={t(locale, 'about.title')}
-    title={t(locale, 'about.subtitle')}
-    image="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=2000&q=80"
-  />
-
   <!-- Mission -->
-  <section class="section">
+  <section class="section section--page-start">
     <div class="container">
       <div class="reveal max-w-[880px] mx-auto text-center">
         <p class="eyebrow">{t(locale, 'about.mission.title')}</p>
@@ -101,3 +94,15 @@ export async function getStaticPaths() {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .section--page-start {
+    padding-top: calc(var(--header-height, 92px) + clamp(2rem, 4vw, 3rem));
+  }
+
+  @media (max-width: 640px) {
+    .section--page-start {
+      padding-top: calc(var(--header-height, 72px) + 1.55rem);
+    }
+  }
+</style>
