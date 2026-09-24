@@ -103,10 +103,6 @@ const neighborhoods = [
       </form>
     </div>
 
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-6 h-10 border-[1.5px] border-white/50 rounded-xl flex justify-center pt-2" aria-hidden="true">
-      <span class="block w-0.5 h2 bg-white rounded-sm" style="animation: scrollHint 1.6s ease-in-out infinite;"></span>
-    </div>
   </section>
 
   <section class="home-regions" aria-labelledby="regions-heading">
@@ -554,9 +550,15 @@ const neighborhoods = [
   }
 
   @media (max-width: 720px) {
+    .home-hero {
+      min-height: 537px !important;
+      height: 537px;
+      align-items: flex-start;
+    }
+
     .home-hero__content {
-      padding-top: calc(var(--header-height) + 4rem);
-      padding-bottom: 6rem;
+      padding-top: calc(var(--header-height) + 2.9rem);
+      padding-bottom: 5rem;
     }
 
     .home-hero__title {
@@ -575,9 +577,11 @@ const neighborhoods = [
     }
 
     .home-hero__search {
-      min-height: 68px;
+      width: min(100%, 400px);
+      min-height: 64px;
+      height: 64px;
       gap: 0.7rem;
-      padding: 0.65rem 0.7rem 0.65rem 1.25rem;
+      padding: 0.55rem 0.6rem 0.55rem 1.1rem;
     }
 
     .home-hero__search-icon {
@@ -590,8 +594,8 @@ const neighborhoods = [
     }
 
     .home-hero__search button {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
     }
 
     .home-hero__search button svg {
@@ -606,9 +610,9 @@ const neighborhoods = [
     .home-regions {
       position: relative;
       z-index: 2;
-      margin-top: -2.3rem;
+      margin-top: -2rem;
       padding: 3.25rem 0 3.25rem;
-      border-radius: 28px 28px 0 0;
+      border-radius: 30px 30px 0 0;
       background: #f4f4f4;
       overflow: hidden;
     }
@@ -709,9 +713,4 @@ const neighborhoods = [
     }
   }
 
-  /* Hero scroll-indicator animation */
-  @keyframes scrollHint {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(14px); opacity: 0; }
-  }
 </style>
