@@ -64,7 +64,9 @@ const neighborhoods = [
     <div class="container home-hero__content pt-[calc(var(--header-height)+5rem)] pb-24">
       <h1 class="home-hero__title reveal text-white"
           style="--reveal-delay: 120ms;">
-        {locale === 'es' ? <>Haz una mudanza para tu<br/><span>futuro</span></> : <>Make a Move For Your<br/><span>Future</span></>}
+        {locale === 'es'
+          ? <><span class="home-hero__title-line">Haz una mudanza para tu</span><span>futuro</span></>
+          : <><span class="home-hero__title-line">Make a Move For Your</span><span>Future</span></>}
       </h1>
       <p class="home-hero__subtitle reveal"
          style="--reveal-delay: 280ms;">
@@ -243,6 +245,14 @@ const neighborhoods = [
     letter-spacing: 0;
     text-wrap: balance;
     text-shadow: 0 8px 34px rgba(0, 0, 0, 0.28);
+  }
+
+  .home-hero__title span {
+    display: block;
+  }
+
+  .home-hero__title-line {
+    white-space: nowrap;
   }
 
   .home-hero__subtitle {
