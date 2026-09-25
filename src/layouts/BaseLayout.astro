@@ -102,11 +102,38 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
          reliable than scroll events on mobile Safari/Android Chrome). -->
     <script is:inline>
       (function() {
+        const headerWindow = window;
+        if (headerWindow.__globalMoveHeaderScrollVersion === 'v2') return;
+        headerWindow.__globalMoveHeaderScrollVersion = 'v2';
+
         let observer = null;
+        let scrollHandler = null;
+
+        const closeMenus = () => {
+          document.querySelectorAll('.site-header.is-menu-open').forEach((el) => {
+            el.classList.remove('is-menu-open');
+          });
+          document.querySelectorAll('.site-header__toggle.is-open, .site-drawer.is-open').forEach((el) => {
+            el.classList.remove('is-open');
+            if (el.classList.contains('site-header__toggle')) el.setAttribute('aria-expanded', 'false');
+            if (el.classList.contains('site-drawer')) el.setAttribute('aria-hidden', 'true');
+          });
+          document.body.style.overflow = '';
+        };
 
         const setupObserver = () => {
+          closeMenus();
+          if (observer) observer.disconnect();
+          if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+          observer = null;
+          scrollHandler = null;
+
           const header = document.querySelector('.site-header');
-          if (!header || header.dataset.transparent !== 'true') return;
+          if (!header) return;
+          if (header.dataset.transparent !== 'true') {
+            header.classList.remove('is-scrolled');
+            return;
+          }
           // Sentinel: a 1px line just below the header. When it scrolls
           // out of viewport, the header becomes solid.
           let sentinel = document.getElementById('header-scroll-sentinel');
@@ -125,13 +152,16 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
           );
           observer.observe(sentinel);
           // Also keep scroll fallback for top-of-page <30px edge case
-          window.addEventListener('scroll', () => {
+          scrollHandler = () => {
             header.classList.toggle('is-scrolled', window.scrollY > 60);
-          }, { passive: true });
+          };
+          window.addEventListener('scroll', scrollHandler, { passive: true });
+          scrollHandler();
         };
 
         setupObserver();
         document.addEventListener('astro:page-load', setupObserver);
+        document.addEventListener('astro:before-swap', closeMenus);
       })();
     </script>
 

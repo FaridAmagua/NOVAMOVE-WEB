@@ -296,7 +296,9 @@ const neighborhoods = [
     outline: 0;
     background: transparent;
     color: var(--color-navy);
-    font-size: 1.05rem;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 14px;
     font-weight: 700;
   }
 
@@ -589,10 +591,6 @@ const neighborhoods = [
       height: 20px;
     }
 
-    .home-hero__search input {
-      font-size: 0.92rem;
-    }
-
     .home-hero__search button {
       width: 48px;
       height: 48px;
@@ -618,8 +616,8 @@ const neighborhoods = [
     }
 
     .home-regions__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.8rem;
+      grid-template-columns: 1fr;
+      gap: 0.72rem;
       margin-top: 2.4rem;
     }
 
@@ -650,9 +648,9 @@ const neighborhoods = [
     }
 
     .home-region-pill {
-      min-height: 58px;
+      min-height: 52px;
       justify-content: center;
-      padding: 0.78rem 0.75rem;
+      padding: 0.78rem 1rem;
       text-align: center;
       font-size: 16px;
       line-height: 1.12;

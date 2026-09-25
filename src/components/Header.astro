@@ -42,6 +42,7 @@ const isActive = (href: string) => {
          designed for dark backgrounds. -->
     <a href={localizedPath(locale, '/')} class="site-header__wordmark" aria-label="Global Move — Inicio">
       <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="894" height="100" />
+      <img class="site-header__wordmark-icon" src="/brand/global-move-icon-gold.png" alt="" width="512" height="512" aria-hidden="true" />
       <span>GLOBAL.MOVE</span>
     </a>
 
@@ -173,9 +174,9 @@ const isActive = (href: string) => {
 
   .site-header.is-scrolled .site-header__inner,
   .site-header:not(.site-header--transparent) .site-header__inner {
-    background: rgba(10, 29, 63, 0.94);
+    background: rgba(10, 29, 63, 0.72);
     border-color: rgba(255, 255, 255, 0.16);
-    box-shadow: 0 16px 45px rgba(10, 29, 63, 0.22);
+    box-shadow: 0 16px 45px rgba(10, 29, 63, 0.16);
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
   }
@@ -183,23 +184,31 @@ const isActive = (href: string) => {
   .site-header__wordmark {
     display: inline-flex;
     align-items: center;
+    gap: 0.42rem;
     text-decoration: none;
     flex-shrink: 0;
     transition: opacity var(--dur-base) var(--ease);
   }
   .site-header__wordmark img {
-    display: block;
+    display: none;
     height: 50px;
     width: auto;
   }
+  .site-header__wordmark .site-header__wordmark-icon {
+    display: block;
+    width: calc(1.2em + 14px);
+    height: calc(1.2em + 14px);
+    object-fit: contain;
+    flex-shrink: 0;
+  }
   .site-header__wordmark span {
-    display: none;
+    display: block;
     color: var(--color-white);
-    font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 23px;
-    letter-spacing: 0;
+    font-family: var(--font-display, var(--font-sans));
+    font-size: clamp(1.48rem, 6.05vw, 1.86rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
     white-space: nowrap;
   }
   .site-header__wordmark:hover { opacity: 0.85; }
@@ -428,22 +437,15 @@ const isActive = (href: string) => {
 
     .site-header.is-scrolled .site-header__inner,
     .site-header:not(.site-header--transparent) .site-header__inner {
-      background: rgba(0, 26, 114, 0.92);
+      background: rgba(0, 26, 114, 0.85);
       border-color: rgba(255, 255, 255, 0.16);
-      box-shadow: 0 18px 46px rgba(0, 26, 114, 0.26);
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow: 0 18px 46px rgba(0, 26, 114, 0.16);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
     }
 
     .site-header__wordmark img {
       display: none;
-    }
-
-    .site-header__wordmark span {
-      display: block;
-      font-size: 16px;
-      font-weight: 500;
-      transform: translateY(-0.02em);
     }
 
     .site-header__icon-btn {
