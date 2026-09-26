@@ -46,6 +46,8 @@ export interface Property {
   bathrooms: number | null;
   sizeM2: number | null;
   images: string[];
+  /** Versiones ligeras para tarjetas y listados. Si faltan, se usan images. */
+  cardImages?: string[];
   /** CSS object-position for every image, in the same order as images. */
   imagePositions?: string[];
   /** CSS object-position. */

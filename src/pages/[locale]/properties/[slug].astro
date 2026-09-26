@@ -745,7 +745,7 @@ function featureIcon(feature: string) {
           {otherProps.map((p) => (
             <a href={`/${locale}/properties/${p.slug}/`} class="related-card reveal reveal--fade" data-tilt="3">
               <div class="related-card__media">
-                <img src={p.images[0]} alt={p.name[locale]} loading="lazy"
+                <img src={p.cardImages?.[0] ?? p.images[0]} alt={p.name[locale]} loading="lazy"
                      style={`object-position: ${p.imagePositions?.[0] ?? p.imagePosition ?? '50% 50%'};`} />
                 <span class={`related-card__chip related-card__chip--${p.transaction === 'sale' ? 'sale' : 'rent'}`}>
                   {p.transaction === 'sale' ? t(locale, 'properties.saleBadge') : t(locale, 'properties.rentBadge')}
