@@ -4979,6 +4979,48 @@ function featureIcon(feature: string) {
     }
   }
 
+  @media (max-width: 390px) {
+    .prop-detail-nav {
+      width: min(calc(100% - 1.4rem), 420px) !important;
+      height: 78px !important;
+      padding-inline: 1rem !important;
+      gap: 0.65rem !important;
+    }
+
+    .prop-detail-nav__wordmark {
+      gap: 0.32rem !important;
+      min-width: 0;
+      flex-shrink: 1;
+      font-size: clamp(1.24rem, 5.45vw, 1.46rem) !important;
+    }
+
+    .prop-detail-nav__wordmark img {
+      width: calc(1.1em + 8px);
+      height: calc(1.1em + 8px);
+    }
+
+    .prop-detail-nav__actions {
+      gap: 0.42rem !important;
+      flex-shrink: 0;
+    }
+
+    .prop-detail-nav__icon {
+      width: 38px !important;
+      height: 38px !important;
+    }
+
+    .prop-detail-nav__icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .prop-detail-nav__toggle span {
+      width: 19px !important;
+      height: 2.2px !important;
+      margin-left: -9.5px !important;
+    }
+  }
+
   .property-zone-section:not(.property-zone-section--sidebar) {
     display: none !important;
   }

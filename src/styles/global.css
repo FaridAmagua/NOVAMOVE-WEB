@@ -414,6 +414,20 @@ nav a {
 
 .btn--link:hover { gap: var(--space-4); }
 
+@media (max-width: 390px) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  a.btn,
+  button.btn {
+    margin-inline: auto;
+  }
+}
+
 /* ============================================
    Typography utilities
    ============================================ */

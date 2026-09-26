@@ -39,6 +39,17 @@ const neighborhoods = [
   { slug: 'chamartin-viso', label: 'CHAMARTIN - VISO' },
   { slug: 'rios-rosas-cuatro-caminos', label: 'RIOS ROSAS - CUATRO CAMINOS' },
 ];
+const homeReviews = locale === 'es'
+  ? [
+      { name: 'Laura M.', source: 'Email verificado', text: 'Nos ayudaron a encontrar una vivienda en Madrid sin perder tiempo. La comunicaci&oacute;n fue clara desde el primer d&iacute;a.' },
+      { name: 'Carlos R.', source: 'Cuenta Google', text: 'El proceso fue muy profesional. Coordinaci&oacute;n r&aacute;pida, buenas opciones y seguimiento despu&eacute;s de la visita.' },
+      { name: 'Sofia P.', source: 'Email verificado', text: 'Global Move entendi&oacute; exactamente lo que necesit&aacute;bamos y nos acompa&ntilde;&oacute; en cada paso del alquiler.' },
+    ]
+  : [
+      { name: 'Laura M.', source: 'Verified email', text: 'They helped us find a home in Madrid without wasting time. Communication was clear from day one.' },
+      { name: 'Carlos R.', source: 'Google account', text: 'The process felt very professional. Fast coordination, strong options, and follow-up after the viewing.' },
+      { name: 'Sofia P.', source: 'Verified email', text: 'Global Move understood exactly what we needed and supported us through every step of the rental.' },
+    ];
 ---
 
 <BaseLayout transparentHeader={true}>
@@ -187,6 +198,87 @@ const neighborhoods = [
     </div>
   </section>
 
+  <section class="home-reviews" aria-labelledby="reviews-heading">
+    <div class="container">
+      <div class="home-reviews__layout">
+        <div class="home-reviews__content reveal">
+          <span class="home-reviews__eyebrow">
+            <span set:html={locale === 'es' ? 'Rese&ntilde;as verificadas' : 'Verified Reviews'}></span>
+          </span>
+          <h2 id="reviews-heading" class="home-section-title">
+            {locale === 'es' ? 'Lo que dicen nuestros clientes' : 'What Our Clients Say'}
+          </h2>
+          <p set:html={locale === 'es'
+            ? 'Solo publicamos rese&ntilde;as asociadas a una cuenta de Google o a un email verificado por nuestro equipo.'
+            : 'We only publish reviews linked to a Google account or to an email verified by our team.'}
+          ></p>
+
+          <div class="home-reviews__list">
+            {homeReviews.map((review) => (
+              <article class="home-review-card reveal reveal--fade">
+                <div class="home-review-card__stars" aria-label={locale === 'es' ? '5 de 5 estrellas' : '5 out of 5 stars'}>&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p set:html={review.text}></p>
+                <footer>
+                  <strong>{review.name}</strong>
+                  <span>{review.source}</span>
+                </footer>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <form
+          class="home-review-form reveal reveal--fade"
+          name="home-review"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          data-loading-on-submit
+        >
+          <input type="hidden" name="form-name" value="home-review" />
+          <p class="home-review-form__hidden">
+            <label>Do not fill this field <input name="bot-field" /></label>
+          </p>
+
+          <h3 set:html={locale === 'es' ? 'Deja tu rese&ntilde;a' : 'Leave a Review'}></h3>
+          <p
+            class="home-review-form__note"
+            set:html={locale === 'es'
+              ? 'Usa tu correo o cuenta Google. Revisaremos la rese&ntilde;a antes de publicarla.'
+              : 'Use your email or Google account. We will review it before publishing.'}
+          ></p>
+
+          <label>
+            <span>{locale === 'es' ? 'Nombre' : 'Name'}</span>
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+
+          <label>
+            <span>{locale === 'es' ? 'Email registrado o Google' : 'Registered or Google email'}</span>
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+
+          <div class="home-review-form__rating" role="radiogroup" aria-label={locale === 'es' ? 'Valoracion' : 'Rating'}>
+            {[5, 4, 3, 2, 1].map((rating) => (
+              <label>
+                <input type="radio" name="rating" value={rating} required={rating === 5} />
+                <span>{String.fromCharCode(9733).repeat(rating)}</span>
+              </label>
+            ))}
+          </div>
+
+          <label>
+            <span>{locale === 'es' ? 'Comentario' : 'Comment'}</span>
+            <textarea name="comment" rows="4" required></textarea>
+          </label>
+
+          <button type="submit">
+            <span set:html={locale === 'es' ? 'Enviar rese&ntilde;a' : 'Submit Review'}></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
   <!-- ============ CTA ============ -->
   <section class="section section--cta grain" aria-labelledby="cta-heading">
     <div class="container">
@@ -541,6 +633,215 @@ const neighborhoods = [
     margin: 0;
   }
 
+  .home-reviews {
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+    background: #f4f4f4;
+  }
+
+  .home-reviews__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.72fr);
+    gap: clamp(2rem, 4.6vw, 4.5rem);
+    align-items: start;
+  }
+
+  .home-reviews__eyebrow {
+    display: inline-flex;
+    margin-bottom: 0.9rem;
+    color: #071b68;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .home-reviews__content > p {
+    max-width: 42rem;
+    margin-top: 1.1rem;
+    color: #4a4f58;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .home-reviews__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-top: clamp(2rem, 4vw, 3.2rem);
+  }
+
+  .home-review-card {
+    min-height: 228px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid rgba(7, 27, 104, 0.06);
+    border-radius: 8px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.035);
+  }
+
+  .home-review-card__stars {
+    color: #d5a329;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  .home-review-card p {
+    margin: 1.1rem 0 1.35rem;
+    color: #111;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .home-review-card footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    color: #071b68;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+  }
+
+  .home-review-card strong {
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .home-review-card span {
+    color: #686868;
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .home-review-form {
+    padding: clamp(1.35rem, 3vw, 2rem);
+    background: #001a72;
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 22px 46px rgba(0, 26, 114, 0.18);
+  }
+
+  .home-review-form__hidden {
+    display: none;
+  }
+
+  .home-review-form h3 {
+    margin: 0;
+    color: #fff;
+    font-family: var(--font-display, var(--font-sans));
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  .home-review-form__note {
+    margin: 0.75rem 0 1.35rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .home-review-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+    margin-bottom: 0.92rem;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .home-review-form input,
+  .home-review-form textarea {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    outline: 0;
+  }
+
+  .home-review-form input {
+    height: 42px;
+    padding: 0 0.9rem;
+  }
+
+  .home-review-form textarea {
+    min-height: 108px;
+    padding: 0.8rem 0.9rem;
+    resize: vertical;
+  }
+
+  .home-review-form input:focus,
+  .home-review-form textarea:focus {
+    border-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .home-review-form__rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.22rem;
+    margin: 0.15rem 0 1rem;
+  }
+
+  .home-review-form__rating label {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .home-review-form__rating input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .home-review-form__rating span {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .home-review-form__rating label:has(input:checked) span,
+  .home-review-form__rating label:has(input:checked) ~ label span {
+    color: #f4c64d;
+  }
+
+  .home-review-form button {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.25rem;
+    border-radius: 999px;
+    background: #fff;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 800;
+  }
+
   .home-hero__search button:hover {
     background: #0733ad;
     transform: translateY(-1px);
@@ -708,6 +1009,77 @@ const neighborhoods = [
 
     .home-property-card__body div + div::before {
       margin-right: 0.28rem;
+    }
+
+    .home-reviews {
+      padding-block: 3.25rem;
+    }
+
+    .home-reviews__layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .home-reviews .home-section-title {
+      font-size: clamp(1.55rem, 6.8vw, 2rem);
+      line-height: 1.08;
+    }
+
+    .home-reviews__content > p {
+      max-width: 22rem;
+      margin-top: 0.85rem;
+      font-size: 0.95rem;
+      line-height: 1.42;
+    }
+
+    .home-reviews__list {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-top: 1.55rem;
+    }
+
+    .home-review-card {
+      min-height: auto;
+      padding: 1rem;
+    }
+
+    .home-review-form {
+      padding: 1.2rem;
+      border-radius: 8px;
+    }
+
+    .home-review-form h3 {
+      font-size: 20px;
+    }
+
+    .section--cta .relative.text-center {
+      padding: 2.4rem 1.15rem !important;
+    }
+
+    .section--cta .btn {
+      width: min(100%, 352px);
+      min-height: 54px;
+      display: flex;
+      margin-inline: auto;
+      padding-inline: 1rem;
+      text-align: center;
+      white-space: normal;
+      transform: none !important;
+    }
+
+    .section--cta .btn span {
+      width: 100%;
+      display: block;
+      text-align: center;
+      transform: none !important;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .section--cta .btn {
+      width: min(100%, 328px);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
     }
   }
 

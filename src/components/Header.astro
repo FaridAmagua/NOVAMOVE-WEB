@@ -484,6 +484,55 @@ const isActive = (href: string) => {
       padding-top: 1.25rem;
     }
   }
+
+  @media (max-width: 390px) {
+    .site-header {
+      padding-inline: 0.7rem;
+    }
+
+    .site-header__inner {
+      height: 78px;
+      padding-inline: 1rem;
+      gap: 0.65rem;
+    }
+
+    .site-header__wordmark {
+      gap: 0.32rem;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .site-header__wordmark .site-header__wordmark-icon {
+      width: calc(1.1em + 8px);
+      height: calc(1.1em + 8px);
+    }
+
+    .site-header__wordmark span {
+      font-size: clamp(1.24rem, 5.45vw, 1.46rem);
+    }
+
+    .site-header__mobile-actions {
+      gap: 0.42rem;
+      flex-shrink: 0;
+    }
+
+    .site-header__icon-btn,
+    .site-header__toggle {
+      width: 38px;
+      height: 38px;
+    }
+
+    .site-header__icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .site-header__toggle span {
+      width: 19px;
+      height: 2.2px;
+      margin-left: -9.5px;
+    }
+  }
 </style>
 
 <script>
