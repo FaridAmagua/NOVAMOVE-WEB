@@ -88,6 +88,10 @@ export type PublicProperty = {
     isCover: boolean;
     position: number;
     focalPoint?: { x: number; y: number };
+    variants?: {
+      card: string;
+      gallery: string;
+    };
   }>;
 
   publishedAt: string;

@@ -160,7 +160,10 @@ export function fromNivora(np: PublicProperty): Property {
 
   // Imágenes: isCover primero, luego position ascendente.
   const orderedImages = orderImageRecords(np.images);
-  const images = orderedImages.map((image) => image.url);
+  const images = orderedImages.map((image) => image.variants?.gallery ?? image.url);
+  const cardImages = orderedImages.map((image) =>
+    image.variants?.card ?? image.variants?.gallery ?? image.url
+  );
   const imagePositions = orderedImages.map(imagePosition);
 
   return {
@@ -193,6 +196,7 @@ export function fromNivora(np: PublicProperty): Property {
     bathrooms: np.specs.bathrooms,
     sizeM2: np.specs.builtAreaSqm,
     images,
+    cardImages,
     imagePositions,
     imagePosition: imagePositions[0],
     map: np.map,

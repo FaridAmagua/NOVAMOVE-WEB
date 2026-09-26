@@ -149,7 +149,7 @@ const homeReviews = locale === 'es'
           <a class="home-property-card reveal reveal--fade" href={`/${locale}/properties/${property.slug}/`}>
             <figure class="home-property-card__media">
               <img
-                src={property.images[0]}
+                src={property.cardImages?.[0] ?? property.images[0]}
                 alt={property.name[locale]}
                 loading="lazy"
                 decoding="async"
