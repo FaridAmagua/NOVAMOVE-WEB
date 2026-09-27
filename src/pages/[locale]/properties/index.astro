@@ -96,8 +96,10 @@ if (sort === 'price-asc') {
                       loading="lazy"
                       style={`object-position: ${p.imagePosition ?? 'center 62%'};`}
                     />
-                    <span class="absolute top-4 left-4 bg-white/95 text-navy text-[0.7rem] font-semibold tracking-[0.12em] uppercase px-3.5 py-1.5 rounded-full">
-                      {statusLabel(p.status, locale)}
+                    <span class="property-result__transaction">
+                      {p.status === 'available'
+                        ? (locale === 'es' ? 'Alquiler' : 'Rent')
+                        : statusLabel(p.status, locale)}
                     </span>
                     {p.featured && (
                       <span class="absolute top-4 right-4 bg-gold text-navy text-[0.7rem] font-bold tracking-[0.1em] uppercase px-3.5 py-1.5 rounded-full">
@@ -113,9 +115,16 @@ if (sort === 'price-asc') {
                         ? (locale === 'es' ? 'Disponible' : 'Available')
                         : (locale === 'es' ? 'Reservado' : 'Reserved')}
                     </span>
-                    <figcaption>{p.name[locale]}</figcaption>
+                    <figcaption>{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</figcaption>
                   </figure>
                   <div class="property-result__body">
+                    <div class="property-result__badges">
+                      <span class={`property-result__status property-result__status--${p.status}`}>
+                        {p.status === 'available'
+                          ? (locale === 'es' ? 'Disponible' : 'Available')
+                          : (locale === 'es' ? 'Reservado' : 'Reserved')}
+                      </span>
+                    </div>
                     <div class="property-result__location flex gap-2 text-[0.78rem] text-gold font-semibold tracking-[0.08em] uppercase mb-2">
                       <span>{zone}</span>
                       {showLocation && <span>·</span>}
@@ -244,14 +253,23 @@ if (sort === 'price-asc') {
   }
 
   .property-result__media > span {
+    display: none;
+  }
+
+  .property-result__media > .property-result__transaction {
     position: absolute;
     top: 1rem;
-    left: 1rem;
+    right: 1rem;
     z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
     padding: 0.5rem 0.92rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.94);
-    color: #001a72;
+    color: #071b68;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 0.82rem;
     font-weight: 900;
     line-height: 1;
@@ -259,28 +277,56 @@ if (sort === 'price-asc') {
     text-transform: uppercase;
   }
 
-  .property-result__media > span:not(:first-of-type) {
-    display: none;
-  }
-
   .property-result__media figcaption {
     position: absolute;
     left: 0;
     bottom: 0;
-    max-width: 86%;
-    padding: 0.72rem 1.05rem 0.78rem;
+    max-width: 82%;
+    padding: 0.7rem 1rem 0.72rem;
     border-top-right-radius: 999px;
     background: #000;
     color: #fff;
-    font-size: clamp(1rem, 1.22vw, 1.22rem);
-    font-weight: 800;
-    line-height: 1.12;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.15;
   }
 
   .property-result__body {
     display: flex;
     flex-direction: column;
     color: #000;
+  }
+
+  .property-result__badges {
+    order: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 0.72rem;
+  }
+
+  .property-result__status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.5rem 0.92rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #071b68;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .property-result__status--available {
+    border: 1px solid rgba(5, 122, 69, 0.16);
+    background: #e8f7ef;
+    color: #057a45;
   }
 
   .property-result__body > h3,
@@ -294,9 +340,10 @@ if (sort === 'price-asc') {
     display: block;
     margin: 0 0 1rem;
     color: #000;
-    font-size: clamp(1rem, 1.18vw, 1.18rem);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
     font-weight: 500;
-    line-height: 1.32;
+    line-height: 1.35;
     letter-spacing: 0;
     text-transform: none;
   }
@@ -305,15 +352,16 @@ if (sort === 'price-asc') {
     order: 3;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.48rem 0.82rem;
+    gap: 0.52rem 0.86rem;
     padding: 0;
     border: 0;
     margin: 0;
     color: #000;
-    font-size: clamp(0.78rem, 0.9vw, 0.9rem);
-    font-weight: 900;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 12px;
+    font-weight: 700;
     line-height: 1.2;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
 
@@ -335,9 +383,10 @@ if (sort === 'price-asc') {
 
   .property-result__price span:nth-child(2) {
     color: #000;
-    font-size: clamp(1.1rem, 1.38vw, 1.34rem);
-    font-weight: 900;
-    line-height: 1.18;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
   @media (max-width: 960px) {
@@ -368,34 +417,51 @@ if (sort === 'price-asc') {
 
     .property-result__media {
       aspect-ratio: 1.42 / 1;
-      margin-bottom: 1.15rem;
+      margin-bottom: 0.86rem;
     }
 
     .property-result__media > span {
-      top: 0.9rem;
-      left: 0.9rem;
-      padding: 0.5rem 0.88rem;
-      font-size: 0.78rem;
+      display: none;
+    }
+
+    .property-result__media > .property-result__transaction {
+      top: 0.75rem;
+      right: 0.75rem;
+      left: auto;
+      display: inline-flex;
+      padding: 0.42rem 0.72rem;
+      font-size: 0.68rem;
     }
 
     .property-result__media figcaption {
-      max-width: 88%;
-      padding: 0.74rem 1rem 0.82rem;
-      font-size: clamp(1rem, 5.2vw, 1.42rem);
+      max-width: 84%;
+      padding: 0.52rem 0.78rem 0.58rem;
+      font-size: clamp(0.86rem, 3.9vw, 1.02rem);
+      line-height: 1.12;
+    }
+
+    .property-result__status {
+      padding: 0.42rem 0.72rem;
+      font-size: 0.68rem;
     }
 
     .property-result__price span:nth-child(2) {
-      font-size: clamp(1.04rem, 5vw, 1.32rem);
+      font-size: clamp(0.98rem, 4.4vw, 1.14rem);
+      margin-bottom: 0.38rem;
     }
 
     .property-result__location {
-      font-size: clamp(1rem, 4.7vw, 1.25rem);
-      line-height: 1.28;
+      font-size: clamp(0.92rem, 4vw, 1.05rem);
+      line-height: 1.32;
+      margin-bottom: 0.86rem;
+      font-weight: 500;
     }
 
     .property-result__specs {
-      gap: 0.52rem 0.8rem;
-      font-size: clamp(0.78rem, 3.8vw, 0.98rem);
+      gap: 0.36rem 0.64rem;
+      font-size: clamp(0.68rem, 3vw, 0.78rem);
+      line-height: 1.16;
+      letter-spacing: 0.035em;
     }
   }
 </style>

@@ -385,7 +385,7 @@ function featureIcon(feature: string) {
           </section>
 
           <section class="prop-overview prop-section reveal">
-            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Resumen' : 'Overview'}</h2>
+            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Características' : 'Features'}</h2>
             <dl class="prop-overview__list">
               {overviewItems.map(([label, value]) => (
                 <div>
@@ -598,6 +598,39 @@ function featureIcon(feature: string) {
               </div>
             </div>
           </section>}
+          <section class="property-agents-section reveal" aria-labelledby="property-agents-title">
+            <h2 id="property-agents-title">{locale === 'es' ? 'Contactar agentes' : 'Contact Agents'}</h2>
+            <div class="agent__container">
+              <div class="agent__image">
+                <a href={`/${locale}/contact/`} aria-label="Peter Zaitzeff">
+                  <img
+                    src="https://media-production.lp-cdn.com/cdn-cgi/image/format=auto,quality=85,fit=scale-down,width=1280/https://media-production.lp-cdn.com/media/e467cdf5-206b-485d-bb72-5f23e163bf07"
+                    srcset="https://media-production.lp-cdn.com/cdn-cgi/image/format=auto,quality=85,fit=scale-down,width=960/https://media-production.lp-cdn.com/media/e467cdf5-206b-485d-bb72-5f23e163bf07 960w, https://media-production.lp-cdn.com/cdn-cgi/image/format=auto,quality=85,fit=scale-down,width=1280/https://media-production.lp-cdn.com/media/e467cdf5-206b-485d-bb72-5f23e163bf07 1280w, https://media-production.lp-cdn.com/cdn-cgi/image/format=auto,quality=85,fit=scale-down,width=1920/https://media-production.lp-cdn.com/media/e467cdf5-206b-485d-bb72-5f23e163bf07 1920w"
+                    sizes="90px"
+                    height="102"
+                    width="72"
+                    class="agent__avatar portrait"
+                    alt=""
+                    loading="lazy"
+                  />
+                </a>
+              </div>
+              <div class="agent__details">
+                <a href={`/${locale}/contact/`} class="agent__name agent__detail-item lp-link">
+                  <span class="paragraph--16 agent__detail-item-text">Peter Zaitzeff</span>
+                </a>
+                <p class="paragraph--12 agent__position agent__detail-item">
+                  Licensed Real Estate Salesperson, Sales Director | New Development, SERHANT.
+                </p>
+                <a href="tel:+12128127203" class="agent__phone agent__detail-item lp-link">
+                  <span class="label--14 agent__detail-item-text">(212) 812-7203</span>
+                </a>
+                <a href="mailto:peter@serhant.com" class="agent__email agent__detail-item lp-link">
+                  <span class="label--14 agent__detail-item-text">peter@serhant.com</span>
+                </a>
+              </div>
+            </div>
+          </section>
           <div id="tour-card" class="booking-card reveal reveal--scale">
             <div class="booking-card__top">
               <div class={`booking-card__chip booking-card__chip--${property.status === 'available' ? 'rent' : 'sale'}`}>
@@ -1440,6 +1473,91 @@ function featureIcon(feature: string) {
     text-transform: uppercase;
     letter-spacing: 0.16em;
     font-weight: 600;
+  }
+
+  .property-agents-section {
+    margin: 0 0 1.2rem;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .property-agents-section h2 {
+    margin: 0 0 1rem;
+    color: #000;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .agent__container {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 1.25rem;
+    border-radius: 8px;
+    background: #f5f5f5;
+  }
+
+  .agent__image,
+  .agent__image a {
+    display: block;
+  }
+
+  .agent__avatar {
+    display: block;
+    width: 90px;
+    height: 126px;
+    border-radius: 6px;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .agent__details {
+    min-width: 0;
+  }
+
+  .agent__detail-item {
+    display: block;
+    margin: 0;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    text-decoration: none;
+  }
+
+  .agent__name {
+    margin-bottom: 0.38rem;
+    color: #001a72;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+
+  .agent__position {
+    max-width: 32rem;
+    margin-bottom: 1rem;
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 22px;
+  }
+
+  .agent__phone,
+  .agent__email {
+    color: #001a72;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 17px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .agent__phone:hover,
+  .agent__email:hover,
+  .agent__name:hover {
+    color: #000f49;
   }
 
   /* Description with view more */
@@ -4819,6 +4937,25 @@ function featureIcon(feature: string) {
       gap: 1rem;
       padding: 1.65rem 1.35rem 2.15rem;
     }
+
+    .property-agents-section h2 {
+      font-size: 18px;
+    }
+
+    .agent__container {
+      grid-template-columns: 90px minmax(0, 1fr);
+      gap: 0.95rem;
+      padding: 1.15rem;
+    }
+
+    .agent__avatar {
+      width: 90px;
+      height: 126px;
+    }
+
+    .agent__position {
+      margin-bottom: 0.85rem;
+    }
   }
 
   .prop-map-section--inline {
@@ -5032,14 +5169,86 @@ function featureIcon(feature: string) {
   }
 
   .property-zone-section--sidebar h2 {
-    font-size: 24px !important;
-    line-height: 1.12 !important;
-    margin-bottom: 1rem !important;
+    margin: 0 0 0.85rem !important;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 18px !important;
+    line-height: 24px !important;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
   .property-zone-section--sidebar .prop-map {
     min-height: 260px;
     margin: 0 !important;
+    border-radius: 18px;
+    box-shadow: none;
+    isolation: isolate;
+  }
+
+  .property-zone-section--sidebar .prop-map::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    height: 72px;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(246, 247, 251, 0.98), rgba(246, 247, 251, 0));
+  }
+
+  .property-zone-section--sidebar .prop-map iframe {
+    filter: saturate(0.9) contrast(0.98);
+  }
+
+  .property-zone-section--sidebar .prop-map__radius span {
+    width: min(42%, 170px);
+    border-color: rgba(0, 26, 114, 0.5);
+    background: rgba(0, 26, 114, 0.1);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.42), 0 14px 32px rgba(0, 26, 114, 0.18);
+  }
+
+  .property-zone-section--sidebar .prop-map__overlay {
+    left: 0.85rem;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    z-index: 3;
+    max-width: none;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(0, 26, 114, 0.08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 14px 32px rgba(0, 26, 114, 0.14);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .property-zone-section--sidebar .prop-map__overlay svg {
+    width: 18px;
+    height: 18px;
+    margin-top: 0.1rem;
+    color: #001a72;
+  }
+
+  .property-zone-section--sidebar .prop-map__overlay strong {
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 13px;
+    line-height: 17px;
+    font-weight: 700;
+  }
+
+  .property-zone-section--sidebar .prop-map__overlay span {
+    display: block;
+    margin-top: 0.22rem;
+    color: rgba(0, 0, 0, 0.68);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
   }
 
   .prop-section--description .prop-description__extra[hidden] {
@@ -5049,6 +5258,17 @@ function featureIcon(feature: string) {
   @media (max-width: 960px) {
     .property-zone-section--sidebar {
       margin-bottom: 1.4rem;
+    }
+
+    .property-zone-section--sidebar .prop-map {
+      min-height: 240px;
+    }
+
+    .property-zone-section--sidebar .prop-map__overlay {
+      left: 0.7rem;
+      right: 0.7rem;
+      bottom: 0.7rem;
+      padding: 0.78rem 0.86rem;
     }
   }
 
