@@ -262,7 +262,7 @@ const homeReviews = locale === 'es'
             {[5, 4, 3, 2, 1].map((rating) => (
               <label>
                 <input type="radio" name="rating" value={rating} required={rating === 5} />
-                <span>{String.fromCharCode(9733).repeat(rating)}</span>
+                <span aria-hidden="true">&#9733;</span>
               </label>
             ))}
           </div>
