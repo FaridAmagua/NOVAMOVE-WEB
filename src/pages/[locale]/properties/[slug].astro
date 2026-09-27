@@ -576,6 +576,11 @@ function featureIcon(feature: string) {
         <aside class="prop-sidebar">
           {mapLocation && <section class="property-zone-section property-zone-section--sidebar" aria-labelledby="property-zone-title">
             <h2 id="property-zone-title">{t(locale, 'properties.neighborhood')}</h2>
+            <p class="property-zone-section__description">
+              {locale === 'es'
+                ? 'Aquí puedes ver aproximadamente la zona o el barrio donde se encuentra la propiedad.'
+                : 'Here you can see the approximate area or neighbourhood where the property is located.'}
+            </p>
             <div class="prop-map">
               <iframe
                 src={mapSrc}
@@ -5169,13 +5174,21 @@ function featureIcon(feature: string) {
   }
 
   .property-zone-section--sidebar h2 {
-    margin: 0 0 0.85rem !important;
+    margin: 0 0 1rem !important;
     color: #001a72;
     font-family: "Montserrat", var(--font-sans), sans-serif;
-    font-size: 18px !important;
-    line-height: 24px !important;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: 23px !important;
+    line-height: 1.12 !important;
+    font-weight: 900;
+  }
+
+  .property-zone-section__description {
+    margin: 0 0 1rem;
+    color: var(--text-primary);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    font-weight: 500;
   }
 
   .property-zone-section--sidebar .prop-map {
@@ -5184,18 +5197,6 @@ function featureIcon(feature: string) {
     border-radius: 18px;
     box-shadow: none;
     isolation: isolate;
-  }
-
-  .property-zone-section--sidebar .prop-map::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    height: 72px;
-    pointer-events: none;
-    background: linear-gradient(to top, rgba(246, 247, 251, 0.98), rgba(246, 247, 251, 0));
   }
 
   .property-zone-section--sidebar .prop-map iframe {
