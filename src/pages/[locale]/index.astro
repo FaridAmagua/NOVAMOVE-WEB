@@ -635,7 +635,8 @@ const homeReviews = locale === 'es'
 
   .home-reviews {
     padding-block: clamp(4.5rem, 8vw, 7rem);
-    background: #f4f4f4;
+    background: #131176;
+    color: #fff;
   }
 
   .home-reviews__layout {
@@ -648,7 +649,7 @@ const homeReviews = locale === 'es'
   .home-reviews__eyebrow {
     display: inline-flex;
     margin-bottom: 0.9rem;
-    color: #071b68;
+    color: rgba(255, 255, 255, 0.72);
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 12px;
     line-height: 1;
@@ -657,10 +658,14 @@ const homeReviews = locale === 'es'
     text-transform: uppercase;
   }
 
+  .home-reviews .home-section-title {
+    color: #fff;
+  }
+
   .home-reviews__content > p {
     max-width: 42rem;
     margin-top: 1.1rem;
-    color: #4a4f58;
+    color: rgba(255, 255, 255, 0.82);
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 16px;
     line-height: 1.45;
@@ -725,10 +730,10 @@ const homeReviews = locale === 'es'
 
   .home-review-form {
     padding: clamp(1.35rem, 3vw, 2rem);
-    background: #001a72;
-    color: #fff;
+    background: #fff;
+    color: #111;
     border-radius: 8px;
-    box-shadow: 0 22px 46px rgba(0, 26, 114, 0.18);
+    box-shadow: 0 22px 46px rgba(0, 0, 0, 0.18);
   }
 
   .home-review-form__hidden {
@@ -737,7 +742,7 @@ const homeReviews = locale === 'es'
 
   .home-review-form h3 {
     margin: 0;
-    color: #fff;
+    color: #001a72;
     font-family: var(--font-display, var(--font-sans));
     font-size: 24px;
     line-height: 1;
@@ -747,7 +752,7 @@ const homeReviews = locale === 'es'
 
   .home-review-form__note {
     margin: 0.75rem 0 1.35rem;
-    color: rgba(255, 255, 255, 0.72);
+    color: rgba(0, 0, 0, 0.62);
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 12px;
     line-height: 1.45;
@@ -763,15 +768,16 @@ const homeReviews = locale === 'es'
     font-size: 13px;
     line-height: 1.2;
     font-weight: 700;
+    color: #001a72;
   }
 
   .home-review-form input,
   .home-review-form textarea {
     width: 100%;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    border: 1px solid rgba(0, 0, 0, 0.28);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
+    background: #fff;
+    color: #111;
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 14px;
     line-height: 1.2;
@@ -792,7 +798,7 @@ const homeReviews = locale === 'es'
 
   .home-review-form input:focus,
   .home-review-form textarea:focus {
-    border-color: rgba(255, 255, 255, 0.72);
+    border-color: #001a72;
   }
 
   .home-review-form__rating {
@@ -816,7 +822,7 @@ const homeReviews = locale === 'es'
   }
 
   .home-review-form__rating span {
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(0, 0, 0, 0.25);
     font-size: 18px;
     line-height: 1;
   }
@@ -834,8 +840,9 @@ const homeReviews = locale === 'es'
     justify-content: center;
     margin-top: 0.25rem;
     border-radius: 999px;
-    background: #fff;
-    color: #001a72;
+    border: 1px solid #001a72;
+    background: #001a72;
+    color: #fff;
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 14px;
     line-height: 1;
