@@ -145,43 +145,6 @@ const financialFeatures = rows([
   row(locale === 'es' ? 'Precio' : 'Price', `${formatPrice(property.price, locale)}${property.transaction === 'rent' ? priceUnit : ''}`),
 ]);
 
-// Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
-const amenityIcons: Record<string, string> = {
-  pool:        '<path d="M2 18c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1"/><path d="M6 14V9a3 3 0 0 1 6 0v5"/><path d="M12 10c1.5 0 1.5-1 3-1s1.5 1 3 1"/><path d="M12 6c1.5 0 1.5-1 3-1s1.5 1 3 1"/>',
-  wifi:        '<path d="M5 12.55a11 11 0 0 1 14 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1.5"/>',
-  ac:          '<path d="M3 7v10M21 7v10M3 12h18M7 5h10M7 19h10"/>',
-  parking:     '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h5a3 3 0 0 1 0 6h-5"/>',
-  kitchen:     '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 7l3-4h12l3 4M7 12v4M11 12v4M15 12v4M17 12v4"/>',
-  'sea-view':  '<path d="M2 18c3 0 3-2 6-2s3 2 6 2 3-2 6-2"/><path d="M2 14c3 0 3-2 6-2s3 2 6 2 3-2 6-2"/><circle cx="17" cy="5" r="2.5"/>',
-  'city-view': '<path d="M3 21h18M5 21V8h4v13M11 21V4h4v17M17 21v-9h4v9"/>',
-  garden:      '<path d="M12 2v8m-7-3l5 5m9-5l-5 5M5 14c0 4 3 7 7 7s7-3 7-7"/>',
-  terrace:     '<rect x="3" y="9" width="18" height="9" rx="1"/><path d="M3 9l9-6 9 6M8 14h2M14 14h2"/>',
-  jacuzzi:     '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="11" r="0.8"/><circle cx="13" cy="10" r="0.8"/><circle cx="15" cy="13" r="0.8"/>',
-  gym:         '<path d="M2 12h2M20 12h2M6 8v8M18 8v8M6 12h12"/>',
-  cinema:      '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v14M16 5v14"/>',
-  bbq:         '<rect x="3" y="9" width="18" height="11" rx="1"/><path d="M8 9V5a4 4 0 0 1 8 0v4M12 13v-2"/>',
-  fireplace:   '<path d="M5 21h14M5 21V8h5l2-3 2 3h5v13M12 14c-2 0-3 2-3 4s2 2 3 2 3 0 3-2-1-4-3-4z"/>',
-  'beach-access': '<path d="M3 14c1.5-2 4-2 6 0s4.5 2 6 0 4-2 6 0M2 18h20M12 4v3M11 4h2"/>',
-  concierge:   '<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/>',
-  elevator:    '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 8v4M9 11l3-3 3 3M9 16l3 3 3-3M8 6h8"/>',
-};
-
-const genericFeatureIcon = '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>';
-const featureIconAliases: Array<[string[], string]> = [
-  [['piscina', 'pool'], 'pool'], [['wifi', 'wi-fi'], 'wifi'],
-  [['aire acondicionado', 'air conditioning'], 'ac'], [['garaje', 'parking', 'aparcamiento'], 'parking'],
-  [['cocina', 'kitchen'], 'kitchen'], [['vista al mar', 'vistas al mar', 'sea view'], 'sea-view'],
-  [['vista a la ciudad', 'vistas a la ciudad', 'city view'], 'city-view'], [['jardin', 'garden'], 'garden'],
-  [['terraza', 'terrace'], 'terrace'], [['jacuzzi'], 'jacuzzi'], [['gimnasio', 'gym'], 'gym'],
-  [['cine', 'cinema'], 'cinema'], [['barbacoa', 'bbq'], 'bbq'], [['chimenea', 'fireplace'], 'fireplace'],
-  [['playa', 'beach access'], 'beach-access'], [['portero', 'conserje', 'concierge'], 'concierge'],
-  [['ascensor', 'elevator'], 'elevator'],
-];
-function featureIcon(feature: string) {
-  const normalized = feature.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const alias = featureIconAliases.find(([terms]) => terms.some((term) => normalized.includes(term)));
-  return alias ? amenityIcons[alias[1]] : genericFeatureIcon;
-}
 ---
 
 <BaseLayout
@@ -443,20 +406,14 @@ function featureIcon(feature: string) {
                   </ul>
                 </section>}
               </div>
-              {features.length > 0 && <>
-                <span class="prop-section__count">
-                  {locale === 'es' ? `${features.length} características adicionales` : `${features.length} additional features`}
-                </span>
-                <div class="amenities-grid">
-                  {features.map(a => (
-                    <div class="amenity-item">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                           stroke-linecap="round" stroke-linejoin="round" set:html={featureIcon(a)} />
-                      <span>{a}</span>
-                    </div>
+              {features.length > 0 && <section class="property-feature-group property-feature-group--exterior">
+                <h3>{locale === 'es' ? 'Características adicionales' : 'Additional features'}</h3>
+                <ul>
+                  {features.map(feature => (
+                    <li><span>{feature}</span></li>
                   ))}
-                </div>
-              </>}
+                </ul>
+              </section>}
             </details>
           </section>}
 
