@@ -195,12 +195,17 @@ export function fromNivora(np: PublicProperty): Property {
     bedrooms: np.specs.bedrooms,
     bathrooms: np.specs.bathrooms,
     sizeM2: np.specs.builtAreaSqm,
+    usableAreaM2: np.specs.usableAreaSqm,
+    plotAreaM2: np.specs.plotAreaSqm,
+    terraceAreaM2: np.specs.terraceAreaSqm,
+    details: np.details,
     images,
     cardImages,
     imagePositions,
     imagePosition: imagePositions[0],
     map: np.map,
     featured: np.featured,
+    updatedAt: np.updatedAt,
   };
 }
 

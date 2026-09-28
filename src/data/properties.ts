@@ -45,6 +45,24 @@ export interface Property {
   bedrooms: number | null;
   bathrooms: number | null;
   sizeM2: number | null;
+  usableAreaM2?: number | null;
+  plotAreaM2?: number | null;
+  terraceAreaM2?: number | null;
+  details?: {
+    yearBuilt: number | null;
+    floorLabel: string | null;
+    totalFloors: number | null;
+    parkingSpaces: number | null;
+    furnished: boolean | null;
+    elevator: boolean | null;
+    terrace: boolean | null;
+    pool: boolean | null;
+    heatingType: string | null;
+    airConditioningType: string | null;
+    orientation: string | null;
+    energyRating: string | null;
+    availableFrom: string | null;
+  };
   images: string[];
   /** Versiones ligeras para tarjetas y listados. Si faltan, se usan images. */
   cardImages?: string[];
@@ -57,6 +75,7 @@ export interface Property {
   lng?: number;
   map?: { query: string; precision: 'street' | 'neighborhood' | 'area'; radiusKm: number };
   reviews?: Review[];
+  updatedAt?: string;
 }
 
 /** Default focal point como CSS object-position. */
@@ -99,6 +118,24 @@ export const properties: Property[] = [
     bedrooms: 5,
     bathrooms: 5,
     sizeM2: 620,
+    usableAreaM2: 540,
+    plotAreaM2: 1800,
+    terraceAreaM2: 160,
+    details: {
+      yearBuilt: 2021,
+      floorLabel: null,
+      totalFloors: 2,
+      parkingSpaces: 3,
+      furnished: true,
+      elevator: true,
+      terrace: true,
+      pool: true,
+      heatingType: 'Suelo radiante',
+      airConditioningType: 'Climatización por conductos',
+      orientation: 'Sur',
+      energyRating: 'A',
+      availableFrom: null,
+    },
     images: [
       'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1600&q=80',
       'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1600&q=80',
@@ -108,6 +145,7 @@ export const properties: Property[] = [
     ],
     imagePosition: 'center 62%',
     featured: true,
+    updatedAt: '2026-09-28T00:00:00.000Z',
     lat: 36.5097,
     lng: -4.8862,
   },

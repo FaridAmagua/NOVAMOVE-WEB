@@ -46,11 +46,7 @@ const whatsappMessage = locale === 'es'
 const ctaHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
 const visitHref = `/${locale}/book/${property.slug}/`;
-const availabilitySource = property as Property & {
-  availableFrom?: string | null;
-  availability?: { availableFrom?: string | null } | null;
-};
-const availableFromRaw = availabilitySource.availableFrom ?? availabilitySource.availability?.availableFrom ?? null;
+const availableFromRaw = property.details?.availableFrom ?? null;
 const availableFromDate = availableFromRaw ? new Date(availableFromRaw) : null;
 const showAvailableFrom = Boolean(availableFromDate && !Number.isNaN(availableFromDate.getTime()));
 const availableFromLabel = showAvailableFrom && availableFromDate
@@ -94,47 +90,60 @@ const processSteps = locale === 'es'
       ['Prepare the tenancy', 'We guide you through the terms, documents and next steps.'],
     ];
 
-const overviewItems = [
-  [locale === 'es' ? 'Tipo de propiedad' : 'Property Type', locale === 'es' ? 'Otro' : 'Other'],
-  [locale === 'es' ? 'Ubicación' : 'Location', '21 & 407 Fairfield Pond Ln, Sagaponack, NY 11962'],
-  [locale === 'es' ? 'Año de construcción' : 'Year Built', '1998'],
-  ['MLS ID', '924260'],
-  [locale === 'es' ? 'Última actualización' : 'Listing Last Updated', '9/15/2026 6:03 PM'],
-];
+type DetailRow = [string, string];
+const row = (label: string, value: unknown): DetailRow | null => {
+  if (value === null || value === undefined || value === '') return null;
+  return [label, String(value)];
+};
+const yesNo = (value: boolean) => value
+  ? (locale === 'es' ? 'Sí' : 'Yes')
+  : (locale === 'es' ? 'No' : 'No');
+const dateLabel = (value?: string) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+};
+const rows = (values: Array<DetailRow | null>): DetailRow[] => values.filter((value): value is DetailRow => value !== null);
 
-const interiorFeatures = [
-  [locale === 'es' ? 'Dormitorios totales' : 'Total Bedrooms', property.bedrooms ? String(property.bedrooms) : '8'],
-  [locale === 'es' ? 'Baños completos' : 'Full Bathrooms', property.bathrooms ? String(property.bathrooms) : '7'],
-  [locale === 'es' ? 'Medios baños' : 'Half Bathrooms', '3'],
-  [locale === 'es' ? 'Suelos' : 'Flooring', locale === 'es' ? 'Madera, baldosa, piedra' : 'Hardwood, Tile, Stone'],
-  [locale === 'es' ? 'Lavandería' : 'Laundry Room', locale === 'es' ? 'Lavandería' : 'Laundry Room'],
-  [locale === 'es' ? 'Chimenea' : 'Fireplace', locale === 'es' ? 'Chimenea' : 'Fireplace'],
-  [locale === 'es' ? 'Electrodomésticos' : 'Appliances', locale === 'es' ? 'Lavavajillas, secadora, frigorífico, microondas, horno, electrodomésticos de acero inoxidable, lavadora' : 'Dishwasher, Dryer, Refrigerator, Microwave, Oven, Stainless Steel Appliance(s), Washer'],
-  [locale === 'es' ? 'Otras características interiores' : 'Other Interior Features', locale === 'es' ? 'Dormitorio principal, baño en suite, vestidores, sala multimedia, estudio, gimnasio, recibidor, sala familiar, salón, comedor, zona de desayuno' : 'Primary Bedroom, En Suite Bathroom, Walk-In Closet(s), Media Room, Study, Exercise Room, Entrance Foyer, Family Room, Living Room, Great Room, Dining Room, Breakfast Area'],
-];
+const overviewItems = rows([
+  row(locale === 'es' ? 'Tipo de propiedad' : 'Property type', propertyTypeLabel(property.type, locale)),
+  row(locale === 'es' ? 'Ubicación' : 'Location', mapLocation),
+  row(locale === 'es' ? 'Referencia' : 'Reference', property.reference),
+  row(locale === 'es' ? 'Estado' : 'Status', statusLabel(property.status, locale)),
+  row(locale === 'es' ? 'Año de construcción' : 'Year built', property.details?.yearBuilt),
+  row(locale === 'es' ? 'Última actualización' : 'Last updated', dateLabel(property.updatedAt)),
+]);
 
-const exteriorFeatures = [
-  [locale === 'es' ? 'Plantas' : 'Stories', '2'],
-  [locale === 'es' ? 'Plazas de garaje' : 'Garage Spaces', '3.0'],
-  [locale === 'es' ? 'Suministro de agua' : 'Water Source', locale === 'es' ? 'Pozo privado' : 'Private Well'],
-  [locale === 'es' ? 'Piscina' : 'Pool', locale === 'es' ? 'Gunita, climatizada, enterrada, privada' : 'Gunite, Heated, In Ground, Private'],
-  [locale === 'es' ? 'Cubierta' : 'Roof', locale === 'es' ? 'Cedro' : 'Cedar'],
-  [locale === 'es' ? 'Características de parcela' : 'Lot Features', locale === 'es' ? 'Calle sin salida, vallada, junto a campo de golf, riego instalado' : 'Cul-De-Sac, Fenced, On Golf Course, Sprinklers In Ground'],
-  [locale === 'es' ? 'Aparcamiento' : 'Parking', locale === 'es' ? 'Anexo' : 'Attached'],
-  [locale === 'es' ? 'Calefacción' : 'Heat Type', locale === 'es' ? 'Aire forzado, geotermia' : 'Forced Air, Geothermal'],
-  [locale === 'es' ? 'Aire acondicionado' : 'Air Conditioning', locale === 'es' ? 'Aire central' : 'Central Air'],
-];
+const interiorFeatures = rows([
+  row(locale === 'es' ? 'Dormitorios' : 'Bedrooms', property.bedrooms),
+  row(locale === 'es' ? 'Baños' : 'Bathrooms', property.bathrooms),
+  row(locale === 'es' ? 'Superficie construida' : 'Built area', property.sizeM2 == null ? null : `${property.sizeM2} m²`),
+  row(locale === 'es' ? 'Superficie útil' : 'Usable area', property.usableAreaM2 == null ? null : `${property.usableAreaM2} m²`),
+  row(locale === 'es' ? 'Amueblado' : 'Furnished', property.details?.furnished == null ? null : yesNo(property.details.furnished)),
+  row(locale === 'es' ? 'Calefacción' : 'Heating', property.details?.heatingType),
+  row(locale === 'es' ? 'Aire acondicionado' : 'Air conditioning', property.details?.airConditioningType),
+  row(locale === 'es' ? 'Orientación' : 'Orientation', property.details?.orientation),
+]);
 
-const detailFeatures = [
-  [locale === 'es' ? 'Barrio' : 'Neighborhood', 'Sagaponack'],
-  [locale === 'es' ? 'Estilo arquitectónico' : 'Architecture Styles', locale === 'es' ? 'Contemporáneo' : 'Contemporary'],
-  [locale === 'es' ? 'Frente de agua' : 'Water Frontage', locale === 'es' ? 'Frente al océano, waterfront' : 'Ocean Front, Waterfront'],
-  [locale === 'es' ? 'Vistas' : 'View Description', locale === 'es' ? 'Océano, agua' : 'Ocean, Water'],
-];
+const exteriorFeatures = rows([
+  row(locale === 'es' ? 'Planta' : 'Floor', property.details?.floorLabel),
+  row(locale === 'es' ? 'Plantas del edificio' : 'Building floors', property.details?.totalFloors),
+  row(locale === 'es' ? 'Ascensor' : 'Lift', property.details?.elevator == null ? null : yesNo(property.details.elevator)),
+  row(locale === 'es' ? 'Plazas de garaje' : 'Parking spaces', property.details?.parkingSpaces),
+  row(locale === 'es' ? 'Terraza' : 'Terrace', property.details?.terrace == null ? null : yesNo(property.details.terrace)),
+  row(locale === 'es' ? 'Superficie de terraza' : 'Terrace area', property.terraceAreaM2 == null ? null : `${property.terraceAreaM2} m²`),
+  row(locale === 'es' ? 'Piscina' : 'Pool', property.details?.pool == null ? null : yesNo(property.details.pool)),
+  row(locale === 'es' ? 'Parcela' : 'Plot area', property.plotAreaM2 == null ? null : `${property.plotAreaM2} m²`),
+]);
 
-const financialFeatures = [
-  [locale === 'es' ? 'Precio' : 'Price', '$89,000,000'],
-];
+const detailFeatures = rows([
+  row(locale === 'es' ? 'Certificado energético' : 'Energy rating', property.details?.energyRating),
+  row(locale === 'es' ? 'Disponible desde' : 'Available from', availableFromLabel || null),
+]);
+
+const financialFeatures = rows([
+  row(locale === 'es' ? 'Precio' : 'Price', `${formatPrice(property.price, locale)}${property.transaction === 'rent' ? priceUnit : ''}`),
+]);
 
 // Amenity icon SVGs (custom, monoline, fit Montserrat aesthetic)
 const amenityIcons: Record<string, string> = {
@@ -371,15 +380,6 @@ function featureIcon(feature: string) {
               </summary>
               <div class="prop-description" data-description-collapse>
                 <p class="prop-description__text">{property.description[locale]}</p>
-                <p class="prop-description__extra" hidden>
-                  {locale === 'es'
-                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes. La vivienda combina espacios interiores amplios, zonas exteriores pensadas para disfrutar todo el año y una ubicación cómoda para acceder a restaurantes, servicios, playa y los principales puntos de interés de la zona.`
-                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients. The home combines generous interior spaces, outdoor areas designed for year-round living, and a convenient location close to restaurants, services, the beach, and the area's main points of interest.`}
-                </p>
-                <button type="button" class="prop-description__read-more" data-description-toggle>
-                  <span data-description-label-more>{locale === 'es' ? 'Leer más' : 'Read More'}</span>
-                  <span data-description-label-less hidden>{locale === 'es' ? 'Leer menos' : 'Read Less'}</span>
-                </button>
               </div>
             </details>
           </section>
@@ -393,24 +393,6 @@ function featureIcon(feature: string) {
                   <dd>{value}</dd>
                 </div>
               ))}
-              <template>
-              <div>
-                <dt>{locale === 'es' ? 'Tipo de propiedad' : 'Property Type'}</dt>
-                <dd>{propertyTypeLabel(property.type, locale)}</dd>
-              </div>
-              <div>
-                <dt>{locale === 'es' ? 'Ubicación' : 'Location'}</dt>
-                <dd>{mapLocation}</dd>
-              </div>
-              {property.reference && <div>
-                <dt>{locale === 'es' ? 'Referencia' : 'Reference'}</dt>
-                <dd>{property.reference}</dd>
-              </div>}
-              <div>
-                <dt>{locale === 'es' ? 'Estado' : 'Status'}</dt>
-                <dd>{statusLabel(property.status, locale)}</dd>
-              </div>
-              </template>
             </dl>
           </section>
 
@@ -426,24 +408,19 @@ function featureIcon(feature: string) {
               </summary>
               <div class="prop-description" data-collapse>
                 <p class="prop-description__text">{property.description[locale]}</p>
-                <p class="prop-description__extra" hidden>
-                  {locale === 'es'
-                    ? `Una propiedad única en ${destLabel}, gestionada por Global Move con los más altos estándares de calidad. Cada detalle ha sido cuidado para ofrecer una experiencia memorable a nuestros clientes.`
-                    : `A unique property in ${destLabel}, managed by Global Move with the highest standards of quality. Every detail has been carefully curated to deliver a memorable experience to our clients.`}
-                </p>
               </div>
             </details>
           </section>
 
           <!-- Features (amenities) — ES/EN con fallback -->
-          {features.length > 0 && <section class="prop-section prop-features-section reveal">
+          {(features.length > 0 || interiorFeatures.length > 0 || exteriorFeatures.length > 0) && <section class="prop-section prop-features-section reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
                 <span>{locale === 'es' ? 'Características y amenidades' : 'Property Features & Amenities'}</span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
               <div class="property-feature-groups">
-                <section class="property-feature-group">
+                {interiorFeatures.length > 0 && <section class="property-feature-group">
                   <h3>{locale === 'es' ? 'Interior' : 'Interior'}</h3>
                   <ul>
                     {interiorFeatures.map(([label, value]) => (
@@ -453,8 +430,8 @@ function featureIcon(feature: string) {
                       </li>
                     ))}
                   </ul>
-                </section>
-                <section class="property-feature-group property-feature-group--exterior">
+                </section>}
+                {exteriorFeatures.length > 0 && <section class="property-feature-group property-feature-group--exterior">
                   <h3>{locale === 'es' ? 'Exterior' : 'Exterior'}</h3>
                   <ul>
                     {exteriorFeatures.map(([label, value]) => (
@@ -464,29 +441,29 @@ function featureIcon(feature: string) {
                       </li>
                     ))}
                   </ul>
-                </section>
+                </section>}
               </div>
-              <template>
-              <span class="prop-section__count">
-                {locale === 'es' ? `${features.length} servicios incluidos` : `${features.length} services included`}
-              </span>
-              <div class="amenities-grid">
-                {features.map(a => (
-                  <div class="amenity-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" set:html={featureIcon(a)} />
-                    <span>{a}</span>
-                  </div>
-                ))}
-              </div>
-              </template>
+              {features.length > 0 && <>
+                <span class="prop-section__count">
+                  {locale === 'es' ? `${features.length} características adicionales` : `${features.length} additional features`}
+                </span>
+                <div class="amenities-grid">
+                  {features.map(a => (
+                    <div class="amenity-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round" set:html={featureIcon(a)} />
+                      <span>{a}</span>
+                    </div>
+                  ))}
+                </div>
+              </>}
             </details>
           </section>}
 
-          <section class="prop-section prop-details-financial-section reveal">
+          {(detailFeatures.length > 0 || financialFeatures.length > 0) && <section class="prop-section prop-details-financial-section reveal">
             <div class="property-feature-groups">
-              <section class="property-feature-group">
-                <h3>Details</h3>
+              {detailFeatures.length > 0 && <section class="property-feature-group">
+                <h3>{locale === 'es' ? 'Detalles' : 'Details'}</h3>
                 <ul>
                   {detailFeatures.map(([label, value]) => (
                     <li>
@@ -495,9 +472,9 @@ function featureIcon(feature: string) {
                     </li>
                   ))}
                 </ul>
-              </section>
-              <section class="property-feature-group property-feature-group--financial">
-                <h3>Financial</h3>
+              </section>}
+              {financialFeatures.length > 0 && <section class="property-feature-group property-feature-group--financial">
+                <h3>{locale === 'es' ? 'Información económica' : 'Financial'}</h3>
                 <ul>
                   {financialFeatures.map(([label, value]) => (
                     <li>
@@ -506,9 +483,9 @@ function featureIcon(feature: string) {
                     </li>
                   ))}
                 </ul>
-              </section>
+              </section>}
             </div>
-          </section>
+          </section>}
 
           <!-- Public-area map: coordinates when available, otherwise the configured public zone. -->
           {mapLocation && <section class="prop-section prop-map-section prop-map-section--inline reveal">
