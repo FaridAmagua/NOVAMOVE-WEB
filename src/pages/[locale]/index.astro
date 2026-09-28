@@ -50,6 +50,25 @@ const homeReviews = locale === 'es'
       { name: 'Carlos R.', source: 'Google account', text: 'The process felt very professional. Fast coordination, strong options, and follow-up after the viewing.' },
       { name: 'Sofia P.', source: 'Verified email', text: 'Global Move understood exactly what we needed and supported us through every step of the rental.' },
     ];
+
+const developments = [
+  {
+    title: locale === 'es' ? 'Residencias Castellana' : 'Castellana Residences',
+    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    title: locale === 'es' ? 'The Orson Madrid' : 'The Orson Madrid',
+    image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    title: locale === 'es' ? 'Prospect Place' : 'Prospect Place',
+    image: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    title: locale === 'es' ? 'Marbella Bay Homes' : 'Marbella Bay Homes',
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=80',
+  },
+];
 ---
 
 <BaseLayout transparentHeader={true}>
@@ -280,35 +299,71 @@ const homeReviews = locale === 'es'
     </div>
   </section>
   <!-- ============ CTA ============ -->
-  <section class="section section--cta grain" aria-labelledby="cta-heading">
+  <section class="section section--cta" aria-labelledby="cta-heading">
     <div class="container">
-      <div class="reveal reveal--scale relative rounded-2xl overflow-hidden text-white">
-        <div class="absolute inset-0"
-          style="background:
-            linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-700) 100%),
-            radial-gradient(at top right, var(--color-gold) 0%, transparent 50%);
-            background-blend-mode: normal;">
+      <div class="home-cta reveal reveal--fade">
+        <h2 id="cta-heading">{t(locale, 'cta.headline')}</h2>
+        <p>{t(locale, 'cta.subheadline')}</p>
+        <a href={`/${locale}/contact/`} class="btn btn--primary" data-magnetic="0.35">
+          <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-developments" aria-labelledby="developments-heading">
+    <div class="container">
+      <header class="home-developments__header reveal">
+        <h2 id="developments-heading">
+          {locale === 'es' ? 'Los nuevos desarrollos más exclusivos' : 'The Boldest New Developments'}
+        </h2>
+        <p>
+          {locale === 'es'
+            ? 'Explora edificios y residencias de nueva generación que elevan la vida urbana de lujo.'
+            : 'Explore transformative new buildings that elevate modern luxury living.'}
+        </p>
+      </header>
+
+      <div class="home-developments__rail" data-development-rail>
+        {developments.map((development) => (
+          <article class="home-development-card reveal reveal--fade">
+            <img src={development.image} alt={development.title} loading="lazy" decoding="async" />
+            <h4 class="lp-h4">{development.title}</h4>
+          </article>
+        ))}
+      </div>
+
+      <div class="home-developments__controls">
+        <div class="home-developments__arrows" aria-label={locale === 'es' ? 'Navegar desarrollos' : 'Navigate developments'}>
+          <button type="button" data-development-prev aria-label={locale === 'es' ? 'Anterior' : 'Previous'}>&lsaquo;</button>
+          <button type="button" data-development-next aria-label={locale === 'es' ? 'Siguiente' : 'Next'}>&rsaquo;</button>
         </div>
-        <div class="absolute inset-0"
-          style="background-image:
-            radial-gradient(circle at 90% 10%, rgba(200,167,106,0.35) 0%, transparent 35%),
-            radial-gradient(circle at 10% 90%, rgba(200,167,106,0.15) 0%, transparent 30%);">
-        </div>
-        <div class="relative text-center max-w-2xl mx-auto"
-             style="padding: clamp(3rem, 6vw, 5rem);">
-          <h2 class="h2 text-white mb-4">{t(locale, 'cta.headline')}</h2>
-          <p class="lead text-white/80 mx-auto mb-9"
-             style="font-size: clamp(1.1rem, 1.5vw, 1.3rem);">
-            {t(locale, 'cta.subheadline')}
-          </p>
-          <a href={`/${locale}/contact/`} class="btn btn--primary" data-magnetic="0.35">
-            <span data-magnetic-inner>{t(locale, 'cta.button')}</span>
-          </a>
-        </div>
+        <a href={`/${locale}/properties/`} class="home-developments__view-all">
+          <span>{locale === 'es' ? 'Ver todo' : 'View All'}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  const developmentRail = document.querySelector<HTMLElement>('[data-development-rail]');
+  const developmentPrev = document.querySelector<HTMLButtonElement>('[data-development-prev]');
+  const developmentNext = document.querySelector<HTMLButtonElement>('[data-development-next]');
+
+  const scrollDevelopments = (direction: 1 | -1) => {
+    if (!developmentRail) return;
+    const card = developmentRail.querySelector<HTMLElement>('.home-development-card');
+    const distance = card ? card.offsetWidth + 24 : developmentRail.clientWidth * 0.8;
+    developmentRail.scrollBy({ left: distance * direction, behavior: 'smooth' });
+  };
+
+  developmentPrev?.addEventListener('click', () => scrollDevelopments(-1));
+  developmentNext?.addEventListener('click', () => scrollDevelopments(1));
+</script>
 
 <style is:global>
   .home-hero {
@@ -849,6 +904,189 @@ const homeReviews = locale === 'es'
     font-weight: 800;
   }
 
+  .section--cta {
+    background: #fff;
+    padding-block: clamp(3.8rem, 7vw, 6rem);
+  }
+
+  .home-cta {
+    max-width: 720px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .home-cta h2 {
+    margin: 0;
+    color: #001a72;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 24px;
+    line-height: 1.16;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .home-cta p {
+    max-width: 36rem;
+    margin: 1rem auto 2rem;
+    color: rgba(0, 0, 0, 0.62);
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .home-cta .btn {
+    min-width: 0;
+    min-height: 44px;
+    padding: 0.78rem 1.45rem;
+    border-radius: 999px;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .home-developments {
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .home-developments__header {
+    max-width: 720px;
+    margin-bottom: clamp(2.2rem, 5vw, 3.8rem);
+  }
+
+  .home-developments__header h2 {
+    margin: 0;
+    color: #000;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 24px;
+    line-height: 1.16;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .home-developments__header p {
+    max-width: 44rem;
+    margin: 1.25rem 0 0;
+    color: #111;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .home-developments__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(250px, 31%);
+    gap: clamp(1rem, 2.2vw, 1.45rem);
+    margin-inline: calc(var(--container-padding) * -1);
+    padding-inline: var(--container-padding);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--container-padding);
+    scrollbar-width: none;
+  }
+
+  .home-developments__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-development-card {
+    position: relative;
+    min-height: clamp(320px, 42vw, 520px);
+    border-radius: 8px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    background: #dfe4ea;
+  }
+
+  .home-development-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.58) 100%);
+  }
+
+  .home-development-card img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    transition: transform 700ms var(--ease-out);
+  }
+
+  .home-development-card:hover img {
+    transform: scale(1.035);
+  }
+
+  .home-development-card h4 {
+    position: absolute;
+    left: 1.2rem;
+    right: 1.2rem;
+    bottom: 1.15rem;
+    z-index: 1;
+    margin: 0;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 16px;
+    line-height: 1.18;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .home-developments__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-top: clamp(2rem, 4.8vw, 3.4rem);
+  }
+
+  .home-developments__arrows {
+    display: flex;
+    gap: 0.8rem;
+  }
+
+  .home-developments__arrows button {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .home-developments__view-all {
+    width: 133px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: #001a72;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .home-developments__view-all svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .home-hero__search button:hover {
     background: #0733ad;
     transform: translateY(-1px);
@@ -1064,16 +1302,13 @@ const homeReviews = locale === 'es'
       font-size: 20px;
     }
 
-    .section--cta .relative.text-center {
-      padding: 2.4rem 1.15rem !important;
-    }
-
     .section--cta .btn {
-      width: min(100%, 352px);
-      min-height: 54px;
+      width: auto;
+      max-width: 100%;
+      min-height: 44px;
       display: flex;
       margin-inline: auto;
-      padding-inline: 1rem;
+      padding-inline: 1.25rem;
       text-align: center;
       white-space: normal;
       transform: none !important;
@@ -1084,6 +1319,40 @@ const homeReviews = locale === 'es'
       display: block;
       text-align: center;
       transform: none !important;
+    }
+
+    .home-developments {
+      padding-block: 4rem;
+    }
+
+    .home-developments__header {
+      margin-bottom: 2rem;
+    }
+
+    .home-developments__rail {
+      grid-auto-columns: minmax(245px, 78%);
+      gap: 1rem;
+    }
+
+    .home-development-card {
+      min-height: 330px;
+    }
+
+    .home-developments__controls {
+      align-items: center;
+      margin-top: 2rem;
+    }
+
+    .home-developments__arrows button {
+      width: 40px;
+      height: 40px;
+      font-size: 28px;
+    }
+
+    .home-developments__view-all {
+      width: 133px;
+      min-height: 40px;
+      font-size: 14px;
     }
   }
 
