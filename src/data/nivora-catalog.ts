@@ -66,6 +66,23 @@ export type PublicProperty = {
     builtAreaSqm: number | null;
     usableAreaSqm: number | null;
     plotAreaSqm: number | null;
+    terraceAreaSqm?: number | null;
+  };
+
+  details?: {
+    yearBuilt: number | null;
+    floorLabel: string | null;
+    totalFloors: number | null;
+    parkingSpaces: number | null;
+    furnished: boolean | null;
+    elevator: boolean | null;
+    terrace: boolean | null;
+    pool: boolean | null;
+    heatingType: string | null;
+    airConditioningType: string | null;
+    orientation: string | null;
+    energyRating: string | null;
+    availableFrom: string | null;
   };
 
   features: {

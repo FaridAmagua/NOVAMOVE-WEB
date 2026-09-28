@@ -42,7 +42,22 @@ const fullFixture = {
     },
   },
   pricing: { amountCents: 350000, currency: 'EUR' as const, period: 'month' as const },
-  specs: { bedrooms: 5, bathrooms: 4, builtAreaSqm: 420, usableAreaSqm: 380, plotAreaSqm: 1200 },
+  specs: { bedrooms: 5, bathrooms: 4, builtAreaSqm: 420, usableAreaSqm: 380, plotAreaSqm: 1200, terraceAreaSqm: 80 },
+  details: {
+    yearBuilt: 2020,
+    floorLabel: 'Ático',
+    totalFloors: 4,
+    parkingSpaces: 2,
+    furnished: true,
+    elevator: true,
+    terrace: true,
+    pool: true,
+    heatingType: 'Suelo radiante',
+    airConditioningType: 'Por conductos',
+    orientation: 'Sur',
+    energyRating: 'A',
+    availableFrom: '2026-10-01',
+  },
   features: { es: ['Pool', 'Wi-Fi'], en: ['Pool EN', 'Wi-Fi EN'] },
   images: [
     { id: 'i1', url: 'https://x.com/c.jpg', alt: 'a', width: 100, height: 100, isCover: true, position: 0 },
@@ -80,6 +95,8 @@ try {
   test('bedrooms (5)', p.bedrooms === 5);
   test('bathrooms (4)', p.bathrooms === 4);
   test('sizeM2 (420)', p.sizeM2 === 420);
+  test('superficies ampliadas mapeadas', p.usableAreaM2 === 380 && p.plotAreaM2 === 1200 && p.terraceAreaM2 === 80);
+  test('detalles españoles mapeados', p.details?.floorLabel === 'Ático' && p.details?.energyRating === 'A');
   test('features.es (2)', p.features.es?.length === 2);
   test('features.en (2)', p.features.en?.length === 2);
   test('images ordenadas con cover primero', p.images[0] === 'https://x.com/c.jpg' && p.images[1] === 'https://x.com/a.jpg' && p.images[2] === 'https://x.com/b.jpg');
