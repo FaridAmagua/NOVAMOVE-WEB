@@ -7,8 +7,12 @@ import { formatPrice, statusLabel } from '../../data/properties';
 const locale = Astro.params.locale as Locale;
 
 const { properties } = await getProperties();
-const featuredProperties = properties.filter((property) => property.featured).slice(0, 3);
-const homeProperties = featuredProperties.length > 0 ? featuredProperties : properties.slice(0, 3);
+const featuredProperties = properties.filter((property) => property.featured);
+const featuredSlugs = new Set(featuredProperties.map((property) => property.slug));
+const homeProperties = [
+  ...featuredProperties,
+  ...properties.filter((property) => !featuredSlugs.has(property.slug)),
+].slice(0, 9);
 
 const regions = [
   { slug: 'salamanca', label: 'Salamanca' },
@@ -163,7 +167,7 @@ const developments = [
         </p>
       </header>
 
-      <div class="home-properties-grid">
+      <div class="home-properties-grid" data-property-rail>
         {homeProperties.map((property) => (
           <a class="home-property-card reveal reveal--fade" href={`/${locale}/properties/${property.slug}/`}>
             <figure class="home-property-card__media">
@@ -213,6 +217,18 @@ const developments = [
             </div>
           </a>
         ))}
+      </div>
+      <div class="home-featured__controls">
+        <div class="home-featured__arrows" aria-label={locale === 'es' ? 'Navegar propiedades' : 'Navigate properties'}>
+          <button type="button" data-property-prev aria-label={locale === 'es' ? 'Anterior' : 'Previous'}>&lsaquo;</button>
+          <button type="button" data-property-next aria-label={locale === 'es' ? 'Siguiente' : 'Next'}>&rsaquo;</button>
+        </div>
+        <a href={`/${locale}/properties/`} class="home-featured__view-all">
+          <span>{locale === 'es' ? 'Ver todo' : 'View All'}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
       </div>
     </div>
   </section>
@@ -353,6 +369,9 @@ const developments = [
   const developmentRail = document.querySelector<HTMLElement>('[data-development-rail]');
   const developmentPrev = document.querySelector<HTMLButtonElement>('[data-development-prev]');
   const developmentNext = document.querySelector<HTMLButtonElement>('[data-development-next]');
+  const propertyRail = document.querySelector<HTMLElement>('[data-property-rail]');
+  const propertyPrev = document.querySelector<HTMLButtonElement>('[data-property-prev]');
+  const propertyNext = document.querySelector<HTMLButtonElement>('[data-property-next]');
 
   const scrollDevelopments = (direction: 1 | -1) => {
     if (!developmentRail) return;
@@ -363,6 +382,16 @@ const developments = [
 
   developmentPrev?.addEventListener('click', () => scrollDevelopments(-1));
   developmentNext?.addEventListener('click', () => scrollDevelopments(1));
+
+  const scrollProperties = (direction: 1 | -1) => {
+    if (!propertyRail) return;
+    const card = propertyRail.querySelector<HTMLElement>('.home-property-card');
+    const distance = card ? card.offsetWidth + 32 : propertyRail.clientWidth * 0.85;
+    propertyRail.scrollBy({ left: distance * direction, behavior: 'smooth' });
+  };
+
+  propertyPrev?.addEventListener('click', () => scrollProperties(-1));
+  propertyNext?.addEventListener('click', () => scrollProperties(1));
 </script>
 
 <style is:global>
@@ -467,8 +496,13 @@ const developments = [
   }
 
   .home-regions {
-    padding-block: clamp(4rem, 7vw, 6.5rem);
+    position: relative;
+    z-index: 2;
+    margin-top: -2rem;
+    padding: clamp(3.25rem, 5.5vw, 4.6rem) 0 clamp(3.5rem, 6vw, 5rem);
+    border-radius: 30px 30px 0 0;
     background: #f4f4f4;
+    overflow: hidden;
   }
 
   .home-regions .home-section-title {
@@ -486,24 +520,26 @@ const developments = [
 
   .home-regions__grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.7rem 0.85rem;
-    margin-top: clamp(2rem, 4vw, 3.5rem);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.72rem;
+    margin-top: clamp(1.9rem, 3.2vw, 2.8rem);
   }
 
   .home-region-pill {
-    min-height: 58px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.65rem;
-    padding: 0.85rem 1rem;
+    padding: 0.78rem 0.95rem;
     background: var(--color-white);
     color: #071b68;
     border: 1px solid rgba(7, 27, 104, 0.04);
     border-radius: 8px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.035);
-    font-size: 16px;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1.15;
     font-weight: 700;
     letter-spacing: 0;
     text-align: center;
@@ -527,6 +563,11 @@ const developments = [
     background: var(--color-white);
   }
 
+  .home-featured > .container {
+    max-width: 1840px;
+    padding-inline: clamp(1.5rem, 3.2vw, 4.25rem);
+  }
+
   .home-featured__header {
     max-width: 680px;
     margin-bottom: clamp(3.1rem, 5.8vw, 5.4rem);
@@ -547,17 +588,29 @@ const developments = [
 
   .home-properties-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(1.5rem, 3vw, 2.6rem);
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - clamp(2.7rem, 4vw, 4rem)) / 3);
+    gap: clamp(1.35rem, 2vw, 2rem);
+    margin-inline: calc(var(--container-padding) * -1);
+    padding-inline: var(--container-padding);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--container-padding);
+    scrollbar-width: none;
+  }
+
+  .home-properties-grid::-webkit-scrollbar {
+    display: none;
   }
 
   .home-property-card {
     color: #000;
+    scroll-snap-align: start;
   }
 
   .home-property-card__media {
     position: relative;
-    aspect-ratio: 1.5 / 1;
+    aspect-ratio: 547 / 369.22;
     overflow: hidden;
     border-radius: 8px;
     background: #e7e7e7;
@@ -686,6 +739,57 @@ const developments = [
   .home-property-card__body dt,
   .home-property-card__body dd {
     margin: 0;
+  }
+
+  .home-featured__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-top: clamp(2rem, 4.8vw, 3.4rem);
+  }
+
+  .home-featured__arrows {
+    display: flex;
+    gap: 0.8rem;
+  }
+
+  .home-featured__arrows button {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .home-featured__view-all {
+    width: 133px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: #001a72;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .home-featured__view-all svg {
+    width: 16px;
+    height: 16px;
   }
 
   .home-reviews {
@@ -936,18 +1040,31 @@ const developments = [
   }
 
   .home-cta .btn {
-    min-width: 0;
-    min-height: 44px;
-    padding: 0.78rem 1.45rem;
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.45rem;
     border-radius: 999px;
+    border: 1px solid #001a72;
+    background: #001a72;
+    color: #fff;
+    font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 14px;
     line-height: 1;
+    font-weight: 800;
   }
 
   .home-developments {
     padding-block: clamp(4.5rem, 8vw, 7rem);
-    background: #fff;
+    background: #f4f4f4;
     overflow: hidden;
+  }
+
+  .home-developments > .container {
+    max-width: 1840px;
+    padding-inline: clamp(1.5rem, 3.2vw, 4.25rem);
   }
 
   .home-developments__header {
@@ -957,7 +1074,7 @@ const developments = [
 
   .home-developments__header h2 {
     margin: 0;
-    color: #000;
+    color: #121275;
     font-family: "Montserrat", var(--font-sans), sans-serif;
     font-size: 24px;
     line-height: 1.16;
@@ -1097,6 +1214,88 @@ const developments = [
     height: 25px;
   }
 
+  @media (min-width: 721px) {
+    .home-hero {
+      min-height: 731px !important;
+      height: 731px;
+    }
+
+    .home-hero__content {
+      padding-top: calc(var(--header-height) + 4rem);
+      padding-bottom: 5.5rem;
+    }
+
+    .home-hero__title {
+      max-width: 980px;
+      margin-bottom: 1rem;
+      font-size: 68px;
+      line-height: 76px;
+      font-weight: 800;
+    }
+
+    .home-hero__subtitle {
+      max-width: 720px;
+      margin-bottom: 1.65rem;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 700;
+    }
+
+    .home-hero__search {
+      width: min(100%, 640px);
+      min-height: 58px;
+      gap: 0.7rem;
+      padding: 0.5rem 0.58rem 0.5rem 1.15rem;
+    }
+
+    .home-hero__search-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .home-hero__search button {
+      width: 44px;
+      height: 44px;
+    }
+
+    .home-hero__search button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .home-regions .home-section-title {
+      font-size: 48px;
+      line-height: 60px;
+      font-weight: 800;
+    }
+
+    .home-region-pill {
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 700;
+    }
+
+    .home-featured .home-section-title {
+      color: #001a72;
+      font-size: 48px;
+      line-height: 60px;
+      font-weight: 800;
+    }
+
+    .home-featured__header p {
+      color: #686868;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 500;
+    }
+
+    .home-developments__header h2 {
+      font-size: 48px;
+      line-height: 60px;
+      font-weight: 800;
+    }
+  }
+
   @media (max-width: 720px) {
     .home-hero {
       min-height: 537px !important;
@@ -1168,8 +1367,8 @@ const developments = [
     }
 
     .home-properties-grid {
-      grid-template-columns: 1fr;
-      gap: 2.65rem;
+      grid-auto-columns: minmax(285px, 82%);
+      gap: 1rem;
     }
 
     .home-section-title {
@@ -1261,6 +1460,23 @@ const developments = [
       margin-right: 0.28rem;
     }
 
+    .home-featured__controls {
+      align-items: center;
+      margin-top: 2rem;
+    }
+
+    .home-featured__arrows button {
+      width: 40px;
+      height: 40px;
+      font-size: 28px;
+    }
+
+    .home-featured__view-all {
+      width: 133px;
+      min-height: 40px;
+      font-size: 14px;
+    }
+
     .home-reviews {
       padding-block: 3.25rem;
     }
@@ -1303,12 +1519,10 @@ const developments = [
     }
 
     .section--cta .btn {
-      width: auto;
-      max-width: 100%;
-      min-height: 44px;
-      display: flex;
+      width: 100%;
+      min-height: 48px;
       margin-inline: auto;
-      padding-inline: 1.25rem;
+      padding-inline: 1.45rem;
       text-align: center;
       white-space: normal;
       transform: none !important;

@@ -25,6 +25,101 @@
 
 ---
 
+## Home aprobado como referencia visual
+
+Usar `/es/` como referencia principal para nuevas secciones del sitio. Si se
+crean bloques nuevos en otras paginas, primero intentar reutilizar estos estilos
+antes de inventar otros.
+
+### Paleta aprobada
+
+- Azul principal: `#001a72`
+- Azul texto/titulos secundarios: `#071b68`
+- Azul oscuro review/background especial: `#131176`
+- Gris de secciones claras: `#f4f4f4`
+- Blanco: `#fff`
+- Negro texto fuerte: `#000` / `#111`
+- Texto suave sobre blanco: `rgba(0, 0, 0, 0.62)`
+- Texto suave sobre azul: `rgba(255, 255, 255, 0.72)` a `0.82`
+- Dorado estrellas/review: `#d5a329` / `#f4c64d`
+
+### Tipografia aprobada
+
+La familia base es siempre Montserrat.
+
+- Hero home `h1`: `36px`, `font-weight: 800`, `line-height: 1.08`
+- Hero subtitulo: `16px`, `font-weight: 700`, `line-height: 1.45`
+- Titulos compactos de seccion aprobados: `24px`, `font-weight: 800`, `line-height: 1.16`
+- Parrafos de seccion: `16px`, `font-weight: 500`, `line-height: 1.5`
+- Titulos de cards de desarrollos: `16px`, `font-weight: 500`, `line-height: 1.18`
+- Labels/form labels: `13px`, `font-weight: 700`
+- Texto de inputs: `14px`, `font-weight: 500`
+- Botones principales compactos: `14px`, `font-weight: 800`, `min-height: 48px`
+
+### Superficies y secciones
+
+- Secciones claras tipo barrios/desarrollos: fondo `#f4f4f4`.
+- Cards y formularios sobre fondo claro: fondo blanco, `border-radius: 8px`.
+- Cards de imagen: `border-radius: 8px`, overlay oscuro cuando haya texto encima.
+- Secciones azules: usar `#001a72` para bloques generales y `#131176` para la
+  seccion de reviews aprobada.
+- Footer aprobado: fondo `#001a72`, textos blancos, iconos blancos con borde
+  blanco translucido, sin linea superior.
+
+### Botones aprobados
+
+Boton principal tipo review/CTA:
+
+```css
+width: 100%;
+min-height: 48px;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+border-radius: 999px;
+border: 1px solid #001a72;
+background: #001a72;
+color: #fff;
+font-family: "Montserrat", var(--font-sans), sans-serif;
+font-size: 14px;
+line-height: 1;
+font-weight: 800;
+```
+
+Boton secundario compacto tipo "Ver todo":
+
+```css
+width: 133px;
+min-height: 40px;
+border-radius: 999px;
+background: #001a72;
+color: #fff;
+font-size: 14px;
+font-weight: 700;
+```
+
+Flechas de carrusel:
+
+```css
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: #fff;
+color: #000;
+```
+
+### Responsive movil aprobado
+
+- Evitar que los textos dependan de `vw` cuando ya hay tamanos aprobados.
+- Mantener `border-radius: 30px 30px 0 0` en secciones inferiores que suben sobre
+  el hero, como en `home-regions`.
+- En bloques full-width moviles, usar margenes negativos con
+  `var(--container-padding)` solo cuando sea necesario para eliminar laterales
+  blancos.
+- Validar en anchos pequenos tipo Samsung/iPhone antes de subir a produccion.
+
+---
+
 ## 1. Tokens (variables CSS)
 
 Definir TODAS las decisiones visuales como custom properties en `:root`. **Nunca**
