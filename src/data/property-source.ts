@@ -142,8 +142,11 @@ export function fromNivora(np: PublicProperty): Property {
   // Type: si Nivora devuelve un type no soportado, propagamos error.
   const propertyType: PropertyType = requireKnownType(np);
 
-  // Operación: Nivora ya devuelve 'rent' | 'sale' literales.
-  const transaction: Property['transaction'] = np.operation;
+  // En el contrato Nivora, una tarifa mensual identifica alquiler. Usamos
+  // ese dato como salvaguarda si operation llega discordante (p. ej. sale
+  // junto con period=month); para venta el periodo debe ser null.
+  const transaction: Property['transaction'] =
+    np.pricing.period === 'month' ? 'rent' : np.operation;
 
   // Precio: amountCents (entero) → euros (decimal).
   const priceEuros = np.pricing.amountCents / 100;
@@ -163,6 +166,9 @@ export function fromNivora(np: PublicProperty): Property {
   const images = orderedImages.map((image) => image.variants?.gallery ?? image.url);
   const cardImages = orderedImages.map((image) =>
     image.variants?.card ?? image.variants?.gallery ?? image.url
+  );
+  const thumbImages = orderedImages.map((image) =>
+    image.variants?.thumb ?? image.variants?.card ?? image.variants?.gallery ?? image.url
   );
   const imagePositions = orderedImages.map(imagePosition);
 
@@ -201,6 +207,7 @@ export function fromNivora(np: PublicProperty): Property {
     details: np.details,
     images,
     cardImages,
+    thumbImages,
     imagePositions,
     imagePosition: imagePositions[0],
     map: np.map,

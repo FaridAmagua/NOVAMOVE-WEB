@@ -205,8 +205,12 @@ const financialFeatures = rows([
           <span class="prop-gallery__signature">{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</span>
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" fetchpriority="high"
                style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
-          <span class={`prop-gallery__badge prop-gallery__badge--${property.status === 'available' ? 'rent' : 'sale'}`}>
-            {property.status === 'available' ? (locale === 'es' ? 'Alquiler' : 'Rent') : statusLabel(property.status, locale)}
+          <span class={`prop-gallery__badge prop-gallery__badge--${property.transaction}`}>
+            {property.status === 'reserved'
+              ? statusLabel(property.status, locale)
+              : property.transaction === 'sale'
+                ? (locale === 'es' ? 'Venta' : 'Sale')
+                : (locale === 'es' ? 'Alquiler' : 'Rent')}
           </span>
           <span class="prop-gallery__zoom" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -217,8 +221,8 @@ const financialFeatures = rows([
         </div>
         <div class="prop-gallery__thumbs">
           {property.images.slice(1, 5).map((img, index) => (
-            <div class="prop-gallery__thumb" data-lightbox-trigger="property" data-lightbox-group="property" role="button" tabindex="0" aria-label="Ver foto">
-              <img src={img} alt="" loading="lazy" style={`object-position: ${property.imagePositions?.[index + 1] ?? '50% 50%'};`} />
+            <div class="prop-gallery__thumb" data-lightbox-trigger="property" data-lightbox-group="property" data-lightbox-src={img} data-lightbox-preview={property.thumbImages?.[index + 1] ?? property.cardImages?.[index + 1] ?? img} role="button" tabindex="0" aria-label="Ver foto">
+              <img src={property.thumbImages?.[index + 1] ?? property.cardImages?.[index + 1] ?? img} alt="" loading="lazy" decoding="async" style={`object-position: ${property.imagePositions?.[index + 1] ?? '50% 50%'};`} />
             </div>
           ))}
           {property.images.length < 5 && Array.from({ length: 5 - property.images.length }).map(() => (
@@ -234,8 +238,8 @@ const financialFeatures = rows([
       </div>
       {property.images.length > 5 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'Más fotografías de la propiedad' : 'More property photos'}>
         {property.images.slice(5).map((img, index) => (
-          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" aria-label={locale === 'es' ? `Ver fotografía ${index + 6}` : `View photo ${index + 6}`}>
-            <img src={img} alt={`${property.name[locale]} · ${index + 6}`} loading="lazy" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
+          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" data-lightbox-src={img} data-lightbox-preview={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} aria-label={locale === 'es' ? `Ver fotografía ${index + 6}` : `View photo ${index + 6}`}>
+            <img src={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} alt={`${property.name[locale]} · ${index + 6}`} loading="lazy" decoding="async" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
           </button>
         ))}
       </div>}

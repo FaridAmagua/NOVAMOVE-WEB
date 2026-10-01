@@ -108,6 +108,7 @@ export type PublicProperty = {
     variants?: {
       card: string;
       gallery: string;
+      thumb?: string;
     };
   }>;
 

@@ -66,6 +66,8 @@ export interface Property {
   images: string[];
   /** Versiones ligeras para tarjetas y listados. Si faltan, se usan images. */
   cardImages?: string[];
+  /** Miniaturas WebP para galerías; el lightbox conserva la URL gallery de alta calidad. */
+  thumbImages?: string[];
   /** CSS object-position for every image, in the same order as images. */
   imagePositions?: string[];
   /** CSS object-position. */

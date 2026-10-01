@@ -156,6 +156,7 @@ const { selector = '[data-lightbox]' } = Astro.props;
     prevBtn: HTMLButtonElement;
     nextBtn: HTMLButtonElement;
     images: string[] = [];
+    previews: string[] = [];
     alts: string[] = [];
     index = 0;
     triggers: HTMLElement[] = [];
@@ -208,7 +209,11 @@ const { selector = '[data-lightbox]' } = Astro.props;
       );
       this.images = this.triggers.map(el => {
         const img = el.querySelector('img') || el as unknown as HTMLImageElement;
-        return (img as HTMLImageElement).src;
+        return el.dataset.lightboxSrc || (img as HTMLImageElement).src;
+      });
+      this.previews = this.triggers.map(el => {
+        const img = el.querySelector('img') || el as unknown as HTMLImageElement;
+        return el.dataset.lightboxPreview || (img as HTMLImageElement).src;
       });
       this.alts = this.triggers.map(el => {
         const img = el.querySelector('img');
@@ -247,7 +252,7 @@ const { selector = '[data-lightbox]' } = Astro.props;
 
       // Rebuild thumbs
       this.thumbsContainer.innerHTML = '';
-      this.images.forEach((src, i) => {
+      this.previews.forEach((src, i) => {
         const thumb = document.createElement('button');
         thumb.type = 'button';
         thumb.className = 'lightbox__thumb' + (i === this.index ? ' is-active' : '');
