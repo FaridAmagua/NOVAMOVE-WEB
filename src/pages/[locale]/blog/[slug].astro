@@ -43,11 +43,41 @@ const related = allPosts
   .slice(0, 3);
 
 const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${cat}`);
+const articleUrl = new URL(
+  `/${displayLocale}/blog/${post.slug.replace(/-(es|en)$/, '')}/`,
+  Astro.site ?? 'https://globalmove.agency'
+).toString();
+const articleStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.description,
+  image: post.data.cover,
+  datePublished: post.data.publishDate.toISOString(),
+  dateModified: post.data.publishDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: post.data.author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Global Move',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/brand/global-move-icon-gold.png', Astro.site ?? 'https://globalmove.agency').toString(),
+    },
+  },
+  mainEntityOfPage: articleUrl,
+  inLanguage: displayLocale,
+};
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
+  ogType="article"
+  ogImage={post.data.cover ?? '/og-image.jpg'}
+  structuredData={articleStructuredData}
   transparentHeader={true}
 >
   <article class="article">
@@ -56,6 +86,9 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
         <img
           src={post.data.cover}
           alt={post.data.coverAlt ?? ''}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
           class="absolute inset-0 w-full h-full object-cover"
         />
         <div class="absolute inset-0"
@@ -114,6 +147,7 @@ const categoryLabel = (cat: string, loc: Locale) => t(loc, `blog.categories.${ca
                       src={p.data.cover}
                       alt=""
                       loading="lazy"
+                      decoding="async"
                       class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>

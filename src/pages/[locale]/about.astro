@@ -53,7 +53,7 @@ export async function getStaticPaths() {
     <div class="container">
       <div class="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-8 md:gap-16 items-center">
         <div class="reveal rounded-lg overflow-hidden aspect-[4/5] shadow-md">
-          <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80" alt="" loading="lazy" class="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1400&q=80" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
         </div>
         <div class="reveal">
           <p class="eyebrow">{t(locale, 'about.team.title')}</p>

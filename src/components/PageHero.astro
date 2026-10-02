@@ -18,7 +18,7 @@ const {
 
 <section class={`page-hero page-hero--${align}`}>
   <div class="page-hero__bg" aria-hidden="true">
-    <img src={image} alt="" loading="eager" />
+    <img src={image} alt="" loading="eager" decoding="async" fetchpriority="high" />
     <div class="page-hero__overlay"></div>
   </div>
   <div class="container page-hero__content">

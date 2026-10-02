@@ -41,8 +41,8 @@ const isActive = (href: string) => {
          or navy glass (scrolled / non-transparent pages). The image is white-ish,
          designed for dark backgrounds. -->
     <a href={localizedPath(locale, '/')} class="site-header__wordmark" aria-label="Global Move — Inicio">
-      <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="894" height="100" />
-      <img class="site-header__wordmark-icon" src="/brand/global-move-icon-gold.png" alt="" width="512" height="512" aria-hidden="true" />
+      <img src="/brand/wordmark-light.png" alt="GLOBAL.MOVE" width="894" height="100" decoding="async" fetchpriority="high" />
+      <img class="site-header__wordmark-icon" src="/brand/global-move-icon-gold.png" alt="" width="512" height="512" aria-hidden="true" decoding="async" fetchpriority="high" />
       <span>GLOBAL.MOVE</span>
     </a>
 

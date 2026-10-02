@@ -34,11 +34,25 @@ if (sort === 'price-asc') {
     (a, b) => Number(!!b.featured) - Number(!!a.featured)
   );
 }
+
+const propertiesStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: t(locale, 'properties.title'),
+  numberOfItems: filtered.length,
+  itemListElement: filtered.slice(0, 24).map((property, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: new URL(`/${locale}/properties/${property.slug}/`, Astro.site ?? 'https://globalmove.agency').toString(),
+    name: property.name[locale],
+  })),
+};
 ---
 
 <BaseLayout
   title={t(locale, 'properties.title')}
   description={t(locale, 'properties.subtitle')}
+  structuredData={propertiesStructuredData}
   transparentHeader={false}
 >
   <section class="properties-listing">
@@ -94,6 +108,7 @@ if (sort === 'price-asc') {
                       src={p.cardImages?.[0] ?? p.images[0]}
                       alt={p.name[locale]}
                       loading="lazy"
+                      decoding="async"
                       style={`object-position: ${p.imagePosition ?? 'center 62%'};`}
                     />
                     <span class="property-result__transaction">

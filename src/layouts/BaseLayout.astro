@@ -9,6 +9,9 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  noindex?: boolean;
   transparentHeader?: boolean;
   /** Hide the global header (used by full-bleed pages like 404). */
   hideHeader?: boolean;
@@ -20,6 +23,9 @@ const {
   title,
   description,
   ogImage = '/og-image.jpg',
+  ogType = 'website',
+  structuredData,
+  noindex = false,
   transparentHeader = false,
   hideHeader = false,
   hideFooter = false,
@@ -32,18 +38,70 @@ const seg = Astro.url.pathname.split('/').filter(Boolean)[0];
 const locale: Locale = paramLocale ?? ((seg === 'en' || seg === 'es') ? seg : 'es');
 
 const path = Astro.url.pathname;
-const siteTitle = t(locale, 'site.name');
-const siteTagline = t(locale, 'site.tagline');
-const defaultDesc = t(locale, 'site.description');
+const asText = (value: string | string[]) => Array.isArray(value) ? value.join(' ') : value;
+const siteTitle = asText(t(locale, 'site.name'));
+const siteTagline = asText(t(locale, 'site.tagline'));
+const defaultDesc = asText(t(locale, 'site.description'));
 const fullTitle = title ? `${title} · ${siteTitle}` : `${siteTitle} · ${siteTagline}`;
 const finalDesc = description ?? defaultDesc;
+const site = Astro.site ?? new URL('https://globalmove.agency');
+const siteOrigin = new URL(site).origin;
 
-// Build canonical: strip trailing slash except for the root locale path
-const normalizedPath = path.replace(/\/+$/, '') || `/${locale}`;
-const canonical = new URL(normalizedPath, Astro.site ?? 'https://globalmove.agency').toString();
+const withTrailingSlash = (pathname: string) => {
+  const clean = pathname.split('?')[0]?.replace(/\/+$/, '') || '';
+  return clean ? `${clean}/` : '/';
+};
 
-const restOfPath = stripLocale(path); // e.g. "/services"
-const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 'https://globalmove.agency').toString();
+// Canonicals match Astro trailingSlash: "always".
+const canonicalPath = withTrailingSlash(path);
+const canonical = new URL(canonicalPath, site).toString();
+
+const restOfPath = withTrailingSlash(stripLocale(path)); // e.g. "/services/"
+const buildAlt = (loc: Locale) => {
+  const suffix = restOfPath === '/' ? '' : restOfPath;
+  return new URL(withTrailingSlash(`/${loc}${suffix}`), site).toString();
+};
+
+const baseStructuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: siteTitle,
+    url: siteOrigin,
+    logo: new URL('/brand/global-move-icon-gold.png', site).toString(),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteTitle,
+    url: siteOrigin,
+    inLanguage: locale,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteOrigin}/${locale}/properties/?dest={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: fullTitle,
+    description: finalDesc,
+    url: canonical,
+    inLanguage: locale,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: siteTitle,
+      url: siteOrigin,
+    },
+  },
+];
+const extraStructuredData = Array.isArray(structuredData)
+  ? structuredData
+  : structuredData
+    ? [structuredData]
+    : [];
+const structuredDataItems = [...baseStructuredData, ...extraStructuredData];
 ---
 
 <!doctype html>
@@ -52,7 +110,8 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#0A1D3F" />
+    <meta name="theme-color" content="#001A72" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
@@ -61,10 +120,13 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
     <link rel="canonical" href={canonical} />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={finalDesc} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.agency').toString()} />
+    <meta property="og:image" content={new URL(ogImage, site).toString()} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={fullTitle} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_US'} />
@@ -74,7 +136,7 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={finalDesc} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site ?? 'https://globalmove.agency').toString()} />
+    <meta name="twitter:image" content={new URL(ogImage, site).toString()} />
 
     <!-- Hreflang alternates -->
     {supportedLocales.map(loc => (
@@ -84,6 +146,14 @@ const buildAlt = (loc: Locale) => new URL(`/${loc}${restOfPath}`, Astro.site ?? 
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..900;1,400..900&display=swap" />
+    </noscript>
+    {structuredDataItems.map((item) => (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(item)} />
+    ))}
     <ViewTransitions fallback="swap" />
   </head>
   <body class:list={[{ 'no-header': hideHeader }]}>
