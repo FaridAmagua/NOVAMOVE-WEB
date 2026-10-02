@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Lightbox from '../../../components/Lightbox.astro';
 import { t, supportedLocales, type Locale } from '../../../utils/i18n';
@@ -35,13 +35,13 @@ const propMenuItems = [
   { label: t(locale, 'nav.contact'), href: `/${locale}/contact/` },
 ];
 
-// Nivora = solo alquiler larga duraciÃ³n. CTA = "Solicitar informaciÃ³n".
-// VersiÃ³n de precio: â‚¬/mes (Nivora envÃ­a amountCents/mes).
+// Nivora = solo alquiler larga duración. CTA = "Solicitar información".
+// Versión de precio: €/mes (Nivora envía amountCents/mes).
 const priceUnit = `/${locale === 'es' ? 'mes' : 'month'}`;
 const ctaLabel = t(locale, 'properties.requestInfo');
 const whatsappNumber = '34601518207';
 const whatsappMessage = locale === 'es'
-  ? `Hola, me interesa la propiedad ${property.name.es} (${property.reference}). Â¿PodÃ©is darme mÃ¡s informaciÃ³n?`
+  ? `Hola, me interesa la propiedad ${property.name.es} (${property.reference}). ¿Podéis darme más información?`
   : `Hello, I am interested in ${property.name.en} (${property.reference}). Could you send me more information?`;
 const ctaHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 const visitLabel = locale === 'es' ? 'Concertar visita' : 'Schedule a viewing';
@@ -54,7 +54,7 @@ const availableFromLabel = showAvailableFrom && availableFromDate
   : '';
 
 // Features por idioma: en ES usa features.es; en EN usa features.en con
-// fallback a features.es si estÃ¡ vacÃ­o.
+// fallback a features.es si está vacío.
 const features = (() => {
   const es = property.features.es ?? [];
   const enRaw = property.features.en ?? [];
@@ -80,9 +80,9 @@ const mapSrc = property.lat != null && property.lng != null
   : `https://maps.google.com/maps?q=${encodeURIComponent(property.map?.query || mapLocation)}&z=${mapZoom}&output=embed`;
 const processSteps = locale === 'es'
   ? [
-      ['Solicita informaciÃ³n', 'CuÃ©ntanos quÃ© necesitas y resolveremos tus dudas sobre la vivienda.'],
-      ['Concertamos una visita', 'Coordinamos contigo el mejor dÃ­a y hora para conocer la propiedad.'],
-      ['Preparamos el alquiler', 'Te acompaÃ±amos con las condiciones, documentaciÃ³n y siguientes pasos.'],
+      ['Solicita información', 'Cuéntanos qué necesitas y resolveremos tus dudas sobre la vivienda.'],
+      ['Concertamos una visita', 'Coordinamos contigo el mejor día y hora para conocer la propiedad.'],
+      ['Preparamos el alquiler', 'Te acompañamos con las condiciones, documentación y siguientes pasos.'],
     ]
   : [
       ['Request information', 'Tell us what you need and we will answer your questions about the property.'],
@@ -96,7 +96,7 @@ const row = (label: string, value: unknown): DetailRow | null => {
   return [label, String(value)];
 };
 const yesNo = (value: boolean) => value
-  ? (locale === 'es' ? 'SÃ­' : 'Yes')
+  ? (locale === 'es' ? 'Sí' : 'Yes')
   : (locale === 'es' ? 'No' : 'No');
 const dateLabel = (value?: string) => {
   if (!value) return null;
@@ -107,22 +107,22 @@ const rows = (values: Array<DetailRow | null>): DetailRow[] => values.filter((va
 
 const overviewItems = rows([
   row(locale === 'es' ? 'Tipo de propiedad' : 'Property type', propertyTypeLabel(property.type, locale)),
-  row(locale === 'es' ? 'UbicaciÃ³n' : 'Location', mapLocation),
+  row(locale === 'es' ? 'Ubicación' : 'Location', mapLocation),
   row(locale === 'es' ? 'Referencia' : 'Reference', property.reference),
   row(locale === 'es' ? 'Estado' : 'Status', statusLabel(property.status, locale)),
-  row(locale === 'es' ? 'AÃ±o de construcciÃ³n' : 'Year built', property.details?.yearBuilt),
-  row(locale === 'es' ? 'Ãšltima actualizaciÃ³n' : 'Last updated', dateLabel(property.updatedAt)),
+  row(locale === 'es' ? 'Año de construcción' : 'Year built', property.details?.yearBuilt),
+  row(locale === 'es' ? 'Última actualización' : 'Last updated', dateLabel(property.updatedAt)),
 ]);
 
 const interiorFeatures = rows([
   row(locale === 'es' ? 'Dormitorios' : 'Bedrooms', property.bedrooms),
-  row(locale === 'es' ? 'BaÃ±os' : 'Bathrooms', property.bathrooms),
-  row(locale === 'es' ? 'Superficie construida' : 'Built area', property.sizeM2 == null ? null : `${property.sizeM2} mÂ²`),
-  row(locale === 'es' ? 'Superficie Ãºtil' : 'Usable area', property.usableAreaM2 == null ? null : `${property.usableAreaM2} mÂ²`),
+  row(locale === 'es' ? 'Baños' : 'Bathrooms', property.bathrooms),
+  row(locale === 'es' ? 'Superficie construida' : 'Built area', property.sizeM2 == null ? null : `${property.sizeM2} m²`),
+  row(locale === 'es' ? 'Superficie útil' : 'Usable area', property.usableAreaM2 == null ? null : `${property.usableAreaM2} m²`),
   row(locale === 'es' ? 'Amueblado' : 'Furnished', property.details?.furnished == null ? null : yesNo(property.details.furnished)),
-  row(locale === 'es' ? 'CalefacciÃ³n' : 'Heating', property.details?.heatingType),
+  row(locale === 'es' ? 'Calefacción' : 'Heating', property.details?.heatingType),
   row(locale === 'es' ? 'Aire acondicionado' : 'Air conditioning', property.details?.airConditioningType),
-  row(locale === 'es' ? 'OrientaciÃ³n' : 'Orientation', property.details?.orientation),
+  row(locale === 'es' ? 'Orientación' : 'Orientation', property.details?.orientation),
 ]);
 
 const exteriorFeatures = rows([
@@ -131,13 +131,13 @@ const exteriorFeatures = rows([
   row(locale === 'es' ? 'Ascensor' : 'Lift', property.details?.elevator == null ? null : yesNo(property.details.elevator)),
   row(locale === 'es' ? 'Plazas de garaje' : 'Parking spaces', property.details?.parkingSpaces),
   row(locale === 'es' ? 'Terraza' : 'Terrace', property.details?.terrace == null ? null : yesNo(property.details.terrace)),
-  row(locale === 'es' ? 'Superficie de terraza' : 'Terrace area', property.terraceAreaM2 == null ? null : `${property.terraceAreaM2} mÂ²`),
+  row(locale === 'es' ? 'Superficie de terraza' : 'Terrace area', property.terraceAreaM2 == null ? null : `${property.terraceAreaM2} m²`),
   row(locale === 'es' ? 'Piscina' : 'Pool', property.details?.pool == null ? null : yesNo(property.details.pool)),
-  row(locale === 'es' ? 'Parcela' : 'Plot area', property.plotAreaM2 == null ? null : `${property.plotAreaM2} mÂ²`),
+  row(locale === 'es' ? 'Parcela' : 'Plot area', property.plotAreaM2 == null ? null : `${property.plotAreaM2} m²`),
 ]);
 
 const detailFeatures = rows([
-  row(locale === 'es' ? 'Certificado energÃ©tico' : 'Energy rating', property.details?.energyRating),
+  row(locale === 'es' ? 'Certificado energético' : 'Energy rating', property.details?.energyRating),
   row(locale === 'es' ? 'Disponible desde' : 'Available from', availableFromLabel || null),
 ]);
 
@@ -202,7 +202,7 @@ const propertyStructuredData = {
        Hero: Gallery + Title (top section, full bleed)
        ======================================================= -->
   <section class="prop-gallery-wrap">
-    <div class="prop-detail-nav" aria-label={locale === 'es' ? 'NavegaciÃ³n de propiedad' : 'Property navigation'}>
+    <div class="prop-detail-nav" aria-label={locale === 'es' ? 'Navegación de propiedad' : 'Property navigation'}>
       <a href={`/${locale}/`} class="prop-detail-nav__wordmark" aria-label="Global Move - Inicio">
         <img src="/brand/global-move-icon-gold.png" alt="" width="512" height="512" aria-hidden="true" />
         <span>GLOBAL.MOVE</span>
@@ -214,7 +214,7 @@ const propertyStructuredData = {
             <path d="m20 20-3.5-3.5"></path>
           </svg>
         </a>
-        <button class="prop-detail-nav__icon prop-detail-nav__toggle site-header__toggle" type="button" aria-label="Abrir menÃº" aria-expanded="false" aria-controls="prop-detail-menu" data-prop-menu-toggle>
+        <button class="prop-detail-nav__icon prop-detail-nav__toggle site-header__toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="prop-detail-menu" data-prop-menu-toggle>
           <span></span>
           <span></span>
           <span></span>
@@ -222,7 +222,7 @@ const propertyStructuredData = {
       </div>
     </div>
     <div id="prop-detail-menu" class="prop-detail-menu" aria-hidden="true" data-prop-menu>
-      <nav class="prop-detail-menu__nav" aria-label={locale === 'es' ? 'MenÃº de propiedad' : 'Property menu'}>
+      <nav class="prop-detail-menu__nav" aria-label={locale === 'es' ? 'Menú de propiedad' : 'Property menu'}>
         {propMenuItems.map(item => (
           <a href={item.href}>{item.label}</a>
         ))}
@@ -232,9 +232,9 @@ const propertyStructuredData = {
       <!-- Breadcrumb -->
       <nav class="prop-breadcrumb reveal" aria-label="Breadcrumb">
         <a href={`/${locale}/`}>{t(locale, 'properties.breadcrumbHome')}</a>
-        <span aria-hidden="true">â€º</span>
+        <span aria-hidden="true">›</span>
         <a href={`/${locale}/properties/`}>{t(locale, 'properties.breadcrumbProperties')}</a>
-        <span aria-hidden="true">â€º</span>
+        <span aria-hidden="true">›</span>
         <span aria-current="page">{property.name[locale]}</span>
       </nav>
 
@@ -248,7 +248,7 @@ const propertyStructuredData = {
           tabindex="0"
           aria-label={locale === 'es' ? 'Ver fotos en pantalla completa' : 'View photos fullscreen'}
         >
-          <span class="prop-gallery__signature">{locale === 'es' ? 'GLOBAL.MOVE SelecciÃ³n' : 'GLOBAL.MOVE Signature'}</span>
+          <span class="prop-gallery__signature">{locale === 'es' ? 'GLOBAL.MOVE Selección' : 'GLOBAL.MOVE Signature'}</span>
           <img src={property.images[0]} alt={property.name[locale]} loading="eager" decoding="async" fetchpriority="high"
                style={`object-position: ${property.imagePositions?.[0] ?? property.imagePosition ?? '50% 50%'};`} />
           <span class={`prop-gallery__badge prop-gallery__badge--${property.transaction}`}>
@@ -297,11 +297,10 @@ const propertyStructuredData = {
           ))}
         </div>
       </div>
-      {property.images.length > 5 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'MÃ¡s fotografÃ­as de la propiedad' : 'More property photos'}>
+      {property.images.length > 5 && <div class="prop-gallery-extra" aria-label={locale === 'es' ? 'Más fotografías de la propiedad' : 'More property photos'}>
         {property.images.slice(5).map((img, index) => (
-          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" data-lightbox-src={img} data-lightbox-preview={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} aria-label={locale === 'es' ? `Ver fotografÃ­a ${index + 6}` : `View photo ${index + 6}`}>
-            <img src={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} alt={`${property.name[locale]} Â· ${index + 6}`} loading="lazy" decoding="async" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
-            <img src={img} alt={`${property.name[locale]} Â· ${index + 6}`} loading="lazy" decoding="async" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
+          <button class="prop-gallery-extra__item" type="button" data-lightbox-trigger="property" data-lightbox-group="property" data-lightbox-src={img} data-lightbox-preview={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} aria-label={locale === 'es' ? `Ver fotografía ${index + 6}` : `View photo ${index + 6}`}>
+            <img src={property.thumbImages?.[index + 5] ?? property.cardImages?.[index + 5] ?? img} alt={`${property.name[locale]} · ${index + 6}`} loading="lazy" decoding="async" style={`object-position: ${property.imagePositions?.[index + 5] ?? '50% 50%'};`} />
           </button>
         ))}
       </div>}
@@ -321,13 +320,13 @@ const propertyStructuredData = {
           <header class="prop-title-block reveal">
             {false && <div class="prop-title-block__meta">
               <span class="prop-title-block__type">{propertyTypeLabel(property.type, locale)}</span>
-              <span class="prop-title-block__dot">Â·</span>
+              <span class="prop-title-block__dot">·</span>
               <a href={`/${locale}/properties/?dest=${property.destination}`} class="prop-title-block__city">{destLabel}</a>
-              {showDetailedLocation && <span class="prop-title-block__dot">Â·</span>}
+              {showDetailedLocation && <span class="prop-title-block__dot">·</span>}
               {showDetailedLocation && <span>{detailedLocation}</span>}
               {property.reference && (
                 <>
-                  <span class="prop-title-block__dot">Â·</span>
+                  <span class="prop-title-block__dot">·</span>
                   <span class="prop-title-block__reference">Ref. {property.reference}</span>
                 </>
               )}
@@ -403,7 +402,7 @@ const propertyStructuredData = {
               <summary>
                 <span>
                   <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
-                  <span class="label-mobile">{locale === 'es' ? 'DescripciÃ³n de la propiedad' : 'Property Description'}</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
                 </span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
@@ -414,7 +413,7 @@ const propertyStructuredData = {
           </section>
 
           <section class="prop-overview prop-section reveal">
-            <h2 class="h3 prop-section__title">{locale === 'es' ? 'CaracterÃ­sticas' : 'Features'}</h2>
+            <h2 class="h3 prop-section__title">{locale === 'es' ? 'Características' : 'Features'}</h2>
             <dl class="prop-overview__list">
               {overviewItems.map(([label, value]) => (
                 <div>
@@ -431,7 +430,7 @@ const propertyStructuredData = {
               <summary>
                 <span>
                   <span class="label-desktop">{t(locale, 'properties.highlights')}</span>
-                  <span class="label-mobile">{locale === 'es' ? 'DescripciÃ³n de la propiedad' : 'Property Description'}</span>
+                  <span class="label-mobile">{locale === 'es' ? 'Descripción de la propiedad' : 'Property Description'}</span>
                 </span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
@@ -441,11 +440,11 @@ const propertyStructuredData = {
             </details>
           </section>
 
-          <!-- Features (amenities) â€” ES/EN con fallback -->
+          <!-- Features (amenities) — ES/EN con fallback -->
           {(features.length > 0 || interiorFeatures.length > 0 || exteriorFeatures.length > 0) && <section class="prop-section prop-features-section reveal">
             <details class="prop-mobile-accordion" open>
               <summary>
-                <span>{locale === 'es' ? 'CaracterÃ­sticas y amenidades' : 'Property Features & Amenities'}</span>
+                <span>{locale === 'es' ? 'Características y amenidades' : 'Property Features & Amenities'}</span>
                 <span class="prop-mobile-accordion__icon" aria-hidden="true"></span>
               </summary>
               <div class="property-feature-groups">
@@ -473,7 +472,7 @@ const propertyStructuredData = {
                 </section>}
               </div>
               {features.length > 0 && <section class="property-feature-group property-feature-group--exterior">
-                <h3>{locale === 'es' ? 'CaracterÃ­sticas adicionales' : 'Additional features'}</h3>
+                <h3>{locale === 'es' ? 'Características adicionales' : 'Additional features'}</h3>
                 <ul>
                   {features.map(feature => (
                     <li><span>{feature}</span></li>
@@ -497,7 +496,7 @@ const propertyStructuredData = {
                 </ul>
               </section>}
               {financialFeatures.length > 0 && <section class="property-feature-group property-feature-group--financial">
-                <h3>{locale === 'es' ? 'InformaciÃ³n econÃ³mica' : 'Financial'}</h3>
+                <h3>{locale === 'es' ? 'Información económica' : 'Financial'}</h3>
                 <ul>
                   {financialFeatures.map(([label, value]) => (
                     <li>
@@ -533,8 +532,8 @@ const propertyStructuredData = {
                   <div>
                     <strong>{mapLocation}</strong>
                     <span>{locale === 'es'
-                      ? `${mapPrecisionLabel} Â· radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicaciÃ³n exacta se facilita al concertar la visita.`
-                      : `${mapPrecisionLabel} Â· ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
+                      ? `${mapPrecisionLabel} · radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicación exacta se facilita al concertar la visita.`
+                      : `${mapPrecisionLabel} · ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
                   </div>
                 </div>
               </div>
@@ -549,15 +548,15 @@ const propertyStructuredData = {
               <span class="prop-whatsapp-card__icon" aria-hidden="true">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.3L3 20.5l1.7-4.9A8.4 8.4 0 1 1 20.5 11.6Z"/><path d="M8.3 7.8c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.7 1.7c.1.3.1.5-.1.7l-.6.7c-.2.2-.1.4 0 .6.7 1.2 1.7 2.2 3 2.8.3.1.5.1.7-.1l.8-1c.2-.2.4-.3.7-.2l1.7.8c.3.1.5.3.5.5 0 .3-.1 1.4-.7 2-.5.6-1.4.9-2.3.8-1.1-.1-2.6-.6-4.4-2.2-2-1.8-3.3-4-3.4-5.5 0-.7.2-1.2.5-1.6.4-.5.8-.8 1.2-1Z"/></svg>
               </span>
-              <div><strong>{locale === 'es' ? 'Consulta por WhatsApp' : 'Ask via WhatsApp'}</strong><p>{locale === 'es' ? 'El mensaje incluye automÃ¡ticamente el nombre y la referencia del inmueble.' : 'The message automatically includes the property name and reference.'}</p></div>
+              <div><strong>{locale === 'es' ? 'Consulta por WhatsApp' : 'Ask via WhatsApp'}</strong><p>{locale === 'es' ? 'El mensaje incluye automáticamente el nombre y la referencia del inmueble.' : 'The message automatically includes the property name and reference.'}</p></div>
               <a href={ctaHref} target="_blank" rel="noopener noreferrer" class="btn btn--primary">{locale === 'es' ? 'Abrir WhatsApp' : 'Open WhatsApp'}</a>
             </div>
           </section>
 
           <section class="prop-section prop-desktop-extra reveal">
             <header class="prop-section__header prop-section__header--center">
-              <p class="eyebrow">{locale === 'es' ? 'Alquiler de larga duraciÃ³n' : 'Long-term rental'}</p>
-              <h2 class="h2">{locale === 'es' ? 'Tu prÃ³xima vivienda, paso a paso' : 'Your next home, step by step'}</h2>
+              <p class="eyebrow">{locale === 'es' ? 'Alquiler de larga duración' : 'Long-term rental'}</p>
+              <h2 class="h2">{locale === 'es' ? 'Tu próxima vivienda, paso a paso' : 'Your next home, step by step'}</h2>
             </header>
             <ol class="prop-process" data-stagger data-stagger-step="120">
               {processSteps.map(([title, description], index) => (
@@ -578,7 +577,7 @@ const propertyStructuredData = {
             <h2 id="property-zone-title">{t(locale, 'properties.neighborhood')}</h2>
             <p class="property-zone-section__description">
               {locale === 'es'
-                ? 'AquÃ­ puedes ver aproximadamente la zona o el barrio donde se encuentra la propiedad.'
+                ? 'Aquí puedes ver aproximadamente la zona o el barrio donde se encuentra la propiedad.'
                 : 'Here you can see the approximate area or neighbourhood where the property is located.'}
             </p>
             <div class="prop-map">
@@ -597,8 +596,8 @@ const propertyStructuredData = {
                 <div>
                   <strong>{mapLocation}</strong>
                   <span>{locale === 'es'
-                    ? `${mapPrecisionLabel} Â· radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicaciÃ³n exacta se facilita al concertar la visita.`
-                    : `${mapPrecisionLabel} Â· ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
+                    ? `${mapPrecisionLabel} · radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicación exacta se facilita al concertar la visita.`
+                    : `${mapPrecisionLabel} · ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
                 </div>
               </div>
             </div>
@@ -653,7 +652,7 @@ const propertyStructuredData = {
                 <button type="button" data-tour-type="person" aria-pressed="true">{locale === 'es' ? 'Presencial' : 'In Person'}</button>
                 <button type="button" data-tour-type="video" aria-pressed="false">{locale === 'es' ? 'Videollamada' : 'Via Video Chat'}</button>
               </div>
-              <div class="booking-card__tour-days" data-tour-days aria-label={locale === 'es' ? 'Elige un dÃ­a' : 'Choose a day'}>
+              <div class="booking-card__tour-days" data-tour-days aria-label={locale === 'es' ? 'Elige un día' : 'Choose a day'}>
                 <button type="button" data-tour-day>
                   <small></small><strong></strong><em></em>
                 </button>
@@ -665,8 +664,8 @@ const propertyStructuredData = {
                 </button>
               </div>
               <div class="booking-card__tour-nav">
-                <button type="button" data-tour-prev aria-label={locale === 'es' ? 'DÃ­as anteriores' : 'Previous days'}>â€¹</button>
-                <button type="button" data-tour-next aria-label={locale === 'es' ? 'DÃ­as siguientes' : 'Next days'}>â€º</button>
+                <button type="button" data-tour-prev aria-label={locale === 'es' ? 'Días anteriores' : 'Previous days'}>‹</button>
+                <button type="button" data-tour-next aria-label={locale === 'es' ? 'Días siguientes' : 'Next days'}>›</button>
               </div>
               <div class="booking-card__price">
                 <span class="booking-card__from">{t(locale, 'common.from')}</span>
@@ -731,9 +730,9 @@ const propertyStructuredData = {
                 </div>
               </div>
               <p class="booking-card__note booking-card__note--trust">
-                ðŸ”’ {locale === 'es'
-                  ? 'Tus datos solo se usan para esta consulta Â· Sin compromiso'
-                  : 'Your data is only used for this inquiry Â· No commitment'}
+                🔒 {locale === 'es'
+                  ? 'Tus datos solo se usan para esta consulta · Sin compromiso'
+                  : 'Your data is only used for this inquiry · No commitment'}
               </p>
               <div class="booking-card__form-view" data-tour-form hidden>
                 <form class="booking-card__request-form" data-tour-request-form>
@@ -743,19 +742,19 @@ const propertyStructuredData = {
                     <input type="text" name="fullName" autocomplete="name" />
                   </label>
                   <label>
-                    <span>{locale === 'es' ? 'TelÃ©fono' : 'Phone'}</span>
+                    <span>{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
                     <input type="tel" name="phone" autocomplete="tel" />
                   </label>
                   <label>
-                    <span>{locale === 'es' ? 'Correo electrÃ³nico' : 'Email Address'}</span>
+                    <span>{locale === 'es' ? 'Correo electrónico' : 'Email Address'}</span>
                     <input type="email" name="email" autocomplete="email" />
                   </label>
                   <label class="booking-card__request-consent">
                     <input type="checkbox" name="tourConsent" required />
                     <span>
                       {locale === 'es'
-                        ? <>Al hacer clic en â€œEnviar solicitudâ€, acepto que Global Move me contacte por llamada, correo electrÃ³nico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. He leÃ­do y acepto la <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">PolÃ­tica de privacidad</a> y los <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">TÃ©rminos de uso</a>.</>
-                        : <>By clicking â€œSend Requestâ€ below, I agree to be contacted by Global Move via call, email, and text for real estate services. I can opt out at any time. I acknowledge that I have read and agree to the <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Terms of Use</a>.</>}
+                        ? <>Al hacer clic en “Enviar solicitud”, acepto que Global Move me contacte por llamada, correo electrónico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. He leído y acepto la <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Política de privacidad</a> y los <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Términos de uso</a>.</>
+                        : <>By clicking “Send Request” below, I agree to be contacted by Global Move via call, email, and text for real estate services. I can opt out at any time. I acknowledge that I have read and agree to the <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">Terms of Use</a>.</>}
                     </span>
                   </label>
                   <button type="submit">{locale === 'es' ? 'Enviar solicitud' : 'Send Request'}</button>
@@ -817,8 +816,8 @@ const propertyStructuredData = {
           <input type="email" name="email" placeholder="Email" autocomplete="email" />
         </label>
         <label>
-          <span>{locale === 'es' ? 'TelÃ©fono' : 'Phone'}</span>
-          <input type="tel" name="phone" placeholder={locale === 'es' ? 'TelÃ©fono' : 'Phone'} autocomplete="tel" />
+          <span>{locale === 'es' ? 'Teléfono' : 'Phone'}</span>
+          <input type="tel" name="phone" placeholder={locale === 'es' ? 'Teléfono' : 'Phone'} autocomplete="tel" />
         </label>
         <label class="property-contact-form__select">
           <span>{locale === 'es' ? 'Selecciona un tema' : 'Select a Topic'}</span>
@@ -840,13 +839,13 @@ const propertyStructuredData = {
               id="property-contact-termsAccepted"
               name="termsAccepted"
               required
-              oninvalid={locale === 'es' ? "this.setCustomValidity('Acepta los tÃ©rminos y condiciones')" : "this.setCustomValidity('Please accept the terms and conditions')"}
+              oninvalid={locale === 'es' ? "this.setCustomValidity('Acepta los términos y condiciones')" : "this.setCustomValidity('Please accept the terms and conditions')"}
               oninput="this.setCustomValidity('')"
             />
           </span>
           <span class="lp-tcr-message">
             {locale === 'es'
-              ? <>Acepto que Global Move me contacte por llamada, correo electrÃ³nico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. <a href={`/${locale}/privacy/`} target="_blank">PolÃ­tica de privacidad</a>.</>
+              ? <>Acepto que Global Move me contacte por llamada, correo electrónico y mensaje para servicios inmobiliarios. Puedo cancelar estas comunicaciones en cualquier momento. <a href={`/${locale}/privacy/`} target="_blank">Política de privacidad</a>.</>
               : <>I agree to be contacted by Global Move via call, email, and text for real estate services. To opt out, you can reply 'stop' at any time or use the unsubscribe link in emails. Message and data rates may apply. <a href={`/${locale}/privacy/`} target="_blank">Privacy Policy</a>.</>}
           </span>
         </label>
@@ -874,8 +873,8 @@ const propertyStructuredData = {
           <div>
             <strong>{mapLocation}</strong>
             <span>{locale === 'es'
-              ? `${mapPrecisionLabel} Â· radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicaciÃ³n exacta se facilita al concertar la visita.`
-              : `${mapPrecisionLabel} Â· ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
+              ? `${mapPrecisionLabel} · radio de ${mapRadiusKm.toLocaleString('es-ES')} km. La ubicación exacta se facilita al concertar la visita.`
+              : `${mapPrecisionLabel} · ${mapRadiusKm.toLocaleString('en-GB')} km radius. The exact location is shared when arranging a viewing.`}</span>
           </div>
         </div>
       </div>
@@ -1680,7 +1679,7 @@ const propertyStructuredData = {
     line-height: 1.55;
   }
   .rules-list li::before {
-    content: 'â€”';
+    content: '—';
     position: absolute;
     left: 0;
     color: var(--color-gold);
@@ -4151,7 +4150,7 @@ const propertyStructuredData = {
     }
 
     .prop-description__toggle::after {
-      content: "âŒ„";
+      content: "⌄";
       margin-left: 0.35rem;
       font-size: 0.8rem;
       line-height: 0.8;
@@ -4768,7 +4767,15 @@ const propertyStructuredData = {
       background: transparent !important;
     }
 
+    .prop-main {
+      display: grid !important;
+      grid-template-columns: max-content max-content minmax(0, 1fr) !important;
+      align-items: start !important;
+      column-gap: 1.35rem !important;
+    }
+
     .prop-title-block {
+      grid-column: 1 / -1 !important;
       margin-bottom: -1px !important;
       padding: 0.55rem 0 0 !important;
       background: #000 !important;
@@ -4786,12 +4793,13 @@ const propertyStructuredData = {
     }
 
     .prop-quick-specs {
+      grid-column: 1 !important;
       display: flex !important;
       align-items: center !important;
       flex-wrap: wrap !important;
       gap: 0 !important;
       margin: -1px 0 -1px !important;
-      padding: 0.85rem 0 1.05rem !important;
+      padding: 0.85rem 0 2.15rem !important;
       background: #000 !important;
       border-radius: 0 !important;
     }
@@ -4836,48 +4844,72 @@ const propertyStructuredData = {
     }
 
     .prop-share-button {
-      width: 100% !important;
+      grid-column: 2 !important;
+      grid-row: 2 !important;
+      width: auto !important;
       display: flex !important;
       align-items: center !important;
-      justify-content: flex-start !important;
-      margin: -1px 0 0 !important;
-      padding: 0 0 3.25rem !important;
+      justify-content: center !important;
+      align-self: start !important;
+      gap: 0.55rem !important;
+      margin: 0.32rem 0 0 !important;
+      padding: 0.35rem 0.9rem !important;
       background: #000 !important;
       color: #fff !important;
-      border: 0 !important;
-      border-radius: 0 !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      border-radius: 999px !important;
     }
 
     .prop-share-button svg {
       width: 15px !important;
       height: 15px !important;
-      padding: 11px !important;
-      border: 1px solid rgba(255, 255, 255, 0.28) !important;
-      border-radius: 50% !important;
-      box-sizing: content-box !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-sizing: border-box !important;
+      order: 2;
     }
 
     .prop-share-button span {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
+      position: static !important;
+      width: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+      clip: auto !important;
       white-space: nowrap;
+      color: #fff !important;
+      font-size: 0.78rem !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
     }
 
     .prop-section {
+      position: relative !important;
+      grid-column: 1 / -1 !important;
+      width: calc(100% + (clamp(2.5rem, 3.35vw, 4rem) * 2)) !important;
+      max-width: none !important;
+      margin: 0 calc(clamp(2.5rem, 3.35vw, 4rem) * -1) !important;
+      padding-inline: clamp(2.5rem, 3.35vw, 4rem) !important;
       background: #fff !important;
-      box-shadow: 0 0 0 100vmax #fff;
-      clip-path: inset(0 -100vmax);
-      margin-bottom: 0 !important;
       padding-bottom: 3rem !important;
+      box-sizing: border-box !important;
+      box-shadow: 0 0 0 100vmax #fff !important;
+      clip-path: inset(0 -100vmax) !important;
+    }
+
+    .prop-section .property-feature-groups,
+    .prop-section .prop-process {
+      grid-template-columns: 1fr !important;
     }
 
     .prop-section--description {
       position: relative !important;
+      left: auto !important;
       z-index: 3 !important;
+      grid-column: 1 / -1 !important;
+      flex: 0 0 auto !important;
       width: calc(100% + (clamp(2.5rem, 3.35vw, 4rem) * 2)) !important;
+      max-width: none !important;
       margin: 0 calc(clamp(2.5rem, 3.35vw, 4rem) * -1) 0 !important;
       padding: clamp(4rem, 5.2vw, 5rem) clamp(2.5rem, 3.35vw, 4rem) 3rem !important;
       border-top: 0 !important;
