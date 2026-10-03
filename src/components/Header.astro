@@ -152,7 +152,8 @@ const isActive = (href: string) => {
 
   .site-header__inner {
     height: 72px;
-    max-width: min(100%, 1520px);
+    width: 100%;
+    max-width: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -423,7 +424,7 @@ const isActive = (href: string) => {
     }
 
     .site-header__inner {
-      width: min(100%, 420px);
+      width: 100%;
       height: 86px;
       margin-inline: auto;
       padding-inline: clamp(1.3rem, 4.4vw, 1.72rem);
