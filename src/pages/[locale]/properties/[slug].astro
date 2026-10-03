@@ -351,23 +351,23 @@ const propertyStructuredData = {
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
-              <span><strong>{property.bedrooms}</strong> BEDS</span>
+              <span><strong>{property.bedrooms}</strong> {locale === 'es' ? 'HAB.' : 'BEDS'}</span>
             </div>}
             {property.bathrooms && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M9 6L6 18h12l-3-12M9 6V4a3 3 0 0 1 6 0v2M5 21h14"/>
               </svg>
-              <span><strong>{property.bathrooms}</strong> FULL BATHS</span>
+              <span><strong>{property.bathrooms}</strong> {locale === 'es' ? 'BAÑOS' : 'FULL BATHS'}</span>
             </div>}
             <div class="prop-quick-spec">
-              <span><strong>3</strong> HALF BATHS</span>
+              <span><strong>3</strong> {locale === 'es' ? 'ASEOS' : 'HALF BATHS'}</span>
             </div>
             {property.sizeM2 && <div class="prop-quick-spec">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <path d="M3 10h18"/>
               </svg>
-              <span><strong>{property.sizeM2}</strong> SQ.FT.</span>
+              <span><strong>{property.sizeM2}</strong> {locale === 'es' ? 'M²' : 'SQ.FT.'}</span>
             </div>}
             <div class="prop-quick-spec prop-quick-spec--status">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

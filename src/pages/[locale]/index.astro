@@ -193,13 +193,13 @@ const developments = [
                   {statusLabel(property.status, locale)}
                 </span>
               </div>
-              <strong>{formatPrice(property.price, locale)}</strong>
               <p>{property.location[locale]}</p>
+              <strong>{formatPrice(property.price, locale)}</strong>
               <dl>
                 {property.bedrooms && (
                   <div>
                     <dd>{property.bedrooms}</dd>
-                    <dt>{locale === 'es' ? 'DORM.' : 'BEDS'}</dt>
+                    <dt>{locale === 'es' ? 'HAB.' : 'BEDS'}</dt>
                   </div>
                 )}
                 {property.bathrooms && (
@@ -666,7 +666,7 @@ const developments = [
     font-size: 14px;
     line-height: 1.2;
     font-weight: 700;
-    margin-bottom: 0.45rem;
+    margin-bottom: 1.15rem;
   }
 
   .home-property-card__body p {
@@ -675,7 +675,7 @@ const developments = [
     font-size: 16px;
     line-height: 1.35;
     font-weight: 500;
-    margin-bottom: 1.15rem;
+    margin-bottom: 0.35rem;
   }
 
   .home-property-card__body dl {
@@ -1464,13 +1464,13 @@ const developments = [
 
     .home-property-card__body strong {
       font-size: clamp(0.98rem, 4.4vw, 1.14rem);
-      margin-bottom: 0.38rem;
+      margin-bottom: 0.86rem;
     }
 
     .home-property-card__body p {
       font-size: clamp(0.92rem, 4vw, 1.05rem);
       line-height: 1.32;
-      margin-bottom: 0.86rem;
+      margin-bottom: 0.38rem;
       font-weight: 500;
     }
 
